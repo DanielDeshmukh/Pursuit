@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/lib/theme-provider";
+import { ThemeInit } from "@/components/theme-init";
 import "./globals.css";
 
 const inter = Inter({
@@ -24,17 +25,6 @@ export const metadata: Metadata = {
   },
 };
 
-const themeScript = `
-(function() {
-  try {
-    var theme = localStorage.getItem('theme');
-    var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    var resolved = theme === 'dark' || (!theme && systemDark) ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', resolved);
-  } catch(e) {}
-})();
-`;
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -46,10 +36,8 @@ export default function RootLayout({
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
       <body className="min-h-full flex flex-col">
+        <ThemeInit />
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
