@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { loginSchema } from "@/lib/auth";
+import { loginSchema } from "@/lib/validation";
 import { PasswordInput } from "@/components/password-input";
 
 export default function LoginPage() {

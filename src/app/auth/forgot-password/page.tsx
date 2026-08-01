@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { forgotPassword } from "@/lib/actions/auth";
-import { forgotPasswordSchema } from "@/lib/auth";
+import { forgotPasswordSchema } from "@/lib/validation";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");

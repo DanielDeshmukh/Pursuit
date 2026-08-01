@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { resetPassword } from "@/lib/actions/auth";
-import { resetPasswordSchema } from "@/lib/auth";
+import { resetPasswordSchema } from "@/lib/validation";
 import { PasswordInput } from "@/components/password-input";
 
 export default function ResetPasswordPage() {

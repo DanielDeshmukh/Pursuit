@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signup } from "@/lib/actions/auth";
-import { signupSchema } from "@/lib/auth";
+import { signupSchema } from "@/lib/validation";
 import { PasswordInput } from "@/components/password-input";
 
 export default function SignupPage() {
