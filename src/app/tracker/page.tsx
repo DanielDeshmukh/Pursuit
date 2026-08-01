@@ -24,6 +24,12 @@ export default function TrackerPage() {
             >
               Reminders
             </Link>
+            <Link
+              href="/outreach"
+              className="text-sm text-charcoal hover:text-ink"
+            >
+              Outreach
+            </Link>
           </nav>
         </div>
         <ThemeToggle />

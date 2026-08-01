@@ -26,6 +26,12 @@ export default function AnalyticsPage() {
             >
               Reminders
             </Link>
+            <Link
+              href="/outreach"
+              className="text-sm text-charcoal hover:text-ink"
+            >
+              Outreach
+            </Link>
           </nav>
         </div>
         <ThemeToggle />

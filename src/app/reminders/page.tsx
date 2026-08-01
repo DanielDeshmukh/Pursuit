@@ -26,6 +26,12 @@ export default function RemindersPage() {
             <span className="text-sm font-medium text-primary">
               Reminders
             </span>
+            <Link
+              href="/outreach"
+              className="text-sm text-charcoal hover:text-ink"
+            >
+              Outreach
+            </Link>
           </nav>
         </div>
         <ThemeToggle />
