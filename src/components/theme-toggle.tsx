@@ -1,6 +1,6 @@
 "use client";
 
-import { useTheme } from "next-themes";
+import { useTheme } from "@/lib/theme-provider";
 import { useSyncExternalStore } from "react";
 
 function useMounted() {
@@ -12,7 +12,7 @@ function useMounted() {
 }
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const mounted = useMounted();
 
   if (!mounted) {
@@ -21,11 +21,11 @@ export function ThemeToggle() {
 
   return (
     <button
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
       className="flex h-9 w-9 items-center justify-center rounded-lg border border-hairline bg-paper text-ink transition-colors hover:bg-cloud"
       aria-label="Toggle theme"
     >
-      {theme === "dark" ? (
+      {resolvedTheme === "dark" ? (
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="18"
