@@ -234,7 +234,7 @@ function AddReminderModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-xl border border-hairline bg-paper p-6 shadow-modal">
         <h3 className="mb-4 text-lg font-medium text-ink">Add Reminder</h3>
 
