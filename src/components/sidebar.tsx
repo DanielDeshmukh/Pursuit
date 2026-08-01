@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { signOut } from "next-auth/react";
+import { useSidebar } from "@/lib/sidebar-context";
 
 const navItems = [
   {
@@ -54,7 +55,7 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, setCollapsed } = useSidebar();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
