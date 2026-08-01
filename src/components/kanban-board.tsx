@@ -38,6 +38,43 @@ export function KanbanBoard() {
     "Other",
   ];
 
+  function exportCSV() {
+    const headers = [
+      "Job Title",
+      "Company",
+      "Status",
+      "Source",
+      "Salary Min",
+      "Salary Max",
+      "Job URL",
+      "Notes",
+      "Applied At",
+    ];
+    const rows = applications.map((app) => [
+      app.jobTitle,
+      app.company.name,
+      app.status,
+      app.source ?? "",
+      app.salaryMin ?? "",
+      app.salaryMax ?? "",
+      app.jobUrl ?? "",
+      app.notes ?? "",
+      app.appliedAt ?? "",
+    ]);
+    const csv = [headers, ...rows]
+      .map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
+      )
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `pursuit-applications-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   useEffect(() => {
     loadApplications();
   }, []);
@@ -85,12 +122,20 @@ export function KanbanBoard() {
         <h2 className="text-lg font-medium text-ink">
           Applications ({applications.length})
         </h2>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-semibold tracking-wide text-on-primary transition-colors hover:bg-primary-deep"
-        >
-          + Add Application
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={exportCSV}
+            className="rounded-md border border-hairline bg-canvas px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-cloud"
+          >
+            Export CSV
+          </button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="rounded-md bg-primary px-4 py-2 text-sm font-semibold tracking-wide text-on-primary transition-colors hover:bg-primary-deep"
+          >
+            + Add Application
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center gap-3 px-6 pb-3">
