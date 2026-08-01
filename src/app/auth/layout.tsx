@@ -8,11 +8,12 @@ export default function AuthLayout({
 }) {
   return (
     <div className="flex min-h-screen bg-canvas">
-      <div className="hidden w-1/2 bg-ink lg:flex lg:flex-col lg:items-center lg:justify-center">
-        <Link href="/" className="text-4xl font-semibold text-on-primary">
+      <div className="hidden w-1/2 lg:flex lg:flex-col lg:items-center lg:justify-center" style={{ backgroundColor: "#0a1929" }}>
+        <Link href="/" className="flex items-center gap-3 text-4xl font-semibold text-white">
+          <img src="/favicon.svg" alt="" className="h-10 w-10" />
           Pursuit
         </Link>
-        <p className="mt-4 max-w-xs text-center text-sm text-steel">
+        <p className="mt-4 max-w-xs text-center text-sm text-blue-200/60">
           Your job search, tracked, automated, and actually organized.
         </p>
       </div>
@@ -24,8 +25,9 @@ export default function AuthLayout({
 
         <Link
           href="/"
-          className="mb-8 text-2xl font-semibold text-ink lg:hidden"
+          className="mb-8 flex items-center gap-2 text-2xl font-semibold text-ink lg:hidden"
         >
+          <img src="/favicon.svg" alt="" className="h-8 w-8" />
           Pursuit
         </Link>
 

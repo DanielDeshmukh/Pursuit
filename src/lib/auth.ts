@@ -10,6 +10,7 @@ import { loginSchema } from "@/lib/validation";
 export { signupSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from "@/lib/validation";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
