@@ -14,6 +14,9 @@ export async function getApplications() {
       jobTitle: applications.jobTitle,
       jobUrl: applications.jobUrl,
       status: applications.status,
+      salaryMin: applications.salaryMin,
+      salaryMax: applications.salaryMax,
+      source: applications.source,
       appliedAt: applications.appliedAt,
       resumeVersionUsed: applications.resumeVersionUsed,
       notes: applications.notes,
@@ -39,6 +42,9 @@ export async function getApplications() {
     jobTitle: row.jobTitle,
     jobUrl: row.jobUrl,
     status: row.status,
+    salaryMin: row.salaryMin,
+    salaryMax: row.salaryMax,
+    source: row.source,
     appliedAt: row.appliedAt,
     resumeVersionUsed: row.resumeVersionUsed,
     notes: row.notes,
@@ -76,6 +82,9 @@ export async function addApplication(data: {
   jobTitle: string;
   companyName: string;
   jobUrl?: string;
+  salaryMin?: string;
+  salaryMax?: string;
+  source?: string;
   notes?: string;
   status?: string;
 }) {
@@ -98,6 +107,9 @@ export async function addApplication(data: {
       companyId: company.id,
       jobTitle: data.jobTitle,
       jobUrl: data.jobUrl,
+      salaryMin: data.salaryMin,
+      salaryMax: data.salaryMax,
+      source: data.source,
       notes: data.notes,
       status: data.status ?? "SAVED",
     })

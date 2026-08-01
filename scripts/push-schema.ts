@@ -76,11 +76,12 @@ async function main() {
     try {
       await client.execute(s);
       console.log("OK:", s.split("\n")[0].trim());
-    } catch (e: any) {
-      if (e.message?.includes("duplicate column")) {
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (msg.includes("duplicate column")) {
         console.log("SKIP:", s.split("\n")[0].trim(), "(already exists)");
       } else {
-        console.error("ERR:", s.split("\n")[0].trim(), e.message);
+        console.error("ERR:", s.split("\n")[0].trim(), msg);
       }
     }
   }
