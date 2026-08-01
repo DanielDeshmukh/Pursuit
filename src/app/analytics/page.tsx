@@ -20,6 +20,12 @@ export default function AnalyticsPage() {
             <span className="text-sm font-medium text-primary">
               Analytics
             </span>
+            <Link
+              href="/reminders"
+              className="text-sm text-charcoal hover:text-ink"
+            >
+              Reminders
+            </Link>
           </nav>
         </div>
         <ThemeToggle />

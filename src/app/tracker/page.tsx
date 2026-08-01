@@ -18,6 +18,12 @@ export default function TrackerPage() {
             >
               Analytics
             </Link>
+            <Link
+              href="/reminders"
+              className="text-sm text-charcoal hover:text-ink"
+            >
+              Reminders
+            </Link>
           </nav>
         </div>
         <ThemeToggle />
