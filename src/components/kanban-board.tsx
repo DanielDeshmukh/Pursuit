@@ -24,6 +24,19 @@ export function KanbanBoard() {
   const [selectedApp, setSelectedApp] =
     useState<ApplicationWithRelations | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [sourceFilter, setSourceFilter] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const sources = [
+    "ALL",
+    "LinkedIn",
+    "Naukri",
+    "Referral",
+    "Walk-in",
+    "Company Website",
+    "Indeed",
+    "Other",
+  ];
 
   useEffect(() => {
     loadApplications();
@@ -51,7 +64,15 @@ export function KanbanBoard() {
   }
 
   function getAppsByStatus(status: string) {
-    return applications.filter((app) => app.status === status);
+    return applications.filter((app) => {
+      const matchesSource =
+        sourceFilter === "ALL" || app.source === sourceFilter;
+      const matchesSearch =
+        !searchQuery ||
+        app.jobTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        app.company.name.toLowerCase().includes(searchQuery.toLowerCase());
+      return app.status === status && matchesSource && matchesSearch;
+    });
   }
 
   if (loading) {
@@ -70,6 +91,27 @@ export function KanbanBoard() {
         >
           + Add Application
         </button>
+      </div>
+
+      <div className="flex items-center gap-3 px-6 pb-3">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search by title or company..."
+          className="w-64 rounded-md border border-steel bg-canvas px-3 py-1.5 text-sm text-ink placeholder:text-graphite focus:border-ink focus:outline-none"
+        />
+        <select
+          value={sourceFilter}
+          onChange={(e) => setSourceFilter(e.target.value)}
+          className="rounded-md border border-steel bg-canvas px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none"
+        >
+          {sources.map((s) => (
+            <option key={s} value={s}>
+              {s === "ALL" ? "All Sources" : s}
+            </option>
+          ))}
+        </select>
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
