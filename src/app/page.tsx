@@ -3,17 +3,18 @@ import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-canvas font-sans">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-center gap-8 py-32 px-16">
-        <div className="absolute top-6 right-6">
+    <div className="flex flex-1 items-center justify-center bg-canvas">
+      <main className="flex w-full max-w-3xl flex-col items-center gap-8 px-6 py-16 sm:px-16 sm:py-32">
+        <div className="absolute right-6 top-6">
           <ThemeToggle />
         </div>
 
         <div className="flex flex-col items-center gap-4 text-center">
-          <h1 className="text-4xl font-medium tracking-tight text-ink">
+          <img src="/favicon.svg" alt="Pursuit" className="h-12 w-12" />
+          <h1 className="text-3xl font-medium tracking-tight text-ink sm:text-4xl">
             Pursuit
           </h1>
-          <p className="text-lg text-charcoal">
+          <p className="text-base text-charcoal sm:text-lg">
             Your job search, tracked, automated, and actually organized.
           </p>
         </div>
@@ -30,7 +31,7 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <div className="mt-8 grid w-full grid-cols-1 gap-6 sm:grid-cols-3">
           <div className="rounded-xl border border-hairline bg-paper p-6 shadow-card">
             <h3 className="mb-2 text-sm font-medium text-ink">Tracker</h3>
             <p className="text-sm text-charcoal">
