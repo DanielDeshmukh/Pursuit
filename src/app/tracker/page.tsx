@@ -12,9 +12,12 @@ export default function TrackerPage() {
           </Link>
           <nav className="flex gap-4">
             <span className="text-sm font-medium text-primary">Tracker</span>
-            <span className="text-sm text-charcoal hover:text-ink cursor-pointer">
+            <Link
+              href="/analytics"
+              className="text-sm text-charcoal hover:text-ink"
+            >
               Analytics
-            </span>
+            </Link>
           </nav>
         </div>
         <ThemeToggle />
