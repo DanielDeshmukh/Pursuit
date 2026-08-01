@@ -1,26 +1,147 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+:root,
+[data-theme="light"] {
+  /* Brand & Accent */
+  --color-primary: #024ad8;
+  --color-primary-bright: #296ef9;
+  --color-primary-deep: #0e3191;
+  --color-primary-soft: #c9e0fc;
+  --color-on-primary: #ffffff;
+
+  /* Surface */
+  --color-canvas: #ffffff;
+  --color-paper: #ffffff;
+  --color-cloud: #f7f7f7;
+  --color-fog: #e8e8e8;
+  --color-steel: #c2c2c2;
+
+  /* Text */
+  --color-ink: #1a1a1a;
+  --color-ink-deep: #000000;
+  --color-ink-soft: #292929;
+  --color-on-ink: #ffffff;
+  --color-charcoal: #3d3d3d;
+  --color-graphite: #636363;
+
+  /* Borders */
+  --color-hairline: #e8e8e8;
+  --color-hairline-strong: #c2c2c2;
+
+  /* Links */
+  --color-link: #024ad8;
+  --color-link-pressed: #0e3191;
+
+  /* Semantic */
+  --color-error: #b3262b;
+  --color-bloom-coral: #ff5050;
+  --color-bloom-rose: #f9d4d2;
+  --color-bloom-deep: #b3262b;
+  --color-bloom-wine: #5a1313;
+  --color-storm-mist: #8ebdce;
+  --color-storm-sea: #7fadbe;
+  --color-storm-deep: #356373;
+
+  /* Shadows */
+  --shadow-card: 0 2px 8px rgba(26, 26, 26, 0.08);
+  --shadow-modal: 0 8px 24px rgba(26, 26, 26, 0.12);
+}
+
+[data-theme="dark"] {
+  /* Brand & Accent */
+  --color-primary: #296ef9;
+  --color-primary-bright: #4a8bff;
+  --color-primary-deep: #024ad8;
+  --color-primary-soft: #1a3a5c;
+  --color-on-primary: #ffffff;
+
+  /* Surface */
+  --color-canvas: #0f0f0f;
+  --color-paper: #1a1a1a;
+  --color-cloud: #1a1a1a;
+  --color-fog: #242424;
+  --color-steel: #404040;
+
+  /* Text */
+  --color-ink: #f0f0f0;
+  --color-ink-deep: #ffffff;
+  --color-ink-soft: #d4d4d4;
+  --color-on-ink: #0f0f0f;
+  --color-charcoal: #a0a0a0;
+  --color-graphite: #808080;
+
+  /* Borders */
+  --color-hairline: #2a2a2a;
+  --color-hairline-strong: #404040;
+
+  /* Links */
+  --color-link: #4a8bff;
+  --color-link-pressed: #296ef9;
+
+  /* Semantic */
+  --color-error: #f87171;
+  --color-bloom-coral: #ff7070;
+  --color-bloom-rose: #3d1a1a;
+  --color-bloom-deep: #f87171;
+  --color-bloom-wine: #f9d4d2;
+  --color-storm-mist: #a8d4e6;
+  --color-storm-sea: #8fbdd4;
+  --color-storm-deep: #5a9ab0;
+
+  /* Shadows */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-modal: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-primary: var(--color-primary);
+  --color-primary-bright: var(--color-primary-bright);
+  --color-primary-deep: var(--color-primary-deep);
+  --color-primary-soft: var(--color-primary-soft);
+  --color-on-primary: var(--color-on-primary);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-canvas: var(--color-canvas);
+  --color-paper: var(--color-paper);
+  --color-cloud: var(--color-cloud);
+  --color-fog: var(--color-fog);
+  --color-steel: var(--color-steel);
+
+  --color-ink: var(--color-ink);
+  --color-ink-deep: var(--color-ink-deep);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-on-ink: var(--color-on-ink);
+  --color-charcoal: var(--color-charcoal);
+  --color-graphite: var(--color-graphite);
+
+  --color-hairline: var(--color-hairline);
+  --color-hairline-strong: var(--color-hairline-strong);
+
+  --color-link: var(--color-link);
+  --color-link-pressed: var(--color-link-pressed);
+
+  --color-error: var(--color-error);
+  --color-bloom-coral: var(--color-bloom-coral);
+  --color-bloom-rose: var(--color-bloom-rose);
+  --color-bloom-deep: var(--color-bloom-deep);
+  --color-bloom-wine: var(--color-bloom-wine);
+  --color-storm-mist: var(--color-storm-mist);
+  --color-storm-sea: var(--color-storm-sea);
+  --color-storm-deep: var(--color-storm-deep);
+
+  --font-primary: var(--font-inter);
+  --font-mono: var(--font-geist-mono);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-modal: var(--shadow-modal);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-primary, "Inter", Arial, Helvetica, sans-serif);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+* {
+  border-color: var(--color-hairline);
 }

@@ -1,0 +1,81 @@
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  name: text("name"),
+  resumeUrl: text("resume_url"),
+  createdAt: text("created_at")
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+});
+
+export const companies = sqliteTable("companies", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  name: text("name").notNull(),
+  website: text("website"),
+  industry: text("industry"),
+  source: text("source"),
+});
+
+export const contacts = sqliteTable("contacts", {
+  id: text("id").primaryKey(),
+  companyId: text("company_id")
+    .notNull()
+    .references(() => companies.id),
+  name: text("name").notNull(),
+  role: text("role"),
+  email: text("email"),
+  linkedinUrl: text("linkedin_url"),
+  lastContactedAt: text("last_contacted_at"),
+});
+
+export const applications = sqliteTable("applications", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  companyId: text("company_id")
+    .notNull()
+    .references(() => companies.id),
+  contactId: text("contact_id").references(() => contacts.id),
+  jobTitle: text("job_title").notNull(),
+  jobUrl: text("job_url"),
+  status: text("status").notNull().default("SAVED"),
+  salaryMin: text("salary_min"),
+  salaryMax: text("salary_max"),
+  source: text("source"),
+  appliedAt: text("applied_at"),
+  resumeVersionUsed: text("resume_version_used"),
+  notes: text("notes"),
+  nextFollowUpAt: text("next_follow_up_at"),
+});
+
+export const outreachMessages = sqliteTable("outreach_messages", {
+  id: text("id").primaryKey(),
+  applicationId: text("application_id")
+    .notNull()
+    .references(() => applications.id),
+  contactId: text("contact_id")
+    .notNull()
+    .references(() => contacts.id),
+  channel: text("channel").notNull(),
+  subject: text("subject"),
+  body: text("body").notNull(),
+  status: text("status").notNull().default("drafted"),
+  sentAt: text("sent_at"),
+});
+
+export const reminders = sqliteTable("reminders", {
+  id: text("id").primaryKey(),
+  applicationId: text("application_id")
+    .notNull()
+    .references(() => applications.id),
+  type: text("type").notNull(),
+  dueAt: text("due_at").notNull(),
+  done: integer("done", { mode: "boolean" }).notNull().default(false),
+});
