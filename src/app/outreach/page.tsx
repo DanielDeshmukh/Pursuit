@@ -1,0 +1,43 @@
+import { OutreachDashboard } from "@/components/outreach-dashboard";
+import { ThemeToggle } from "@/components/theme-toggle";
+import Link from "next/link";
+
+export default function OutreachPage() {
+  return (
+    <div className="flex h-screen flex-col bg-canvas">
+      <header className="flex items-center justify-between border-b border-hairline px-6 py-3">
+        <div className="flex items-center gap-6">
+          <Link href="/" className="text-lg font-semibold text-ink">
+            Pursuit
+          </Link>
+          <nav className="flex gap-4">
+            <Link
+              href="/tracker"
+              className="text-sm text-charcoal hover:text-ink"
+            >
+              Tracker
+            </Link>
+            <Link
+              href="/analytics"
+              className="text-sm text-charcoal hover:text-ink"
+            >
+              Analytics
+            </Link>
+            <Link
+              href="/reminders"
+              className="text-sm text-charcoal hover:text-ink"
+            >
+              Reminders
+            </Link>
+            <span className="text-sm font-medium text-primary">
+              Outreach
+            </span>
+          </nav>
+        </div>
+        <ThemeToggle />
+      </header>
+
+      <OutreachDashboard />
+    </div>
+  );
+}
