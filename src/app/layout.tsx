@@ -18,6 +18,10 @@ export const metadata: Metadata = {
   title: "Pursuit — Job Search Command Center",
   description:
     "Track applications, automate follow-ups, and land your next role.",
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
