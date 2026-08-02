@@ -3,8 +3,7 @@
   "name": "Pursuit — Job Tracker",
   "version": "1.0.0",
   "description": "Capture job listings from LinkedIn, Indeed, Naukri, and more. Save directly to your Pursuit tracker.",
-  "permissions": ["activeTab", "storage"],
-  "host_permissions": ["http://localhost:3000/*", "https://*.linkedin.com/*", "https://*.indeed.com/*", "https://*.naukri.com/*", "https://*.glassdoor.com/*", "https://*.greenhouse.io/*", "https://*.lever.co/*"],
+  "permissions": ["activeTab", "scripting", "storage"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -18,21 +17,6 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "content_scripts": [
-    {
-      "matches": [
-        "https://*.linkedin.com/jobs/*",
-        "https://*.indeed.com/viewjob*",
-        "https://*.indeed.com/jobs*",
-        "https://*.naukri.com/job/*",
-        "https://*.glassdoor.com/job/*",
-        "https://boards.greenhouse.io/*",
-        "https://jobs.lever.co/*"
-      ],
-      "js": ["content.js"],
-      "run_at": "document_idle"
-    }
-  ],
   "background": {
     "service_worker": "background.js"
   }

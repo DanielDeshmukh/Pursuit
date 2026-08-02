@@ -18,6 +18,7 @@ function populateForm(data) {
   form.classList.remove("hidden");
   document.getElementById("jobTitle").value = data.jobTitle || "";
   document.getElementById("companyName").value = data.companyName || "";
+  document.getElementById("location").value = data.location || "";
   document.getElementById("salaryMin").value = data.salaryMin || "";
   document.getElementById("salaryMax").value = data.salaryMax || "";
   document.getElementById("source").value = data.source || "";
@@ -37,28 +38,30 @@ async function loadData() {
   }
 
   try {
-    const response = await chrome.tabs.sendMessage(tab.id, { type: "GET_JOB_DATA" });
-    if (response && (response.jobTitle || response.companyName)) {
-      chrome.storage.local.set({ lastJob: response });
-      populateForm(response);
-    } else {
-      chrome.storage.local.get(["lastJob"], (result) => {
-        if (result.lastJob) {
-          populateForm(result.lastJob);
-        } else {
-          noJob.classList.remove("hidden");
-        }
-      });
-    }
-  } catch {
-    chrome.storage.local.get(["lastJob"], (result) => {
-      if (result.lastJob) {
-        populateForm(result.lastJob);
-      } else {
-        noJob.classList.remove("hidden");
-      }
+    const results = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ["extract.js"],
     });
+
+    if (results && results[0] && results[0].result) {
+      const data = results[0].result;
+      if (data.jobTitle || data.companyName) {
+        chrome.storage.local.set({ lastJob: data });
+        populateForm(data);
+        return;
+      }
+    }
+  } catch (err) {
+    console.error("Injection failed:", err);
   }
+
+  chrome.storage.local.get(["lastJob"], (result) => {
+    if (result.lastJob) {
+      populateForm(result.lastJob);
+    } else {
+      noJob.classList.remove("hidden");
+    }
+  });
 }
 
 loadData();
@@ -73,6 +76,7 @@ saveBtn.addEventListener("click", async () => {
   const jobData = {
     jobTitle: document.getElementById("jobTitle").value,
     companyName: document.getElementById("companyName").value,
+    location: document.getElementById("location").value || undefined,
     salaryMin: document.getElementById("salaryMin").value || undefined,
     salaryMax: document.getElementById("salaryMax").value || undefined,
     source: document.getElementById("source").value || undefined,
@@ -108,6 +112,7 @@ copyBtn.addEventListener("click", () => {
   const jobData = {
     jobTitle: document.getElementById("jobTitle").value,
     companyName: document.getElementById("companyName").value,
+    location: document.getElementById("location").value || undefined,
     salaryMin: document.getElementById("salaryMin").value || undefined,
     salaryMax: document.getElementById("salaryMax").value || undefined,
     source: document.getElementById("source").value || undefined,
@@ -116,6 +121,7 @@ copyBtn.addEventListener("click", () => {
   const text = [
     jobData.jobTitle && `Title: ${jobData.jobTitle}`,
     jobData.companyName && `Company: ${jobData.companyName}`,
+    jobData.location && `Location: ${jobData.location}`,
     jobData.salaryMin && `Salary Min: ${jobData.salaryMin}`,
     jobData.salaryMax && `Salary Max: ${jobData.salaryMax}`,
     jobData.source && `Source: ${jobData.source}`,
