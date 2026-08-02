@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=380">
+  <title>Pursuit</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="icons/icon48.png" alt="" class="logo">
+      <h1>Pursuit</h1>
+    </div>
+
+    <div id="status" class="status"></div>
+
+    <div id="form" class="form hidden">
+      <div class="field">
+        <label>Job Title</label>
+        <input type="text" id="jobTitle" placeholder="Software Engineer">
+      </div>
+      <div class="field">
+        <label>Company</label>
+        <input type="text" id="companyName" placeholder="Acme Inc.">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Salary Min</label>
+          <input type="text" id="salaryMin" placeholder="80000">
+        </div>
+        <div class="field">
+          <label>Salary Max</label>
+          <input type="text" id="salaryMax" placeholder="120000">
+        </div>
+      </div>
+      <div class="field">
+        <label>Source</label>
+        <input type="text" id="source" placeholder="LinkedIn" readonly>
+      </div>
+      <div class="field">
+        <label>Pursuit URL</label>
+        <input type="url" id="pursuitUrl" placeholder="http://localhost:3000">
+      </div>
+      <button id="saveBtn" class="btn-primary">Save to Pursuit</button>
+      <button id="copyBtn" class="btn-secondary">Copy to Clipboard</button>
+    </div>
+
+    <div id="saved" class="saved hidden">
+      <div class="check">✓</div>
+      <p>Saved to Pursuit!</p>
+    </div>
+
+    <div id="noJob" class="no-job hidden">
+      <p>No job detected on this page.</p>
+      <p class="hint">Navigate to a job listing first, then reopen.</p>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

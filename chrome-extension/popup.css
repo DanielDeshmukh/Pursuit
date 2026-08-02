@@ -1,0 +1,184 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 360px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #fafafa;
+  color: #1a1a1a;
+}
+
+.container {
+  padding: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.logo {
+  width: 28px;
+  height: 28px;
+}
+
+h1 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.status {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 12px;
+  display: none;
+}
+
+.status.error {
+  display: block;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status.success {
+  display: block;
+  background: #dcfce7;
+  color: #166534;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.field input {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #fff;
+  color: #1a1a1a;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.field input:focus {
+  border-color: #024ad8;
+}
+
+.field input[readonly] {
+  background: #f5f5f5;
+  color: #888;
+}
+
+.field-row {
+  display: flex;
+  gap: 8px;
+}
+
+.field-row .field {
+  flex: 1;
+}
+
+.btn-primary {
+  padding: 10px;
+  background: #024ad8;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 4px;
+}
+
+.btn-primary:hover {
+  background: #013ab0;
+}
+
+.btn-primary:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  padding: 8px;
+  background: #fff;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-secondary:hover {
+  background: #f5f5f5;
+}
+
+.saved {
+  text-align: center;
+  padding: 24px 0;
+}
+
+.saved .check {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #024ad8;
+  color: #fff;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+
+.saved p {
+  font-size: 14px;
+  font-weight: 500;
+  color: #166534;
+}
+
+.no-job {
+  text-align: center;
+  padding: 24px 0;
+  color: #666;
+}
+
+.no-job p {
+  font-size: 13px;
+}
+
+.no-job .hint {
+  font-size: 11px;
+  color: #999;
+  margin-top: 4px;
+}
