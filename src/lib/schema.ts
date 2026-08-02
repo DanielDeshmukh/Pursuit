@@ -107,6 +107,7 @@ export const profiles = sqliteTable("profiles", {
   bio: text("bio"),
   coverLetterTemplate: text("cover_letter_template"),
   customAnswers: text("custom_answers"),
+  photo: text("photo"),
   createdAt: text("created_at")
     .notNull()
     .$defaultFn(() => new Date().toISOString()),

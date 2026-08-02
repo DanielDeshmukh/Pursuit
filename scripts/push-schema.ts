@@ -87,8 +87,9 @@ const sql = [
     salary_expectation TEXT,
     bio TEXT,
     cover_letter_template TEXT,
-    custom_answers TEXT,
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  custom_answers TEXT,
+  photo TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
   )`,
   // Indexes

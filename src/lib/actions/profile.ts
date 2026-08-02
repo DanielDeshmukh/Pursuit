@@ -31,7 +31,7 @@ export async function upsertProfile(data: Record<string, string | null | undefin
       "zipCode", "country", "linkedinUrl", "portfolioUrl", "currentTitle",
       "currentCompany", "yearsExperience", "education", "skills",
       "workAuthorization", "salaryExpectation", "bio", "coverLetterTemplate",
-      "customAnswers",
+      "customAnswers", "photo",
     ];
 
     const colMap: Record<string, string> = {
@@ -44,7 +44,7 @@ export async function upsertProfile(data: Record<string, string | null | undefin
       workAuthorization: "work_authorization",
       salaryExpectation: "salary_expectation", bio: "bio",
       coverLetterTemplate: "cover_letter_template",
-      customAnswers: "custom_answers",
+      customAnswers: "custom_answers", photo: "photo",
     };
 
     const setClauses: string[] = [];
