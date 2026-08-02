@@ -23,16 +23,45 @@ function populateForm(data) {
   document.getElementById("source").value = data.source || "";
 }
 
-chrome.storage.local.get(["lastJob", "pursuitUrl"], (result) => {
-  if (result.pursuitUrl) {
-    document.getElementById("pursuitUrl").value = result.pursuitUrl;
-  }
-  if (result.lastJob) {
-    populateForm(result.lastJob);
-  } else {
+async function loadData() {
+  chrome.storage.local.get(["pursuitUrl"], (result) => {
+    if (result.pursuitUrl) {
+      document.getElementById("pursuitUrl").value = result.pursuitUrl;
+    }
+  });
+
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab || !tab.url || !tab.url.startsWith("http")) {
     noJob.classList.remove("hidden");
+    return;
   }
-});
+
+  try {
+    const response = await chrome.tabs.sendMessage(tab.id, { type: "GET_JOB_DATA" });
+    if (response && (response.jobTitle || response.companyName)) {
+      chrome.storage.local.set({ lastJob: response });
+      populateForm(response);
+    } else {
+      chrome.storage.local.get(["lastJob"], (result) => {
+        if (result.lastJob) {
+          populateForm(result.lastJob);
+        } else {
+          noJob.classList.remove("hidden");
+        }
+      });
+    }
+  } catch {
+    chrome.storage.local.get(["lastJob"], (result) => {
+      if (result.lastJob) {
+        populateForm(result.lastJob);
+      } else {
+        noJob.classList.remove("hidden");
+      }
+    });
+  }
+}
+
+loadData();
 
 saveBtn.addEventListener("click", async () => {
   const pursuitUrl = document.getElementById("pursuitUrl").value.replace(/\/+$/, "");
