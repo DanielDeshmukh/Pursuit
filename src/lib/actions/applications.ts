@@ -5,77 +5,87 @@ import { applications, companies, contacts } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 
 export async function getApplications() {
-  const rows = await db
-    .select({
-      id: applications.id,
-      userId: applications.userId,
-      companyId: applications.companyId,
-      contactId: applications.contactId,
-      jobTitle: applications.jobTitle,
-      jobUrl: applications.jobUrl,
-      status: applications.status,
-      salaryMin: applications.salaryMin,
-      salaryMax: applications.salaryMax,
-      source: applications.source,
-      appliedAt: applications.appliedAt,
-      resumeVersionUsed: applications.resumeVersionUsed,
-      notes: applications.notes,
-      nextFollowUpAt: applications.nextFollowUpAt,
-      companyName: companies.name,
-      companyWebsite: companies.website,
-      companyIndustry: companies.industry,
-      companySource: companies.source,
-      contactName: contacts.name,
-      contactRole: contacts.role,
-      contactEmail: contacts.email,
-      contactLinkedinUrl: contacts.linkedinUrl,
-    })
-    .from(applications)
-    .leftJoin(companies, eq(applications.companyId, companies.id))
-    .leftJoin(contacts, eq(applications.contactId, contacts.id));
+  try {
+    const rows = await db
+      .select({
+        id: applications.id,
+        userId: applications.userId,
+        companyId: applications.companyId,
+        contactId: applications.contactId,
+        jobTitle: applications.jobTitle,
+        jobUrl: applications.jobUrl,
+        status: applications.status,
+        salaryMin: applications.salaryMin,
+        salaryMax: applications.salaryMax,
+        source: applications.source,
+        appliedAt: applications.appliedAt,
+        resumeVersionUsed: applications.resumeVersionUsed,
+        notes: applications.notes,
+        nextFollowUpAt: applications.nextFollowUpAt,
+        companyName: companies.name,
+        companyWebsite: companies.website,
+        companyIndustry: companies.industry,
+        companySource: companies.source,
+        contactName: contacts.name,
+        contactRole: contacts.role,
+        contactEmail: contacts.email,
+        contactLinkedinUrl: contacts.linkedinUrl,
+      })
+      .from(applications)
+      .leftJoin(companies, eq(applications.companyId, companies.id))
+      .leftJoin(contacts, eq(applications.contactId, contacts.id));
 
-  return rows.map((row) => ({
-    id: row.id,
-    userId: row.userId,
-    companyId: row.companyId,
-    contactId: row.contactId,
-    jobTitle: row.jobTitle,
-    jobUrl: row.jobUrl,
-    status: row.status,
-    salaryMin: row.salaryMin,
-    salaryMax: row.salaryMax,
-    source: row.source,
-    appliedAt: row.appliedAt,
-    resumeVersionUsed: row.resumeVersionUsed,
-    notes: row.notes,
-    nextFollowUpAt: row.nextFollowUpAt,
-    company: {
-      id: row.companyId,
+    return rows.map((row) => ({
+      id: row.id,
       userId: row.userId,
-      name: row.companyName ?? "",
-      website: row.companyWebsite,
-      industry: row.companyIndustry,
-      source: row.companySource,
-    },
-    contact: row.contactName
-      ? {
-          id: row.contactId!,
-          companyId: row.companyId,
-          name: row.contactName,
-          role: row.contactRole,
-          email: row.contactEmail,
-          linkedinUrl: row.contactLinkedinUrl,
-          lastContactedAt: null,
-        }
-      : null,
-  }));
+      companyId: row.companyId,
+      contactId: row.contactId,
+      jobTitle: row.jobTitle,
+      jobUrl: row.jobUrl,
+      status: row.status,
+      salaryMin: row.salaryMin,
+      salaryMax: row.salaryMax,
+      source: row.source,
+      appliedAt: row.appliedAt,
+      resumeVersionUsed: row.resumeVersionUsed,
+      notes: row.notes,
+      nextFollowUpAt: row.nextFollowUpAt,
+      company: {
+        id: row.companyId,
+        userId: row.userId,
+        name: row.companyName ?? "",
+        website: row.companyWebsite,
+        industry: row.companyIndustry,
+        source: row.companySource,
+      },
+      contact: row.contactName
+        ? {
+            id: row.contactId!,
+            companyId: row.companyId,
+            name: row.contactName,
+            role: row.contactRole,
+            email: row.contactEmail,
+            linkedinUrl: row.contactLinkedinUrl,
+            lastContactedAt: null,
+          }
+        : null,
+    }));
+  } catch (e) {
+    console.error("[getApplications]", e);
+    return [];
+  }
 }
 
 export async function updateApplicationStatus(id: string, status: string) {
-  await db
-    .update(applications)
-    .set({ status })
-    .where(eq(applications.id, id));
+  try {
+    await db
+      .update(applications)
+      .set({ status })
+      .where(eq(applications.id, id));
+  } catch (e) {
+    console.error("[updateApplicationStatus]", e);
+    throw new Error("Failed to update application status");
+  }
 }
 
 export async function addApplication(data: {
@@ -88,38 +98,48 @@ export async function addApplication(data: {
   notes?: string;
   status?: string;
 }) {
-  const userId = "dev-user";
+  try {
+    const userId = "dev-user";
 
-  const [company] = await db
-    .insert(companies)
-    .values({
-      id: crypto.randomUUID(),
-      userId,
-      name: data.companyName,
-    })
-    .returning();
+    const [company] = await db
+      .insert(companies)
+      .values({
+        id: crypto.randomUUID(),
+        userId,
+        name: data.companyName,
+      })
+      .returning();
 
-  const [application] = await db
-    .insert(applications)
-    .values({
-      id: crypto.randomUUID(),
-      userId,
-      companyId: company.id,
-      jobTitle: data.jobTitle,
-      jobUrl: data.jobUrl,
-      salaryMin: data.salaryMin,
-      salaryMax: data.salaryMax,
-      source: data.source,
-      notes: data.notes,
-      status: data.status ?? "SAVED",
-    })
-    .returning();
+    const [application] = await db
+      .insert(applications)
+      .values({
+        id: crypto.randomUUID(),
+        userId,
+        companyId: company.id,
+        jobTitle: data.jobTitle,
+        jobUrl: data.jobUrl,
+        salaryMin: data.salaryMin,
+        salaryMax: data.salaryMax,
+        source: data.source,
+        notes: data.notes,
+        status: data.status ?? "SAVED",
+      })
+      .returning();
 
-  return application;
+    return application;
+  } catch (e) {
+    console.error("[addApplication]", e);
+    throw new Error("Failed to add application");
+  }
 }
 
 export async function deleteApplication(id: string) {
-  await db.delete(applications).where(eq(applications.id, id));
+  try {
+    await db.delete(applications).where(eq(applications.id, id));
+  } catch (e) {
+    console.error("[deleteApplication]", e);
+    throw new Error("Failed to delete application");
+  }
 }
 
 export async function updateApplication(
@@ -137,8 +157,13 @@ export async function updateApplication(
     contactId?: string | null;
   }
 ) {
-  await db
-    .update(applications)
-    .set(data)
-    .where(eq(applications.id, id));
+  try {
+    await db
+      .update(applications)
+      .set(data)
+      .where(eq(applications.id, id));
+  } catch (e) {
+    console.error("[updateApplication]", e);
+    throw new Error("Failed to update application");
+  }
 }

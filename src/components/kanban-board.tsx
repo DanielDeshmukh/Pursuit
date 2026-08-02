@@ -98,7 +98,11 @@ export function KanbanBoard() {
       )
     );
 
-    await updateApplicationStatus(appId, newStatus);
+    try {
+      await updateApplicationStatus(appId, newStatus);
+    } catch {
+      await loadApplications();
+    }
   }
 
   function getAppsByStatus(status: string) {
@@ -255,11 +259,15 @@ export function KanbanBoard() {
           app={selectedApp}
           onClose={() => setSelectedApp(null)}
           onDelete={async () => {
-            await deleteApplication(selectedApp.id);
-            setApplications((prev) =>
-              prev.filter((a) => a.id !== selectedApp.id)
-            );
-            setSelectedApp(null);
+            try {
+              await deleteApplication(selectedApp.id);
+              setApplications((prev) =>
+                prev.filter((a) => a.id !== selectedApp.id)
+              );
+              setSelectedApp(null);
+            } catch {
+              alert("Failed to delete application");
+            }
           }}
           onUpdate={(updated) => {
             setApplications((prev) =>
@@ -274,9 +282,13 @@ export function KanbanBoard() {
         <AddModal
           onClose={() => setShowAddModal(false)}
           onAdd={async (data) => {
-            await addApplication(data);
-            await loadApplications();
-            setShowAddModal(false);
+            try {
+              await addApplication(data);
+              await loadApplications();
+              setShowAddModal(false);
+            } catch {
+              alert("Failed to add application");
+            }
           }}
         />
       )}

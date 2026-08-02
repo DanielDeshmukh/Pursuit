@@ -35,19 +35,27 @@ export function OutreachDashboard() {
   }
 
   async function handleStatusChange(id: string, status: string) {
-    await updateOutreachStatus(id, status);
-    setMessages((prev) =>
-      prev.map((m) =>
-        m.id === id
-          ? { ...m, status, sentAt: status === "sent" ? new Date().toISOString() : m.sentAt }
-          : m
-      )
-    );
+    try {
+      await updateOutreachStatus(id, status);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === id
+            ? { ...m, status, sentAt: status === "sent" ? new Date().toISOString() : m.sentAt }
+            : m
+        )
+      );
+    } catch {
+      alert("Failed to update status");
+    }
   }
 
   async function handleDelete(id: string) {
-    await deleteOutreachMessage(id);
-    setMessages((prev) => prev.filter((m) => m.id !== id));
+    try {
+      await deleteOutreachMessage(id);
+      setMessages((prev) => prev.filter((m) => m.id !== id));
+    } catch {
+      alert("Failed to delete message");
+    }
   }
 
   async function handleEditSave(data: {

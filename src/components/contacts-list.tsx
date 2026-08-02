@@ -33,8 +33,12 @@ export function ContactsList() {
   }
 
   async function handleDelete(id: string) {
-    await deleteContact(id);
-    setContacts((prev) => prev.filter((c) => c.id !== id));
+    try {
+      await deleteContact(id);
+      setContacts((prev) => prev.filter((c) => c.id !== id));
+    } catch {
+      alert("Failed to delete contact");
+    }
   }
 
   async function handleAddSave(data: {

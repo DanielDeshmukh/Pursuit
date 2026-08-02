@@ -32,15 +32,23 @@ export function RemindersList() {
   }
 
   async function handleToggle(id: string, done: boolean) {
-    await toggleReminder(id, done);
-    setReminders((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, done } : r))
-    );
+    try {
+      await toggleReminder(id, done);
+      setReminders((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, done } : r))
+      );
+    } catch {
+      alert("Failed to toggle reminder");
+    }
   }
 
   async function handleDelete(id: string) {
-    await deleteReminder(id);
-    setReminders((prev) => prev.filter((r) => r.id !== id));
+    try {
+      await deleteReminder(id);
+      setReminders((prev) => prev.filter((r) => r.id !== id));
+    } catch {
+      alert("Failed to delete reminder");
+    }
   }
 
   async function handleEditSave(data: {
