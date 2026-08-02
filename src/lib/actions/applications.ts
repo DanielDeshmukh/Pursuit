@@ -121,3 +121,24 @@ export async function addApplication(data: {
 export async function deleteApplication(id: string) {
   await db.delete(applications).where(eq(applications.id, id));
 }
+
+export async function updateApplication(
+  id: string,
+  data: {
+    jobTitle?: string;
+    jobUrl?: string;
+    status?: string;
+    salaryMin?: string;
+    salaryMax?: string;
+    source?: string;
+    notes?: string;
+    resumeVersionUsed?: string;
+    nextFollowUpAt?: string;
+    contactId?: string | null;
+  }
+) {
+  await db
+    .update(applications)
+    .set(data)
+    .where(eq(applications.id, id));
+}

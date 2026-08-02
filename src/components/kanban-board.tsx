@@ -12,6 +12,7 @@ import {
   updateApplicationStatus,
   addApplication,
   deleteApplication,
+  updateApplication,
 } from "@/lib/actions/applications";
 import { STATUS_COLUMNS, type ApplicationWithRelations } from "@/lib/types";
 import { LoadingScreen } from "@/components/loading-screen";
@@ -260,6 +261,12 @@ export function KanbanBoard() {
             );
             setSelectedApp(null);
           }}
+          onUpdate={(updated) => {
+            setApplications((prev) =>
+              prev.map((a) => (a.id === updated.id ? updated : a))
+            );
+            setSelectedApp(updated);
+          }}
         />
       )}
 
@@ -281,105 +288,301 @@ function DetailPanel({
   app,
   onClose,
   onDelete,
+  onUpdate,
 }: {
   app: ApplicationWithRelations;
   onClose: () => void;
   onDelete: () => void;
+  onUpdate: (updated: ApplicationWithRelations) => void;
 }) {
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    jobTitle: app.jobTitle,
+    jobUrl: app.jobUrl ?? "",
+    salaryMin: app.salaryMin ?? "",
+    salaryMax: app.salaryMax ?? "",
+    source: app.source ?? "",
+    notes: app.notes ?? "",
+    resumeVersionUsed: app.resumeVersionUsed ?? "",
+  });
+
+  const sources = [
+    "LinkedIn",
+    "Naukri",
+    "Referral",
+    "Walk-in",
+    "Company Website",
+    "Indeed",
+    "Other",
+  ];
+
+  function handleChange(field: string, value: string) {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  async function handleSave() {
+    if (!form.jobTitle.trim()) return;
+    setSaving(true);
+    try {
+      await updateApplication(app.id, {
+        jobTitle: form.jobTitle,
+        jobUrl: form.jobUrl || undefined,
+        salaryMin: form.salaryMin || undefined,
+        salaryMax: form.salaryMax || undefined,
+        source: form.source || undefined,
+        notes: form.notes || undefined,
+        resumeVersionUsed: form.resumeVersionUsed || undefined,
+      });
+      onUpdate({
+        ...app,
+        jobTitle: form.jobTitle,
+        jobUrl: form.jobUrl || null,
+        salaryMin: form.salaryMin || null,
+        salaryMax: form.salaryMax || null,
+        source: form.source || null,
+        notes: form.notes || null,
+        resumeVersionUsed: form.resumeVersionUsed || null,
+      });
+      setEditing(false);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function handleCancel() {
+    setForm({
+      jobTitle: app.jobTitle,
+      jobUrl: app.jobUrl ?? "",
+      salaryMin: app.salaryMin ?? "",
+      salaryMax: app.salaryMax ?? "",
+      source: app.source ?? "",
+      notes: app.notes ?? "",
+      resumeVersionUsed: app.resumeVersionUsed ?? "",
+    });
+    setEditing(false);
+  }
+
   return (
     <div className="fixed inset-y-0 right-0 z-50 w-96 border-l border-hairline bg-paper shadow-modal">
       <div className="flex h-full flex-col">
         <div className="flex items-center justify-between border-b border-hairline px-4 py-3">
           <h3 className="font-medium text-ink">Application Details</h3>
-          <button
-            onClick={onClose}
-            className="text-charcoal hover:text-ink"
-          >
-            ✕
-          </button>
+          <div className="flex items-center gap-2">
+            {!editing && (
+              <button
+                onClick={() => setEditing(true)}
+                className="rounded-md border border-hairline bg-canvas px-3 py-1 text-xs font-medium text-ink transition-colors hover:bg-cloud"
+              >
+                Edit
+              </button>
+            )}
+            <button onClick={onClose} className="text-charcoal hover:text-ink">
+              ✕
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4">
           <div className="space-y-4">
-            <div>
-              <label className="text-xs font-medium text-graphite">
-                Job Title
-              </label>
-              <p className="text-sm text-ink">{app.jobTitle}</p>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-graphite">
-                Company
-              </label>
-              <p className="text-sm text-ink">{app.company.name}</p>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-graphite">
-                Status
-              </label>
-              <p className="text-sm text-ink">{app.status}</p>
-            </div>
-            {app.source && (
-              <div>
-                <label className="text-xs font-medium text-graphite">
-                  Source
-                </label>
-                <p className="text-sm text-ink">{app.source}</p>
-              </div>
-            )}
-            {(app.salaryMin || app.salaryMax) && (
-              <div>
-                <label className="text-xs font-medium text-graphite">
-                  Salary Range
-                </label>
-                <p className="text-sm text-ink">
-                  {app.salaryMin && app.salaryMax
-                    ? `${app.salaryMin} – ${app.salaryMax}`
-                    : app.salaryMin || app.salaryMax}
-                </p>
-              </div>
-            )}
-            {app.jobUrl && (
-              <div>
-                <label className="text-xs font-medium text-graphite">
-                  Job URL
-                </label>
-                <a
-                  href={app.jobUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-sm text-link hover:text-link-pressed"
-                >
-                  {app.jobUrl}
-                </a>
-              </div>
-            )}
-            {app.resumeVersionUsed && (
-              <div>
-                <label className="text-xs font-medium text-graphite">
-                  Resume Version
-                </label>
-                <p className="text-sm text-ink">{app.resumeVersionUsed}</p>
-              </div>
-            )}
-            {app.notes && (
-              <div>
-                <label className="text-xs font-medium text-graphite">
-                  Notes
-                </label>
-                <p className="text-sm text-ink">{app.notes}</p>
-              </div>
+            {editing ? (
+              <>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-graphite">
+                    Job Title *
+                  </label>
+                  <input
+                    type="text"
+                    value={form.jobTitle}
+                    onChange={(e) => handleChange("jobTitle", e.target.value)}
+                    className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-graphite">
+                    Job URL
+                  </label>
+                  <input
+                    type="url"
+                    value={form.jobUrl}
+                    onChange={(e) => handleChange("jobUrl", e.target.value)}
+                    className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+                    placeholder="https://..."
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-graphite">
+                      Salary Min
+                    </label>
+                    <input
+                      type="text"
+                      value={form.salaryMin}
+                      onChange={(e) => handleChange("salaryMin", e.target.value)}
+                      className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+                      placeholder="e.g. 80000"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-graphite">
+                      Salary Max
+                    </label>
+                    <input
+                      type="text"
+                      value={form.salaryMax}
+                      onChange={(e) => handleChange("salaryMax", e.target.value)}
+                      className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+                      placeholder="e.g. 120000"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-graphite">
+                    Source
+                  </label>
+                  <select
+                    value={form.source}
+                    onChange={(e) => handleChange("source", e.target.value)}
+                    className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+                  >
+                    <option value="">Select source...</option>
+                    {sources.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-graphite">
+                    Resume Version
+                  </label>
+                  <input
+                    type="text"
+                    value={form.resumeVersionUsed}
+                    onChange={(e) =>
+                      handleChange("resumeVersionUsed", e.target.value)
+                    }
+                    className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+                    placeholder="e.g. v2.1"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-graphite">
+                    Notes
+                  </label>
+                  <textarea
+                    value={form.notes}
+                    onChange={(e) => handleChange("notes", e.target.value)}
+                    className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+                    rows={3}
+                    placeholder="Any notes..."
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <label className="text-xs font-medium text-graphite">
+                    Job Title
+                  </label>
+                  <p className="text-sm text-ink">{app.jobTitle}</p>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-graphite">
+                    Company
+                  </label>
+                  <p className="text-sm text-ink">{app.company.name}</p>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-graphite">
+                    Status
+                  </label>
+                  <p className="text-sm text-ink">{app.status}</p>
+                </div>
+                {app.source && (
+                  <div>
+                    <label className="text-xs font-medium text-graphite">
+                      Source
+                    </label>
+                    <p className="text-sm text-ink">{app.source}</p>
+                  </div>
+                )}
+                {(app.salaryMin || app.salaryMax) && (
+                  <div>
+                    <label className="text-xs font-medium text-graphite">
+                      Salary Range
+                    </label>
+                    <p className="text-sm text-ink">
+                      {app.salaryMin && app.salaryMax
+                        ? `${app.salaryMin} – ${app.salaryMax}`
+                        : app.salaryMin || app.salaryMax}
+                    </p>
+                  </div>
+                )}
+                {app.jobUrl && (
+                  <div>
+                    <label className="text-xs font-medium text-graphite">
+                      Job URL
+                    </label>
+                    <a
+                      href={app.jobUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-sm text-link hover:text-link-pressed"
+                    >
+                      {app.jobUrl}
+                    </a>
+                  </div>
+                )}
+                {app.resumeVersionUsed && (
+                  <div>
+                    <label className="text-xs font-medium text-graphite">
+                      Resume Version
+                    </label>
+                    <p className="text-sm text-ink">
+                      {app.resumeVersionUsed}
+                    </p>
+                  </div>
+                )}
+                {app.notes && (
+                  <div>
+                    <label className="text-xs font-medium text-graphite">
+                      Notes
+                    </label>
+                    <p className="text-sm text-ink">{app.notes}</p>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
 
         <div className="border-t border-hairline p-4">
-          <button
-            onClick={onDelete}
-            className="w-full rounded-md border border-error bg-canvas py-2 text-sm font-semibold text-error transition-colors hover:bg-error hover:text-on-primary"
-          >
-            Delete Application
-          </button>
+          {editing ? (
+            <div className="flex gap-3">
+              <button
+                onClick={handleCancel}
+                className="flex-1 rounded-md border border-hairline bg-canvas py-2 text-sm font-medium text-ink transition-colors hover:bg-cloud"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saving || !form.jobTitle.trim()}
+                className="flex-1 rounded-md bg-primary py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-deep disabled:cursor-not-allowed disabled:bg-steel"
+              >
+                {saving ? "Saving..." : "Save"}
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onDelete}
+              className="w-full rounded-md border border-error bg-canvas py-2 text-sm font-semibold text-error transition-colors hover:bg-error hover:text-on-primary"
+            >
+              Delete Application
+            </button>
+          )}
         </div>
       </div>
     </div>
