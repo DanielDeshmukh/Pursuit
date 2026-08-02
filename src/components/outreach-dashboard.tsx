@@ -6,6 +6,7 @@ import {
   addOutreachMessage,
   updateOutreachStatus,
   deleteOutreachMessage,
+  updateOutreachMessage,
   type OutreachWithRelations,
 } from "@/lib/actions/outreach";
 import {
@@ -19,6 +20,7 @@ export function OutreachDashboard() {
   const [applications, setApplications] = useState<ApplicationWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDraftModal, setShowDraftModal] = useState(false);
+  const [editingMsg, setEditingMsg] = useState<OutreachWithRelations | null>(null);
   const [filter, setFilter] = useState<"all" | "drafted" | "sent" | "replied">("all");
 
   useEffect(() => {
@@ -46,6 +48,21 @@ export function OutreachDashboard() {
   async function handleDelete(id: string) {
     await deleteOutreachMessage(id);
     setMessages((prev) => prev.filter((m) => m.id !== id));
+  }
+
+  async function handleEditSave(data: {
+    channel: string;
+    subject: string;
+    body: string;
+  }) {
+    if (!editingMsg) return;
+    await updateOutreachMessage(editingMsg.id, data);
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === editingMsg.id ? { ...m, ...data } : m
+      )
+    );
+    setEditingMsg(null);
   }
 
   const filtered = messages.filter((m) => (filter === "all" ? true : m.status === filter));
@@ -136,12 +153,23 @@ export function OutreachDashboard() {
                   </div>
                   <div className="ml-3 flex items-center gap-2">
                     {m.status === "drafted" && (
-                      <button
-                        onClick={() => handleStatusChange(m.id, "sent")}
-                        className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-on-primary hover:bg-primary-deep"
-                      >
-                        Mark Sent
-                      </button>
+                      <>
+                        <button
+                          onClick={() => setEditingMsg(m)}
+                          className="text-graphite hover:text-primary"
+                          title="Edit"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                            <path d="M10.5 1.5L12.5 3.5L4 12H2V10L10.5 1.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleStatusChange(m.id, "sent")}
+                          className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-on-primary hover:bg-primary-deep"
+                        >
+                          Mark Sent
+                        </button>
+                      </>
                     )}
                     {m.status === "sent" && (
                       <button
@@ -173,6 +201,14 @@ export function OutreachDashboard() {
             await loadData();
             setShowDraftModal(false);
           }}
+        />
+      )}
+
+      {editingMsg && (
+        <EditModal
+          message={editingMsg}
+          onClose={() => setEditingMsg(null)}
+          onSave={handleEditSave}
         />
       )}
     </div>
@@ -296,6 +332,89 @@ function DraftModal({
             className="flex-1 rounded-md bg-primary py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-deep disabled:cursor-not-allowed disabled:bg-steel"
           >
             Save Draft
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EditModal({
+  message,
+  onClose,
+  onSave,
+}: {
+  message: OutreachWithRelations;
+  onClose: () => void;
+  onSave: (data: { channel: string; subject: string; body: string }) => void;
+}) {
+  const [channel, setChannel] = useState(message.channel);
+  const [subject, setSubject] = useState(message.subject ?? "");
+  const [body, setBody] = useState(message.body);
+  const [saving, setSaving] = useState(false);
+
+  async function handleSave() {
+    if (!body.trim()) return;
+    setSaving(true);
+    try {
+      onSave({ channel, subject: subject || undefined as unknown as string, body });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-xl border border-hairline bg-paper p-6 shadow-modal">
+        <h3 className="mb-4 text-lg font-medium text-ink">Edit Message</h3>
+        <div className="space-y-3">
+          <div>
+            <label className="mb-1 block text-xs font-medium text-graphite">Channel</label>
+            <select
+              value={channel}
+              onChange={(e) => setChannel(e.target.value)}
+              className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+            >
+              <option value="email">Email</option>
+              <option value="linkedin">LinkedIn</option>
+            </select>
+          </div>
+          {channel === "email" && (
+            <div>
+              <label className="mb-1 block text-xs font-medium text-graphite">Subject</label>
+              <input
+                type="text"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+                placeholder="Subject line..."
+              />
+            </div>
+          )}
+          <div>
+            <label className="mb-1 block text-xs font-medium text-graphite">Message Body</label>
+            <textarea
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+              rows={8}
+              placeholder="Write your message..."
+            />
+          </div>
+        </div>
+        <div className="mt-5 flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 rounded-md border border-hairline bg-canvas py-2 text-sm font-medium text-ink transition-colors hover:bg-cloud"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving || !body.trim()}
+            className="flex-1 rounded-md bg-primary py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-deep disabled:cursor-not-allowed disabled:bg-steel"
+          >
+            {saving ? "Saving..." : "Save"}
           </button>
         </div>
       </div>

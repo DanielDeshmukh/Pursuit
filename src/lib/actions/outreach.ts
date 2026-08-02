@@ -90,3 +90,17 @@ export async function updateOutreachStatus(id: string, status: string) {
 export async function deleteOutreachMessage(id: string) {
   await db.delete(outreachMessages).where(eq(outreachMessages.id, id));
 }
+
+export async function updateOutreachMessage(
+  id: string,
+  data: {
+    channel?: string;
+    subject?: string;
+    body?: string;
+  }
+) {
+  await db
+    .update(outreachMessages)
+    .set(data)
+    .where(eq(outreachMessages.id, id));
+}
