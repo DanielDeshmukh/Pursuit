@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { signOut } from "next-auth/react";
 import { useSidebar } from "@/lib/sidebar-context";
 
 const navItems = [
@@ -117,19 +116,6 @@ export function Sidebar() {
 
         <div className={`border-t border-hairline px-2 py-3 ${collapsed ? "flex flex-col items-center gap-2" : ""}`}>
           <ThemeToggle />
-          {!collapsed && (
-            <button
-              onClick={() => signOut({ callbackUrl: "/auth/login" })}
-              className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-charcoal hover:bg-cloud hover:text-ink"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <polyline points="16 17 21 12 16 7" />
-                <line x1="21" y1="12" x2="9" y2="12" />
-              </svg>
-              Sign out
-            </button>
-          )}
           <button
             onClick={() => setCollapsed(!collapsed)}
             className="mt-2 hidden w-full items-center justify-center rounded-lg p-2 text-charcoal hover:bg-cloud hover:text-ink lg:flex"
