@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -87,11 +86,11 @@ export function Sidebar() {
         <div className={`flex h-14 items-center border-b border-hairline ${collapsed ? "justify-center px-2" : "px-4"}`}>
           {!collapsed && (
             <Link href="/" className="flex items-center gap-2">
-              <Image src="/favicon.png" alt="" width={24} height={24} />
+              <img src="/favicon.png" alt="" className="h-6 w-6" />
               <span className="text-sm font-semibold text-ink">Pursuit</span>
             </Link>
           )}
-          {collapsed && <Image src="/favicon.png" alt="Pursuit" width={24} height={24} />}
+          {collapsed && <img src="/favicon.png" alt="Pursuit" className="h-6 w-6" />}
         </div>
 
         <nav className="flex-1 overflow-y-auto px-2 py-3">

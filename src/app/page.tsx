@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Home() {
@@ -11,7 +10,7 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col items-center gap-4 text-center">
-          <Image src="/favicon.png" alt="Pursuit" width={48} height={48} />
+          <img src="/favicon.png" alt="Pursuit" className="h-12 w-12" />
           <h1 className="text-3xl font-medium tracking-tight text-ink sm:text-4xl">
             Pursuit
           </h1>
