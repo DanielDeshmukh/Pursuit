@@ -6,6 +6,7 @@ import {
   addReminder,
   toggleReminder,
   deleteReminder,
+  updateReminder,
   type ReminderWithApp,
 } from "@/lib/actions/reminders";
 import { getApplications, type ApplicationWithRelations } from "@/lib/actions/applications";
@@ -16,6 +17,7 @@ export function RemindersList() {
   const [applications, setApplications] = useState<ApplicationWithRelations[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingReminder, setEditingReminder] = useState<ReminderWithApp | null>(null);
   const [filter, setFilter] = useState<"all" | "pending" | "done">("all");
 
   useEffect(() => {
@@ -39,6 +41,23 @@ export function RemindersList() {
   async function handleDelete(id: string) {
     await deleteReminder(id);
     setReminders((prev) => prev.filter((r) => r.id !== id));
+  }
+
+  async function handleEditSave(data: {
+    applicationId: string;
+    type: string;
+    dueAt: string;
+  }) {
+    if (!editingReminder) return;
+    await updateReminder(editingReminder.id, data);
+    setReminders((prev) =>
+      prev.map((r) =>
+        r.id === editingReminder.id
+          ? { ...r, ...data }
+          : r
+      )
+    );
+    setEditingReminder(null);
   }
 
   const filtered = reminders.filter((r) => {
@@ -164,6 +183,15 @@ export function RemindersList() {
                   </div>
 
                   <button
+                    onClick={() => setEditingReminder(r)}
+                    className="shrink-0 text-graphite hover:text-primary"
+                    title="Edit"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M10.5 1.5L12.5 3.5L4 12H2V10L10.5 1.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                  <button
                     onClick={() => handleDelete(r.id)}
                     className="shrink-0 text-graphite hover:text-error"
                   >
@@ -197,6 +225,15 @@ export function RemindersList() {
             await loadData();
             setShowAddModal(false);
           }}
+        />
+      )}
+
+      {editingReminder && (
+        <EditReminderModal
+          reminder={editingReminder}
+          applications={applications}
+          onClose={() => setEditingReminder(null)}
+          onSave={handleEditSave}
         />
       )}
     </div>
@@ -305,6 +342,116 @@ function AddReminderModal({
             className="flex-1 rounded-md bg-primary py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-deep disabled:cursor-not-allowed disabled:bg-steel"
           >
             Add
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EditReminderModal({
+  reminder,
+  applications,
+  onClose,
+  onSave,
+}: {
+  reminder: ReminderWithApp;
+  applications: ApplicationWithRelations[];
+  onClose: () => void;
+  onSave: (data: { applicationId: string; type: string; dueAt: string }) => void;
+}) {
+  const [applicationId, setApplicationId] = useState(reminder.applicationId);
+  const [type, setType] = useState(reminder.type);
+  const [dueAt, setDueAt] = useState(() => {
+    const d = new Date(reminder.dueAt);
+    return d.toISOString().split("T")[0];
+  });
+  const [saving, setSaving] = useState(false);
+
+  const types = [
+    { value: "follow_up", label: "Follow-up" },
+    { value: "interview_prep", label: "Interview Prep" },
+    { value: "thank_you", label: "Thank You Note" },
+  ];
+
+  async function handleSave() {
+    if (!applicationId) return;
+    setSaving(true);
+    try {
+      onSave({
+        applicationId,
+        type,
+        dueAt: new Date(dueAt).toISOString(),
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-xl border border-hairline bg-paper p-6 shadow-modal">
+        <h3 className="mb-4 text-lg font-medium text-ink">Edit Reminder</h3>
+
+        <div className="space-y-4">
+          <div>
+            <label className="mb-1 block text-xs font-medium text-graphite">
+              Application
+            </label>
+            <select
+              value={applicationId}
+              onChange={(e) => setApplicationId(e.target.value)}
+              className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+            >
+              {applications.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.jobTitle} @ {a.company.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-graphite">
+              Type
+            </label>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+            >
+              {types.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-graphite">
+              Due Date
+            </label>
+            <input
+              type="date"
+              value={dueAt}
+              onChange={(e) => setDueAt(e.target.value)}
+              className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+            />
+          </div>
+        </div>
+
+        <div className="mt-6 flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 rounded-md border border-hairline bg-canvas py-2 text-sm font-medium text-ink transition-colors hover:bg-cloud"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving || !applicationId}
+            className="flex-1 rounded-md bg-primary py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-deep disabled:cursor-not-allowed disabled:bg-steel"
+          >
+            {saving ? "Saving..." : "Save"}
           </button>
         </div>
       </div>

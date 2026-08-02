@@ -68,3 +68,17 @@ export async function toggleReminder(id: string, done: boolean) {
 export async function deleteReminder(id: string) {
   await db.delete(reminders).where(eq(reminders.id, id));
 }
+
+export async function updateReminder(
+  id: string,
+  data: {
+    applicationId?: string;
+    type?: string;
+    dueAt?: string;
+  }
+) {
+  await db
+    .update(reminders)
+    .set(data)
+    .where(eq(reminders.id, id));
+}
