@@ -9,6 +9,8 @@ import {
   Cell,
   BarChart,
   Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
@@ -19,14 +21,14 @@ import {
 type AnalyticsData = Awaited<ReturnType<typeof getAnalytics>>;
 
 const COLORS = [
-  "#024ad8",
-  "#296ef9",
-  "#8ebdce",
-  "#ff5050",
-  "#636363",
-  "#356373",
-  "#c9e0fc",
-  "#b3262b",
+  "var(--color-primary)",
+  "var(--color-primary-bright)",
+  "var(--color-sky-mist)",
+  "var(--color-bloom-coral)",
+  "var(--color-graphite)",
+  "var(--color-storm-deep)",
+  "var(--color-primary-soft)",
+  "var(--color-bloom-rose)",
 ];
 
 export function AnalyticsDashboard() {
@@ -51,6 +53,16 @@ export function AnalyticsDashboard() {
     },
   ];
 
+  const funnelSteps = [
+    { label: "Saved", value: data.funnel.saved },
+    { label: "Applied", value: data.funnel.applied },
+    { label: "Screening", value: data.funnel.screening },
+    { label: "Interview", value: data.funnel.interview },
+    { label: "Offer", value: data.funnel.offer },
+  ];
+
+  const tickColor = "var(--color-graphite)";
+
   return (
     <div className="flex flex-1 flex-col overflow-y-auto p-6">
       <h2 className="mb-6 text-lg font-medium text-ink">Analytics</h2>
@@ -67,6 +79,79 @@ export function AnalyticsDashboard() {
             </p>
           </div>
         ))}
+      </div>
+
+      <div className="mb-8">
+        <h3 className="mb-4 text-sm font-medium text-ink">
+          Conversion Funnel
+        </h3>
+        <div className="flex items-end gap-2">
+          {funnelSteps.map((step, i) => {
+            const maxVal = Math.max(...funnelSteps.map((s) => s.value), 1);
+            const heightPct = (step.value / maxVal) * 100;
+            return (
+              <div key={step.label} className="flex flex-1 flex-col items-center">
+                <span className="mb-1 text-sm font-medium text-ink">
+                  {step.value}
+                </span>
+                <div
+                  className="w-full rounded-t-md transition-all"
+                  style={{
+                    height: `${Math.max(heightPct, 4)}%`,
+                    minHeight: 8,
+                    backgroundColor: COLORS[i % COLORS.length],
+                  }}
+                />
+                <span className="mt-2 text-[10px] text-graphite">
+                  {step.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <h3 className="mb-4 text-sm font-medium text-ink">
+          Applications Over Time
+        </h3>
+        {data.timeSeries.length > 0 ? (
+          <div className="rounded-xl border border-hairline bg-paper p-4">
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={data.timeSeries}>
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 11, fill: tickColor }}
+                  tickFormatter={(v: string) => {
+                    const [y, m] = v.split("-");
+                    return `${["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][Number(m)]} ${y?.slice(2)}`;
+                  }}
+                />
+                <YAxis tick={{ fontSize: 11, fill: tickColor }} allowDecimals={false} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "var(--color-paper)",
+                    border: "1px solid var(--color-hairline)",
+                    borderRadius: 8,
+                    fontSize: 12,
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="var(--color-primary)"
+                  strokeWidth={2}
+                  dot={{ fill: "var(--color-primary)", r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <p className="py-8 text-center text-sm text-graphite">
+            No timeline data yet
+          </p>
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -87,13 +172,17 @@ export function AnalyticsDashboard() {
                   dataKey="value"
                 >
                   {data.bySource.map((_, i) => (
-                    <Cell
-                      key={i}
-                      fill={COLORS[i % COLORS.length]}
-                    />
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "var(--color-paper)",
+                    border: "1px solid var(--color-hairline)",
+                    borderRadius: 8,
+                    fontSize: 12,
+                  }}
+                />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
@@ -113,19 +202,23 @@ export function AnalyticsDashboard() {
               <BarChart data={data.byStatus}>
                 <XAxis
                   dataKey="name"
-                  tick={{ fontSize: 11, fill: "#636363" }}
+                  tick={{ fontSize: 11, fill: tickColor }}
                   angle={-30}
                   textAnchor="end"
                   height={60}
                 />
-                <YAxis tick={{ fontSize: 11, fill: "#636363" }} />
-                <Tooltip />
+                <YAxis tick={{ fontSize: 11, fill: tickColor }} allowDecimals={false} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "var(--color-paper)",
+                    border: "1px solid var(--color-hairline)",
+                    borderRadius: 8,
+                    fontSize: 12,
+                  }}
+                />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                   {data.byStatus.map((_, i) => (
-                    <Cell
-                      key={i}
-                      fill={COLORS[i % COLORS.length]}
-                    />
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
                   ))}
                 </Bar>
               </BarChart>
