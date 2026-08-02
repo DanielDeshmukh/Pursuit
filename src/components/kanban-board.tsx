@@ -16,6 +16,7 @@ import {
 } from "@/lib/actions/applications";
 import { STATUS_COLUMNS, type ApplicationWithRelations } from "@/lib/types";
 import { LoadingScreen } from "@/components/loading-screen";
+import { useEscapeKey } from "@/lib/use-escape-key";
 
 export function KanbanBoard() {
   const [applications, setApplications] = useState<ApplicationWithRelations[]>(
@@ -27,6 +28,11 @@ export function KanbanBoard() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [sourceFilter, setSourceFilter] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEscapeKey(() => {
+    if (selectedApp) setSelectedApp(null);
+    else if (showAddModal) setShowAddModal(false);
+  });
 
   const sources = [
     "ALL",

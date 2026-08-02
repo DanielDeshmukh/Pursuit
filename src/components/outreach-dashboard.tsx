@@ -14,6 +14,7 @@ import {
   type ApplicationWithRelations,
 } from "@/lib/actions/applications";
 import { LoadingScreen } from "@/components/loading-screen";
+import { useEscapeKey } from "@/lib/use-escape-key";
 
 export function OutreachDashboard() {
   const [messages, setMessages] = useState<OutreachWithRelations[]>([]);
@@ -22,6 +23,11 @@ export function OutreachDashboard() {
   const [showDraftModal, setShowDraftModal] = useState(false);
   const [editingMsg, setEditingMsg] = useState<OutreachWithRelations | null>(null);
   const [filter, setFilter] = useState<"all" | "drafted" | "sent" | "replied">("all");
+
+  useEscapeKey(() => {
+    if (editingMsg) setEditingMsg(null);
+    else if (showDraftModal) setShowDraftModal(false);
+  });
 
   useEffect(() => {
     loadData();

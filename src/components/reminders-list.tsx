@@ -11,6 +11,7 @@ import {
 } from "@/lib/actions/reminders";
 import { getApplications, type ApplicationWithRelations } from "@/lib/actions/applications";
 import { LoadingScreen } from "@/components/loading-screen";
+import { useEscapeKey } from "@/lib/use-escape-key";
 
 export function RemindersList() {
   const [reminders, setReminders] = useState<ReminderWithApp[]>([]);
@@ -19,6 +20,11 @@ export function RemindersList() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingReminder, setEditingReminder] = useState<ReminderWithApp | null>(null);
   const [filter, setFilter] = useState<"all" | "pending" | "done">("all");
+
+  useEscapeKey(() => {
+    if (editingReminder) setEditingReminder(null);
+    else if (showAddModal) setShowAddModal(false);
+  });
 
   useEffect(() => {
     loadData();

@@ -10,6 +10,7 @@ import {
   type ContactWithCompany,
 } from "@/lib/actions/contacts";
 import { LoadingScreen } from "@/components/loading-screen";
+import { useEscapeKey } from "@/lib/use-escape-key";
 
 type Company = { id: string; name: string };
 
@@ -20,6 +21,11 @@ export function ContactsList() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingContact, setEditingContact] = useState<ContactWithCompany | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEscapeKey(() => {
+    if (editingContact) setEditingContact(null);
+    else if (showAddModal) setShowAddModal(false);
+  });
 
   useEffect(() => {
     loadData();
