@@ -28,7 +28,7 @@ export async function upsertProfile(data: Record<string, string | null | undefin
 
     const cols = [
       "firstName", "lastName", "email", "phone", "address", "city", "state",
-      "zipCode", "country", "linkedinUrl", "portfolioUrl", "currentTitle",
+      "zipCode", "country", "linkedinUrl", "githubUrl", "portfolioUrl", "currentTitle",
       "currentCompany", "yearsExperience", "education", "skills",
       "workAuthorization", "salaryExpectation", "bio", "coverLetterTemplate",
       "customAnswers", "photo", "summary", "workExperience", "projects",
@@ -38,7 +38,7 @@ export async function upsertProfile(data: Record<string, string | null | undefin
       firstName: "first_name", lastName: "last_name", email: "email",
       phone: "phone", address: "address", city: "city", state: "state",
       zipCode: "zip_code", country: "country", linkedinUrl: "linkedin_url",
-      portfolioUrl: "portfolio_url", currentTitle: "current_title",
+      githubUrl: "github_url", portfolioUrl: "portfolio_url", currentTitle: "current_title",
       currentCompany: "current_company", yearsExperience: "years_experience",
       education: "education", skills: "skills",
       workAuthorization: "work_authorization",

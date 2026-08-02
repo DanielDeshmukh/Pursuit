@@ -96,6 +96,7 @@ export const profiles = sqliteTable("profiles", {
   zipCode: text("zip_code"),
   country: text("country"),
   linkedinUrl: text("linkedin_url"),
+  githubUrl: text("github_url"),
   portfolioUrl: text("portfolio_url"),
   currentTitle: text("current_title"),
   currentCompany: text("current_company"),

@@ -11,7 +11,7 @@ type ProjectEntry = { name: string; description: string; tech: string; bullets: 
 const FIELD_LABELS: Record<string, string> = {
   firstName: "First Name", lastName: "Last Name", email: "Email",
   phone: "Phone", city: "City", country: "Country",
-  linkedinUrl: "LinkedIn", portfolioUrl: "Portfolio",
+  linkedinUrl: "LinkedIn", githubUrl: "GitHub", portfolioUrl: "Portfolio",
   currentTitle: "Current Title", currentCompany: "Current Company",
   yearsExperience: "Years of Experience", education: "Education",
   skills: "Skills", workAuthorization: "Work Authorization",
@@ -20,7 +20,7 @@ const FIELD_LABELS: Record<string, string> = {
 
 const EDITABLE_KEYS = [
   "firstName", "lastName", "email", "phone", "city", "country",
-  "linkedinUrl", "portfolioUrl", "currentTitle", "currentCompany",
+  "linkedinUrl", "githubUrl", "portfolioUrl", "currentTitle", "currentCompany",
   "yearsExperience", "education", "skills", "workAuthorization",
   "salaryExpectation",
 ];
@@ -440,12 +440,15 @@ export default function ProfilePage() {
               )}
 
               {/* Links */}
-              {(form.linkedinUrl || form.portfolioUrl) && (
+              {(form.linkedinUrl || form.githubUrl || form.portfolioUrl) && (
                 <section className="rounded-xl border border-hairline bg-paper p-5">
                   <h4 className="text-xs font-semibold uppercase tracking-wider text-graphite mb-2">Links</h4>
                   <div className="flex flex-wrap gap-3">
                     {form.linkedinUrl && (
                       <a href={form.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">LinkedIn →</a>
+                    )}
+                    {form.githubUrl && (
+                      <a href={form.githubUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">GitHub →</a>
                     )}
                     {form.portfolioUrl && (
                       <a href={form.portfolioUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">Portfolio →</a>
@@ -680,10 +683,15 @@ export default function ProfilePage() {
               {/* Links */}
               <section className="rounded-xl border border-hairline bg-paper p-5 space-y-4">
                 <h3 className="text-sm font-semibold text-ink">Links</h3>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <div>
                     <label className="mb-1 block text-xs font-medium text-graphite">LinkedIn URL</label>
                     <input type="url" value={form.linkedinUrl ?? ""} onChange={(e) => setField("linkedinUrl", e.target.value)} placeholder="https://linkedin.com/in/..."
+                      className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-graphite">GitHub URL</label>
+                    <input type="url" value={form.githubUrl ?? ""} onChange={(e) => setField("githubUrl", e.target.value)} placeholder="https://github.com/..."
                       className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none" />
                   </div>
                   <div>
