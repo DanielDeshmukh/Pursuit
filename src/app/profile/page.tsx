@@ -152,6 +152,36 @@ export default function ProfilePage() {
         </div>
 
         <div className="mx-auto w-full max-w-3xl space-y-8">
+          {firstName && (
+            <section className="rounded-xl border border-hairline bg-paper p-5">
+              <div className="flex items-start gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10 text-lg font-semibold text-primary">
+                  {firstName[0]}{lastName?.[0] || ""}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base font-semibold text-ink">{firstName} {lastName}</h3>
+                  {currentTitle && currentCompany && (
+                    <p className="text-sm text-charcoal">{currentTitle} at {currentCompany}</p>
+                  )}
+                  <div className="mt-2 flex flex-wrap gap-3 text-xs text-graphite">
+                    {email && <span>{email}</span>}
+                    {phone && <span>{phone}</span>}
+                    {city && <span>{city}{country ? `, ${country}` : ""}</span>}
+                  </div>
+                  {skills && (
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {skills.split(",").slice(0, 8).map((s, i) => (
+                        <span key={i} className="rounded-full bg-cloud px-2.5 py-0.5 text-[10px] font-medium text-charcoal">{s.trim()}</span>
+                      ))}
+                      {skills.split(",").length > 8 && (
+                        <span className="rounded-full bg-cloud px-2.5 py-0.5 text-[10px] font-medium text-graphite">+{skills.split(",").length - 8} more</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
           <section className="rounded-xl border border-hairline bg-paper p-4">
             <div className="flex items-center justify-between">
               <div>
