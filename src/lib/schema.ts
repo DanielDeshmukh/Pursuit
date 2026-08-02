@@ -84,6 +84,37 @@ export const outreachMessages = sqliteTable(
   ]
 );
 
+export const profiles = sqliteTable("profiles", {
+  id: text("id").primaryKey(),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  email: text("email"),
+  phone: text("phone"),
+  address: text("address"),
+  city: text("city"),
+  state: text("state"),
+  zipCode: text("zip_code"),
+  country: text("country"),
+  linkedinUrl: text("linkedin_url"),
+  portfolioUrl: text("portfolio_url"),
+  currentTitle: text("current_title"),
+  currentCompany: text("current_company"),
+  yearsExperience: text("years_experience"),
+  education: text("education"),
+  skills: text("skills"),
+  workAuthorization: text("work_authorship"),
+  salaryExpectation: text("salary_expectation"),
+  bio: text("bio"),
+  coverLetterTemplate: text("cover_letter_template"),
+  customAnswers: text("custom_answers"),
+  createdAt: text("created_at")
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  updatedAt: text("updated_at")
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+});
+
 export const reminders = sqliteTable(
   "reminders",
   {
