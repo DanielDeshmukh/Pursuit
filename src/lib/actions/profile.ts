@@ -10,7 +10,7 @@ export async function getProfile() {
       sql: "SELECT * FROM profiles WHERE id = ? LIMIT 1",
       args: ["default"],
     });
-    return result.rows[0] ?? null;
+    return result.rows[0] ? { ...result.rows[0] } : null;
   } catch (e) {
     console.error("[getProfile]", e);
     return null;
@@ -75,7 +75,7 @@ export async function upsertProfile(data: Record<string, string | null | undefin
       sql: "SELECT * FROM profiles WHERE id = ? LIMIT 1",
       args: ["default"],
     });
-    return result.rows[0];
+    return result.rows[0] ? { ...result.rows[0] } : null;
   } catch (e) {
     console.error("[upsertProfile]", e);
     throw new Error("Failed to save profile");
