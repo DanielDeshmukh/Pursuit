@@ -5,26 +5,38 @@ import { SidebarLayout } from "@/components/sidebar-layout";
 import { getProfile, upsertProfile } from "@/lib/actions/profile";
 
 type Profile = Record<string, string | null>;
+type WorkEntry = { company: string; role: string; startDate: string; endDate: string; location: string; bullets: string[] };
+type ProjectEntry = { name: string; description: string; tech: string; bullets: string[] };
 
 const FIELD_LABELS: Record<string, string> = {
   firstName: "First Name", lastName: "Last Name", email: "Email",
-  phone: "Phone", address: "Address", city: "City", state: "State",
-  zipCode: "Zip Code", country: "Country", linkedinUrl: "LinkedIn",
-  portfolioUrl: "Portfolio", currentTitle: "Current Title",
-  currentCompany: "Current Company", yearsExperience: "Experience",
-  education: "Education", skills: "Skills",
-  workAuthorization: "Work Authorization",
-  salaryExpectation: "Salary Expectation", bio: "Bio",
-  coverLetterTemplate: "Cover Letter", customAnswers: "Custom Answers",
+  phone: "Phone", city: "City", country: "Country",
+  linkedinUrl: "LinkedIn", portfolioUrl: "Portfolio",
+  currentTitle: "Current Title", currentCompany: "Current Company",
+  yearsExperience: "Years of Experience", education: "Education",
+  skills: "Skills", workAuthorization: "Work Authorization",
+  salaryExpectation: "Salary Expectation",
 };
 
 const EDITABLE_KEYS = [
-  "firstName", "lastName", "email", "phone", "address", "city", "state",
-  "zipCode", "country", "linkedinUrl", "portfolioUrl", "currentTitle",
-  "currentCompany", "yearsExperience", "education", "skills",
-  "workAuthorization", "salaryExpectation", "bio", "coverLetterTemplate",
-  "customAnswers",
+  "firstName", "lastName", "email", "phone", "city", "country",
+  "linkedinUrl", "portfolioUrl", "currentTitle", "currentCompany",
+  "yearsExperience", "education", "skills", "workAuthorization",
+  "salaryExpectation",
 ];
+
+function parseJSON<T>(val: string | null | undefined, fallback: T): T {
+  if (!val) return fallback;
+  try { return JSON.parse(val) as T; } catch { return fallback; }
+}
+
+function emptyWork(): WorkEntry {
+  return { company: "", role: "", startDate: "", endDate: "", location: "", bullets: [""] };
+}
+
+function emptyProject(): ProjectEntry {
+  return { name: "", description: "", tech: "", bullets: [""] };
+}
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
@@ -40,6 +52,8 @@ export default function ProfilePage() {
 
   const [form, setForm] = useState<Profile>({});
   const [original, setOriginal] = useState<Profile>({});
+  const [workEntries, setWorkEntries] = useState<WorkEntry[]>([]);
+  const [projectEntries, setProjectEntries] = useState<ProjectEntry[]>([]);
 
   useEffect(() => {
     getProfile().then((p) => {
@@ -47,6 +61,8 @@ export default function ProfilePage() {
         setForm(p);
         setOriginal(p);
         setPhoto(p.photo ?? null);
+        setWorkEntries(parseJSON<WorkEntry[]>(p.workExperience, []));
+        setProjectEntries(parseJSON<ProjectEntry[]>(p.projects, []));
       }
       setLoading(false);
     });
@@ -56,6 +72,54 @@ export default function ProfilePage() {
     setForm((f) => ({ ...f, [key]: val }));
   }
 
+  function updateWork(idx: number, key: keyof WorkEntry, val: string | string[]) {
+    setWorkEntries((w) => w.map((e, i) => i === idx ? { ...e, [key]: val } : e));
+  }
+
+  function updateProject(idx: number, key: keyof ProjectEntry, val: string | string[]) {
+    setProjectEntries((p) => p.map((e, i) => i === idx ? { ...e, [key]: val } : e));
+  }
+
+  function updateWorkBullet(workIdx: number, bulletIdx: number, val: string) {
+    setWorkEntries((w) => w.map((e, i) => {
+      if (i !== workIdx) return e;
+      const bullets = [...e.bullets];
+      bullets[bulletIdx] = val;
+      return { ...e, bullets };
+    }));
+  }
+
+  function addWorkBullet(workIdx: number) {
+    setWorkEntries((w) => w.map((e, i) => i === workIdx ? { ...e, bullets: [...e.bullets, ""] } : e));
+  }
+
+  function removeWorkBullet(workIdx: number, bulletIdx: number) {
+    setWorkEntries((w) => w.map((e, i) => {
+      if (i !== workIdx) return e;
+      return { ...e, bullets: e.bullets.filter((_, j) => j !== bulletIdx) };
+    }));
+  }
+
+  function updateProjectBullet(projIdx: number, bulletIdx: number, val: string) {
+    setProjectEntries((p) => p.map((e, i) => {
+      if (i !== projIdx) return e;
+      const bullets = [...e.bullets];
+      bullets[bulletIdx] = val;
+      return { ...e, bullets };
+    }));
+  }
+
+  function addProjectBullet(projIdx: number) {
+    setProjectEntries((p) => p.map((e, i) => i === projIdx ? { ...e, bullets: [...e.bullets, ""] } : e));
+  }
+
+  function removeProjectBullet(projIdx: number, bulletIdx: number) {
+    setProjectEntries((p) => p.map((e, i) => {
+      if (i !== projIdx) return e;
+      return { ...e, bullets: e.bullets.filter((_, j) => j !== bulletIdx) };
+    }));
+  }
+
   async function handleSave() {
     setSaving(true);
     setSaved(false);
@@ -63,11 +127,16 @@ export default function ProfilePage() {
       const toSave: Record<string, string | null> = {};
       for (const k of EDITABLE_KEYS) toSave[k] = form[k] ?? null;
       toSave.photo = photo;
+      toSave.summary = form.summary ?? null;
+      toSave.workExperience = JSON.stringify(workEntries.filter((e) => e.company || e.role));
+      toSave.projects = JSON.stringify(projectEntries.filter((e) => e.name));
       const result = await upsertProfile(toSave);
       if (result) {
         setOriginal(result);
         setForm(result);
         setPhoto(result.photo ?? null);
+        setWorkEntries(parseJSON<WorkEntry[]>(result.workExperience, []));
+        setProjectEntries(parseJSON<ProjectEntry[]>(result.projects, []));
       }
       setSaved(true);
       setEditing(false);
@@ -81,18 +150,17 @@ export default function ProfilePage() {
 
   function handleCancel() {
     setForm({ ...original });
+    setWorkEntries(parseJSON<WorkEntry[]>(original.workExperience, []));
+    setProjectEntries(parseJSON<ProjectEntry[]>(original.projects, []));
     setEditing(false);
   }
 
   function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      alert("Photo must be under 2MB");
-      return;
-    }
+    if (file.size > 2 * 1024 * 1024) { alert("Photo must be under 2MB"); return; }
     const reader = new FileReader();
-    reader.onload = async () => {
+    reader.onload = () => {
       const dataUrl = reader.result as string;
       setPhoto(dataUrl);
       setForm((f) => ({ ...f, photo: dataUrl }));
@@ -117,16 +185,13 @@ export default function ProfilePage() {
       if (!resp.ok) throw new Error(data.error);
       const parsed: Profile = data.profile;
 
-      const hasExisting = EDITABLE_KEYS.some((k) => original[k]?.trim());
+      const hasExisting = EDITABLE_KEYS.some((k) => original[k]?.trim()) ||
+        original.workExperience || original.projects;
       if (hasExisting) {
         setParseResult(parsed);
         setShowOverwriteWarning(true);
       } else {
-        const updated = { ...form };
-        for (const k of EDITABLE_KEYS) {
-          if (parsed[k]) updated[k] = parsed[k];
-        }
-        setForm(updated);
+        applyParsedData(parsed, false);
         setEditing(true);
       }
     } catch (err) {
@@ -137,20 +202,28 @@ export default function ProfilePage() {
     }
   }
 
-  function applyParsed(merge: boolean) {
-    if (!parseResult) return;
+  function applyParsedData(parsed: Profile, merge: boolean) {
+    const updated = { ...form };
+    for (const k of EDITABLE_KEYS) {
+      if (parsed[k]) {
+        if (merge && original[k]?.trim()) continue;
+        updated[k] = parsed[k];
+      }
+    }
+    if (parsed.summary) {
+      if (!merge || !original.summary?.trim()) updated.summary = parsed.summary;
+    }
+    setForm(updated);
+
+    const parsedWork = parseJSON<WorkEntry[]>(parsed.workExperience as string, []);
+    const parsedProjects = parseJSON<ProjectEntry[]>(parsed.projects as string, []);
+
     if (merge) {
-      const updated = { ...form };
-      for (const k of EDITABLE_KEYS) {
-        if (parseResult[k] && !original[k]?.trim()) updated[k] = parseResult[k];
-      }
-      setForm(updated);
+      if (workEntries.length === 0 && parsedWork.length > 0) setWorkEntries(parsedWork);
+      if (projectEntries.length === 0 && parsedProjects.length > 0) setProjectEntries(parsedProjects);
     } else {
-      const updated = { ...form };
-      for (const k of EDITABLE_KEYS) {
-        if (parseResult[k]) updated[k] = parseResult[k];
-      }
-      setForm(updated);
+      if (parsedWork.length > 0) setWorkEntries(parsedWork);
+      if (parsedProjects.length > 0) setProjectEntries(parsedProjects);
     }
     setEditing(true);
     setShowOverwriteWarning(false);
@@ -166,37 +239,32 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <SidebarLayout>
-        <div className="flex flex-1 items-center justify-center text-sm text-graphite">
-          Loading profile...
-        </div>
+        <div className="flex flex-1 items-center justify-center text-sm text-graphite">Loading profile...</div>
       </SidebarLayout>
     );
   }
 
-  const isEmpty = !EDITABLE_KEYS.some((k) => original[k]?.trim());
+  const isEmpty = !EDITABLE_KEYS.some((k) => original[k]?.trim()) && !original.workExperience && !original.projects;
   const displayName = [form.firstName, form.lastName].filter(Boolean).join(" ") || "Your Name";
   const initials = (form.firstName?.[0] ?? "") + (form.lastName?.[0] ?? "");
+  const work = parseJSON<WorkEntry[]>(form.workExperience, []);
+  const projects = parseJSON<ProjectEntry[]>(form.projects, []);
 
   return (
     <SidebarLayout>
       <div className="flex flex-1 flex-col overflow-y-auto p-4 sm:p-6">
         <div className="mx-auto w-full max-w-3xl space-y-6">
 
-          {/* ── Overwrite Warning Modal ── */}
+          {/* ── Overwrite Warning ── */}
           {showOverwriteWarning && parseResult && (
             <div className="rounded-xl border border-amber/30 bg-amber/5 p-5 space-y-4">
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber/20 text-sm">
-                  ⚠️
-                </div>
+                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber/20 text-sm">⚠️</div>
                 <div>
-                  <h3 className="text-sm font-semibold text-ink">Resume Already Has Data</h3>
-                  <p className="mt-1 text-xs text-charcoal">
-                    Your profile already contains data. Choose how to apply the parsed resume.
-                  </p>
+                  <h3 className="text-sm font-semibold text-ink">Profile Already Has Data</h3>
+                  <p className="mt-1 text-xs text-charcoal">Choose how to apply the parsed resume data.</p>
                 </div>
               </div>
-
               <div className="max-h-64 overflow-y-auto rounded-lg border border-hairline">
                 <table className="w-full text-xs">
                   <thead>
@@ -214,36 +282,17 @@ export default function ProfilePage() {
                         <tr key={k} className={`border-b border-hairline ${d.changed ? "bg-amber/5" : ""}`}>
                           <td className="px-3 py-2 font-medium text-ink">{FIELD_LABELS[k]}</td>
                           <td className="px-3 py-2 text-charcoal">{d.old || <span className="text-graphite italic">empty</span>}</td>
-                          <td className={`px-3 py-2 ${d.changed ? "font-medium text-amber-deep" : "text-charcoal"}`}>
-                            {d.new}
-                            {d.changed && <span className="ml-1 text-[10px] text-amber-deep">changed</span>}
-                          </td>
+                          <td className={`px-3 py-2 ${d.changed ? "font-medium text-amber-deep" : "text-charcoal"}`}>{d.new}</td>
                         </tr>
                       );
                     })}
                   </tbody>
                 </table>
               </div>
-
               <div className="flex items-center gap-3">
-                <button
-                  onClick={() => applyParsed(false)}
-                  className="rounded-md bg-primary px-4 py-2 text-xs font-semibold text-on-primary hover:bg-primary-deep"
-                >
-                  Overwrite All
-                </button>
-                <button
-                  onClick={() => applyParsed(true)}
-                  className="rounded-md border border-hairline bg-canvas px-4 py-2 text-xs font-medium text-ink hover:bg-cloud"
-                >
-                  Merge (Keep Existing)
-                </button>
-                <button
-                  onClick={() => { setShowOverwriteWarning(false); setParseResult(null); }}
-                  className="rounded-md px-4 py-2 text-xs font-medium text-graphite hover:text-ink"
-                >
-                  Cancel
-                </button>
+                <button onClick={() => applyParsedData(parseResult, false)} className="rounded-md bg-primary px-4 py-2 text-xs font-semibold text-on-primary hover:bg-primary-deep">Overwrite All</button>
+                <button onClick={() => applyParsedData(parseResult, true)} className="rounded-md border border-hairline bg-canvas px-4 py-2 text-xs font-medium text-ink hover:bg-cloud">Merge (Keep Existing)</button>
+                <button onClick={() => { setShowOverwriteWarning(false); setParseResult(null); }} className="rounded-md px-4 py-2 text-xs font-medium text-graphite hover:text-ink">Cancel</button>
               </div>
             </div>
           )}
@@ -252,141 +301,165 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-medium text-ink">Profile</h2>
             <div className="flex items-center gap-2">
-              {saved && (
-                <span className="text-sm font-medium text-graphite animate-pulse">Saved!</span>
-              )}
+              {saved && <span className="text-sm font-medium text-graphite animate-pulse">Saved!</span>}
               {!editing && !isEmpty && (
-                <button
-                  onClick={() => setEditing(true)}
-                  className="rounded-md border border-hairline bg-canvas px-4 py-2 text-xs font-medium text-ink transition-colors hover:bg-cloud"
-                >
+                <button onClick={() => setEditing(true)} className="rounded-md border border-hairline bg-canvas px-4 py-2 text-xs font-medium text-ink hover:bg-cloud">
                   Edit Profile
                 </button>
               )}
             </div>
           </div>
 
-          {/* ── Profile Card (view mode) ── */}
+          {/* ═══════════════════════ VIEW MODE ═══════════════════════ */}
           {!editing && !isEmpty && (
-            <section className="rounded-xl border border-hairline bg-paper overflow-hidden">
-              {/* Banner */}
-              <div className="h-24 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent" />
-
-              <div className="px-6 pb-6">
-                {/* Photo + Name Row */}
-                <div className="flex items-end gap-5 -mt-10">
-                  <div className="relative group">
-                    <div className="h-20 w-20 rounded-full border-4 border-paper bg-cloud overflow-hidden flex items-center justify-center">
+            <>
+              {/* Profile Header Card */}
+              <section className="rounded-xl border border-hairline bg-paper overflow-hidden">
+                <div className="h-20 bg-gradient-to-r from-primary/15 via-primary/8 to-transparent" />
+                <div className="px-6 pb-5">
+                  <div className="flex items-end gap-4 -mt-8">
+                    <div className="h-16 w-16 rounded-full border-3 border-paper bg-cloud overflow-hidden flex items-center justify-center shrink-0">
                       {photo ? (
-                        <img src={photo} alt="Profile" className="h-full w-full object-cover" />
+                        <img src={photo} alt="" className="h-full w-full object-cover" />
                       ) : (
-                        <span className="text-xl font-semibold text-graphite">{initials || "?"}</span>
+                        <span className="text-lg font-semibold text-graphite">{initials || "?"}</span>
                       )}
                     </div>
-                  </div>
-                  <div className="pb-1">
-                    <h3 className="text-xl font-semibold text-ink">{displayName}</h3>
-                    {form.currentTitle && form.currentCompany && (
-                      <p className="text-sm text-charcoal">{form.currentTitle} at {form.currentCompany}</p>
-                    )}
-                    {form.currentTitle && !form.currentCompany && (
-                      <p className="text-sm text-charcoal">{form.currentTitle}</p>
-                    )}
+                    <div className="pb-0.5 min-w-0">
+                      <h3 className="text-lg font-semibold text-ink leading-tight">{displayName}</h3>
+                      {form.currentTitle && (
+                        <p className="text-sm text-charcoal mt-0.5">
+                          {form.currentTitle}{form.currentCompany ? ` at ${form.currentCompany}` : ""}
+                        </p>
+                      )}
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-graphite">
+                        {form.city && <span>{form.city}{form.country ? `, ${form.country}` : ""}</span>}
+                        {form.email && <span>{form.email}</span>}
+                        {form.phone && <span>{form.phone}</span>}
+                      </div>
+                    </div>
                   </div>
                 </div>
+              </section>
 
-                {/* Info Grid */}
-                <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
-                  {/* Contact */}
-                  <div>
-                    <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-graphite">Contact</h4>
-                    <div className="space-y-1.5 text-sm">
-                      {form.email && (
-                        <div className="flex items-center gap-2 text-charcoal">
-                          <span className="text-graphite">{form.email}</span>
+              {/* Summary */}
+              {form.summary && (
+                <section className="rounded-xl border border-hairline bg-paper p-5">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-graphite mb-2">About</h4>
+                  <p className="text-sm leading-relaxed text-charcoal">{form.summary}</p>
+                </section>
+              )}
+
+              {/* Experience */}
+              {work.length > 0 && (
+                <section className="rounded-xl border border-hairline bg-paper p-5">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-graphite mb-4">Experience</h4>
+                  <div className="space-y-0">
+                    {work.map((w, i) => (
+                      <div key={i} className="relative flex gap-4 pb-5 last:pb-0">
+                        {i < work.length - 1 && (
+                          <div className="absolute left-[7px] top-5 bottom-0 w-px bg-hairline" />
+                        )}
+                        <div className="mt-1 h-[15px] w-[15px] shrink-0 rounded-full border-2 border-primary bg-paper" />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-baseline gap-x-2">
+                            <span className="text-sm font-semibold text-ink">{w.role || "Role"}</span>
+                            {w.company && <span className="text-sm text-charcoal">@ {w.company}</span>}
+                          </div>
+                          <div className="mt-0.5 flex flex-wrap gap-x-2 text-xs text-graphite">
+                            {w.startDate && <span>{w.startDate} — {w.endDate || "Present"}</span>}
+                            {w.location && <span>{w.location}</span>}
+                          </div>
+                          {w.bullets.filter(Boolean).length > 0 && (
+                            <ul className="mt-2 space-y-1">
+                              {w.bullets.filter(Boolean).map((b, j) => (
+                                <li key={j} className="text-xs text-charcoal leading-relaxed flex gap-2">
+                                  <span className="text-graphite mt-0.5 shrink-0">•</span>
+                                  <span>{b}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
                         </div>
-                      )}
-                      {form.phone && (
-                        <div className="flex items-center gap-2 text-charcoal">
-                          <span className="text-graphite">{form.phone}</span>
-                        </div>
-                      )}
-                      {(form.city || form.state || form.country) && (
-                        <div className="flex items-center gap-2 text-charcoal">
-                          <span className="text-graphite">
-                            {[form.city, form.state, form.country].filter(Boolean).join(", ")}
-                          </span>
-                        </div>
-                      )}
-                    </div>
+                      </div>
+                    ))}
                   </div>
+                </section>
+              )}
 
-                  {/* Links */}
-                  <div>
-                    <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-graphite">Links</h4>
-                    <div className="space-y-1.5 text-sm">
-                      {form.linkedinUrl && (
-                        <a href={form.linkedinUrl} target="_blank" rel="noopener noreferrer"
-                          className="block truncate text-primary hover:underline">{form.linkedinUrl}</a>
-                      )}
-                      {form.portfolioUrl && (
-                        <a href={form.portfolioUrl} target="_blank" rel="noopener noreferrer"
-                          className="block truncate text-primary hover:underline">{form.portfolioUrl}</a>
-                      )}
-                      {!form.linkedinUrl && !form.portfolioUrl && (
-                        <p className="text-xs text-graphite italic">No links added</p>
-                      )}
-                    </div>
+              {/* Projects */}
+              {projects.length > 0 && (
+                <section className="rounded-xl border border-hairline bg-paper p-5">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-graphite mb-4">Projects</h4>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {projects.map((p, i) => (
+                      <div key={i} className="rounded-lg border border-hairline bg-canvas p-4">
+                        <h5 className="text-sm font-semibold text-ink">{p.name}</h5>
+                        {p.description && <p className="mt-1 text-xs text-charcoal leading-relaxed">{p.description}</p>}
+                        {p.tech && (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {p.tech.split(",").slice(0, 5).map((t, j) => (
+                              <span key={j} className="rounded-full bg-primary/8 px-2 py-0.5 text-[10px] font-medium text-primary-deep">{t.trim()}</span>
+                            ))}
+                          </div>
+                        )}
+                        {p.bullets.filter(Boolean).length > 0 && (
+                          <ul className="mt-2 space-y-0.5">
+                            {p.bullets.filter(Boolean).map((b, j) => (
+                              <li key={j} className="text-[11px] text-graphite leading-relaxed flex gap-1.5">
+                                <span className="mt-0.5 shrink-0">•</span>
+                                <span>{b}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
                   </div>
+                </section>
+              )}
 
-                  {/* Professional */}
-                  <div>
-                    <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-graphite">Professional</h4>
-                    <div className="space-y-1.5 text-sm text-charcoal">
-                      {form.yearsExperience && <div>{form.yearsExperience} years experience</div>}
-                      {form.education && <div>{form.education}</div>}
-                      {form.workAuthorization && <div>{form.workAuthorization}</div>}
-                      {form.salaryExpectation && <div>{form.salaryExpectation}</div>}
-                      {!form.yearsExperience && !form.education && !form.workAuthorization && !form.salaryExpectation && (
-                        <p className="text-xs text-graphite italic">No professional details added</p>
-                      )}
-                    </div>
+              {/* Skills */}
+              {form.skills && (
+                <section className="rounded-xl border border-hairline bg-paper p-5">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-graphite mb-3">Skills</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {form.skills.split(/[,\n]+/).filter(Boolean).map((s, i) => (
+                      <span key={i} className="rounded-full bg-primary/8 px-2.5 py-1 text-xs font-medium text-primary-deep">{s.trim()}</span>
+                    ))}
                   </div>
+                </section>
+              )}
 
-                  {/* Bio */}
-                  <div>
-                    <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-graphite">About</h4>
-                    {form.bio ? (
-                      <p className="text-sm leading-relaxed text-charcoal whitespace-pre-line">{form.bio}</p>
-                    ) : (
-                      <p className="text-xs text-graphite italic">No bio added</p>
+              {/* Education */}
+              {form.education && (
+                <section className="rounded-xl border border-hairline bg-paper p-5">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-graphite mb-2">Education</h4>
+                  <p className="text-sm text-charcoal">{form.education}</p>
+                </section>
+              )}
+
+              {/* Links */}
+              {(form.linkedinUrl || form.portfolioUrl) && (
+                <section className="rounded-xl border border-hairline bg-paper p-5">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-graphite mb-2">Links</h4>
+                  <div className="flex flex-wrap gap-3">
+                    {form.linkedinUrl && (
+                      <a href={form.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">LinkedIn →</a>
+                    )}
+                    {form.portfolioUrl && (
+                      <a href={form.portfolioUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">Portfolio →</a>
                     )}
                   </div>
-                </div>
-
-                {/* Skills */}
-                {form.skills && (
-                  <div className="mt-5">
-                    <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-graphite">Skills</h4>
-                    <div className="flex flex-wrap gap-1.5">
-                      {form.skills.split(/[,\n]+/).filter(Boolean).map((s, i) => (
-                        <span key={i} className="rounded-full bg-primary/8 px-2.5 py-1 text-xs font-medium text-primary-deep">
-                          {s.trim()}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </section>
+                </section>
+              )}
+            </>
           )}
 
           {/* ── Empty State ── */}
           {!editing && isEmpty && (
             <section className="rounded-xl border border-dashed border-steel bg-paper p-12 text-center space-y-4">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-cloud text-2xl">
-                👤
-              </div>
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-cloud text-2xl">👤</div>
               <div>
                 <h3 className="text-sm font-semibold text-ink">No Profile Yet</h3>
                 <p className="mt-1 text-xs text-graphite max-w-xs mx-auto">
@@ -394,139 +467,61 @@ export default function ProfilePage() {
                 </p>
               </div>
               <div className="flex items-center justify-center gap-3">
-                <button
-                  onClick={() => setEditing(true)}
-                  className="rounded-md bg-primary px-5 py-2 text-xs font-semibold text-on-primary hover:bg-primary-deep"
-                >
-                  Create Profile
-                </button>
-                <input
-                  ref={resumeInputRef}
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleResumeUpload}
-                  className="hidden"
-                />
-                <button
-                  onClick={() => resumeInputRef.current?.click()}
-                  disabled={parsing}
-                  className="rounded-md border border-hairline bg-canvas px-5 py-2 text-xs font-medium text-ink hover:bg-cloud disabled:opacity-50"
-                >
+                <button onClick={() => setEditing(true)} className="rounded-md bg-primary px-5 py-2 text-xs font-semibold text-on-primary hover:bg-primary-deep">Create Profile</button>
+                <input ref={resumeInputRef} type="file" accept=".pdf" onChange={handleResumeUpload} className="hidden" />
+                <button onClick={() => resumeInputRef.current?.click()} disabled={parsing} className="rounded-md border border-hairline bg-canvas px-5 py-2 text-xs font-medium text-ink hover:bg-cloud disabled:opacity-50">
                   {parsing ? "Parsing..." : "Import from Resume"}
                 </button>
               </div>
             </section>
           )}
 
-          {/* ── Edit Form ── */}
+          {/* ═══════════════════════ EDIT MODE ═══════════════════════ */}
           {editing && (
             <>
-              {/* Photo Upload */}
-              <section className="rounded-xl border border-hairline bg-paper p-5">
-                <div className="flex items-center gap-5">
-                  <div className="relative group cursor-pointer" onClick={() => photoInputRef.current?.click()}>
-                    <div className="h-20 w-20 rounded-full bg-cloud overflow-hidden flex items-center justify-center border-2 border-dashed border-steel group-hover:border-primary transition-colors">
-                      {photo ? (
-                        <img src={photo} alt="Profile" className="h-full w-full object-cover" />
-                      ) : (
-                        <span className="text-xl font-semibold text-graphite">{initials || "+"}</span>
-                      )}
+              {/* Photo + Resume Row */}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <section className="rounded-xl border border-hairline bg-paper p-4">
+                  <h3 className="text-sm font-semibold text-ink mb-3">Photo</h3>
+                  <div className="flex items-center gap-4">
+                    <div className="relative group cursor-pointer" onClick={() => photoInputRef.current?.click()}>
+                      <div className="h-16 w-16 rounded-full bg-cloud overflow-hidden flex items-center justify-center border-2 border-dashed border-steel group-hover:border-primary transition-colors">
+                        {photo ? <img src={photo} alt="" className="h-full w-full object-cover" /> : <span className="text-lg font-semibold text-graphite">{initials || "+"}</span>}
+                      </div>
+                      <div className="absolute inset-0 rounded-full bg-ink/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span className="text-[10px] font-medium text-on-primary">{photo ? "Change" : "Upload"}</span>
+                      </div>
                     </div>
-                    <div className="absolute inset-0 rounded-full bg-ink/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <span className="text-xs font-medium text-on-primary">{photo ? "Change" : "Upload"}</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-ink">Profile Photo</p>
-                    <p className="mt-0.5 text-xs text-graphite">JPG or PNG, up to 2MB</p>
-                    <div className="mt-2 flex gap-2">
-                      <button
-                        onClick={() => photoInputRef.current?.click()}
-                        className="text-xs text-primary hover:underline font-medium"
-                      >
-                        {photo ? "Change Photo" : "Upload Photo"}
-                      </button>
-                      {photo && (
-                        <button onClick={removePhoto} className="text-xs text-error hover:underline font-medium">
-                          Remove
-                        </button>
-                      )}
+                    <div className="text-xs text-graphite">
+                      <p>JPG or PNG, up to 2MB</p>
+                      <div className="mt-1 flex gap-2">
+                        <button onClick={() => photoInputRef.current?.click()} className="text-primary hover:underline font-medium">{photo ? "Change" : "Upload"}</button>
+                        {photo && <button onClick={removePhoto} className="text-error hover:underline font-medium">Remove</button>}
+                      </div>
                     </div>
                   </div>
-                  <input
-                    ref={photoInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png"
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                  />
-                </div>
-              </section>
+                  <input ref={photoInputRef} type="file" accept="image/jpeg,image/png" onChange={handlePhotoUpload} className="hidden" />
+                </section>
 
-              {/* Resume Import */}
-              <section className="rounded-xl border border-hairline bg-paper p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-sm font-medium text-ink">Resume Import</h3>
-                    <p className="mt-1 text-xs text-graphite">Upload a PDF to auto-fill fields below.</p>
-                  </div>
-                  <input
-                    ref={resumeInputRef}
-                    type="file"
-                    accept=".pdf"
-                    onChange={handleResumeUpload}
-                    className="hidden"
-                  />
-                  <button
-                    onClick={() => resumeInputRef.current?.click()}
-                    disabled={parsing}
-                    className="rounded-md border border-hairline bg-canvas px-4 py-2 text-xs font-medium text-ink transition-colors hover:bg-cloud disabled:opacity-50"
-                  >
-                    {parsing ? "Parsing..." : "Upload Resume"}
+                <section className="rounded-xl border border-hairline bg-paper p-4">
+                  <h3 className="text-sm font-semibold text-ink mb-3">Resume Import</h3>
+                  <p className="text-xs text-graphite mb-3">Upload a PDF to auto-fill all fields below.</p>
+                  <input ref={resumeInputRef} type="file" accept=".pdf" onChange={handleResumeUpload} className="hidden" />
+                  <button onClick={() => resumeInputRef.current?.click()} disabled={parsing} className="rounded-md border border-hairline bg-canvas px-4 py-2 text-xs font-medium text-ink hover:bg-cloud disabled:opacity-50 w-full">
+                    {parsing ? "Parsing..." : "Upload Resume PDF"}
                   </button>
-                </div>
-              </section>
+                </section>
+              </div>
 
               {/* Personal Info */}
               <section className="rounded-xl border border-hairline bg-paper p-5 space-y-4">
                 <h3 className="text-sm font-semibold text-ink">Personal Information</h3>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {(["firstName", "lastName", "email", "phone"] as const).map((k) => (
+                  {(["firstName", "lastName", "email", "phone", "city", "country"] as const).map((k) => (
                     <div key={k}>
                       <label className="mb-1 block text-xs font-medium text-graphite">{FIELD_LABELS[k]}</label>
-                      <input
-                        type={k === "email" ? "email" : k === "phone" ? "tel" : "text"}
-                        value={form[k] ?? ""}
-                        onChange={(e) => setField(k, e.target.value)}
-                        className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              {/* Location */}
-              <section className="rounded-xl border border-hairline bg-paper p-5 space-y-4">
-                <h3 className="text-sm font-semibold text-ink">Location</h3>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="sm:col-span-2">
-                    <label className="mb-1 block text-xs font-medium text-graphite">Address</label>
-                    <input
-                      type="text"
-                      value={form.address ?? ""}
-                      onChange={(e) => setField("address", e.target.value)}
-                      className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
-                    />
-                  </div>
-                  {(["city", "state", "zipCode", "country"] as const).map((k) => (
-                    <div key={k}>
-                      <label className="mb-1 block text-xs font-medium text-graphite">{FIELD_LABELS[k]}</label>
-                      <input
-                        type="text"
-                        value={form[k] ?? ""}
-                        onChange={(e) => setField(k, e.target.value)}
-                        className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
-                      />
+                      <input type={k === "email" ? "email" : k === "phone" ? "tel" : "text"} value={form[k] ?? ""} onChange={(e) => setField(k, e.target.value)}
+                        className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none" />
                     </div>
                   ))}
                 </div>
@@ -539,23 +534,146 @@ export default function ProfilePage() {
                   {(["currentTitle", "currentCompany", "yearsExperience", "workAuthorization"] as const).map((k) => (
                     <div key={k}>
                       <label className="mb-1 block text-xs font-medium text-graphite">{FIELD_LABELS[k]}</label>
-                      <input
-                        type="text"
-                        value={form[k] ?? ""}
-                        onChange={(e) => setField(k, e.target.value)}
-                        className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
-                      />
+                      <input type="text" value={form[k] ?? ""} onChange={(e) => setField(k, e.target.value)}
+                        className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none" />
                     </div>
                   ))}
                   <div className="sm:col-span-2">
-                    <label className="mb-1 block text-xs font-medium text-graphite">{FIELD_LABELS.salaryExpectation}</label>
-                    <input
-                      type="text"
-                      value={form.salaryExpectation ?? ""}
-                      onChange={(e) => setField("salaryExpectation", e.target.value)}
-                      className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
-                    />
+                    <label className="mb-1 block text-xs font-medium text-graphite">Salary Expectation</label>
+                    <input type="text" value={form.salaryExpectation ?? ""} onChange={(e) => setField("salaryExpectation", e.target.value)}
+                      className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none" />
                   </div>
+                </div>
+              </section>
+
+              {/* Summary */}
+              <section className="rounded-xl border border-hairline bg-paper p-5 space-y-4">
+                <h3 className="text-sm font-semibold text-ink">About</h3>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-graphite">Professional Summary</label>
+                  <textarea value={form.summary ?? ""} onChange={(e) => setField("summary", e.target.value)} rows={4}
+                    className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+                    placeholder="A concise 2-3 sentence professional summary..." />
+                  <p className="mt-1 text-[11px] text-graphite">Max 100 words. Used by the Chrome extension for auto-fill.</p>
+                </div>
+              </section>
+
+              {/* Work Experience */}
+              <section className="rounded-xl border border-hairline bg-paper p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-ink">Work Experience</h3>
+                  <button onClick={() => setWorkEntries((w) => [...w, emptyWork()])} className="text-xs text-primary hover:underline font-medium">+ Add Entry</button>
+                </div>
+                {workEntries.length === 0 && <p className="text-xs text-graphite italic">No entries yet. Add your work experience above.</p>}
+                {workEntries.map((w, i) => (
+                  <div key={i} className="rounded-lg border border-hairline bg-canvas p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-graphite">Entry {i + 1}</span>
+                      <button onClick={() => setWorkEntries((e) => e.filter((_, j) => j !== i))} className="text-xs text-error hover:underline">Remove</button>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1 block text-[11px] font-medium text-graphite">Company</label>
+                        <input type="text" value={w.company} onChange={(e) => updateWork(i, "company", e.target.value)}
+                          className="w-full rounded-md border border-steel bg-paper px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none" />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-[11px] font-medium text-graphite">Role</label>
+                        <input type="text" value={w.role} onChange={(e) => updateWork(i, "role", e.target.value)}
+                          className="w-full rounded-md border border-steel bg-paper px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none" />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-[11px] font-medium text-graphite">Start Date</label>
+                        <input type="text" value={w.startDate} onChange={(e) => updateWork(i, "startDate", e.target.value)} placeholder="e.g. Jul 2024"
+                          className="w-full rounded-md border border-steel bg-paper px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none" />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-[11px] font-medium text-graphite">End Date</label>
+                        <input type="text" value={w.endDate} onChange={(e) => updateWork(i, "endDate", e.target.value)} placeholder="e.g. Present"
+                          className="w-full rounded-md border border-steel bg-paper px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none" />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="mb-1 block text-[11px] font-medium text-graphite">Location</label>
+                        <input type="text" value={w.location} onChange={(e) => updateWork(i, "location", e.target.value)} placeholder="e.g. Mumbai, India"
+                          className="w-full rounded-md border border-steel bg-paper px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none" />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-[11px] font-medium text-graphite">Bullets</label>
+                        <button onClick={() => addWorkBullet(i)} className="text-[11px] text-primary hover:underline">+ Add</button>
+                      </div>
+                      {w.bullets.map((b, j) => (
+                        <div key={j} className="flex gap-2 mb-1.5">
+                          <input type="text" value={b} onChange={(e) => updateWorkBullet(i, j, e.target.value)} placeholder="Achievement or responsibility..."
+                            className="flex-1 rounded-md border border-steel bg-paper px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none" />
+                          {w.bullets.length > 1 && (
+                            <button onClick={() => removeWorkBullet(i, j)} className="text-graphite hover:text-error text-xs">✕</button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </section>
+
+              {/* Projects */}
+              <section className="rounded-xl border border-hairline bg-paper p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-ink">Projects</h3>
+                  <button onClick={() => setProjectEntries((p) => [...p, emptyProject()])} className="text-xs text-primary hover:underline font-medium">+ Add Entry</button>
+                </div>
+                {projectEntries.length === 0 && <p className="text-xs text-graphite italic">No entries yet. Add your projects above.</p>}
+                {projectEntries.map((p, i) => (
+                  <div key={i} className="rounded-lg border border-hairline bg-canvas p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-graphite">Entry {i + 1}</span>
+                      <button onClick={() => setProjectEntries((e) => e.filter((_, j) => j !== i))} className="text-xs text-error hover:underline">Remove</button>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1 block text-[11px] font-medium text-graphite">Name</label>
+                        <input type="text" value={p.name} onChange={(e) => updateProject(i, "name", e.target.value)}
+                          className="w-full rounded-md border border-steel bg-paper px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none" />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-[11px] font-medium text-graphite">Tech Stack</label>
+                        <input type="text" value={p.tech} onChange={(e) => updateProject(i, "tech", e.target.value)} placeholder="React, Node.js, etc."
+                          className="w-full rounded-md border border-steel bg-paper px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none" />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="mb-1 block text-[11px] font-medium text-graphite">Description</label>
+                        <input type="text" value={p.description} onChange={(e) => updateProject(i, "description", e.target.value)} placeholder="One-line description"
+                          className="w-full rounded-md border border-steel bg-paper px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none" />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-[11px] font-medium text-graphite">Bullets</label>
+                        <button onClick={() => addProjectBullet(i)} className="text-[11px] text-primary hover:underline">+ Add</button>
+                      </div>
+                      {p.bullets.map((b, j) => (
+                        <div key={j} className="flex gap-2 mb-1.5">
+                          <input type="text" value={b} onChange={(e) => updateProjectBullet(i, j, e.target.value)} placeholder="What was built or achieved..."
+                            className="flex-1 rounded-md border border-steel bg-paper px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none" />
+                          {p.bullets.length > 1 && (
+                            <button onClick={() => removeProjectBullet(i, j)} className="text-graphite hover:text-error text-xs">✕</button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </section>
+
+              {/* Skills */}
+              <section className="rounded-xl border border-hairline bg-paper p-5 space-y-4">
+                <h3 className="text-sm font-semibold text-ink">Skills</h3>
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-graphite">Skills</label>
+                  <textarea value={form.skills ?? ""} onChange={(e) => setField("skills", e.target.value)} rows={3}
+                    className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+                    placeholder="Comma-separated skills" />
                 </div>
               </section>
 
@@ -563,89 +681,28 @@ export default function ProfilePage() {
               <section className="rounded-xl border border-hairline bg-paper p-5 space-y-4">
                 <h3 className="text-sm font-semibold text-ink">Links</h3>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {(["linkedinUrl", "portfolioUrl"] as const).map((k) => (
-                    <div key={k}>
-                      <label className="mb-1 block text-xs font-medium text-graphite">{FIELD_LABELS[k]}</label>
-                      <input
-                        type="url"
-                        value={form[k] ?? ""}
-                        onChange={(e) => setField(k, e.target.value)}
-                        className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
-                        placeholder={k === "linkedinUrl" ? "https://linkedin.com/in/..." : "https://..."}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              {/* About & Skills */}
-              <section className="rounded-xl border border-hairline bg-paper p-5 space-y-4">
-                <h3 className="text-sm font-semibold text-ink">About</h3>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-graphite">{FIELD_LABELS.bio}</label>
-                  <textarea
-                    value={form.bio ?? ""}
-                    onChange={(e) => setField("bio", e.target.value)}
-                    rows={4}
-                    className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-graphite">{FIELD_LABELS.skills}</label>
-                  <textarea
-                    value={form.skills ?? ""}
-                    onChange={(e) => setField("skills", e.target.value)}
-                    rows={3}
-                    className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
-                    placeholder="Comma-separated skills"
-                  />
-                </div>
-              </section>
-
-              {/* Templates */}
-              <section className="rounded-xl border border-hairline bg-paper p-5 space-y-4">
-                <h3 className="text-sm font-semibold text-ink">Templates</h3>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-graphite">Cover Letter Template</label>
-                  <textarea
-                    value={form.coverLetterTemplate ?? ""}
-                    onChange={(e) => setField("coverLetterTemplate", e.target.value)}
-                    rows={8}
-                    className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
-                    placeholder="Write your cover letter template here..."
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-graphite">Custom Q&amp;A Answers</label>
-                  <textarea
-                    value={form.customAnswers ?? ""}
-                    onChange={(e) => setField("customAnswers", e.target.value)}
-                    rows={6}
-                    className="w-full rounded-md border border-steel bg-canvas px-3 py-2 font-mono text-sm text-ink focus:border-ink focus:outline-none"
-                    placeholder='{"Why this company?": "Because...", "Where do you see yourself?": "..."}'
-                  />
-                  <p className="mt-1 text-xs text-graphite">JSON object mapping question prompts to your answers.</p>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-graphite">LinkedIn URL</label>
+                    <input type="url" value={form.linkedinUrl ?? ""} onChange={(e) => setField("linkedinUrl", e.target.value)} placeholder="https://linkedin.com/in/..."
+                      className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-graphite">Portfolio URL</label>
+                    <input type="url" value={form.portfolioUrl ?? ""} onChange={(e) => setField("portfolioUrl", e.target.value)} placeholder="https://..."
+                      className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none" />
+                  </div>
                 </div>
               </section>
 
               {/* Save / Cancel */}
               <div className="flex items-center gap-3 pb-8">
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="rounded-md bg-primary px-6 py-2.5 text-sm font-semibold text-on-primary hover:bg-primary-deep disabled:cursor-not-allowed disabled:bg-steel"
-                >
+                <button onClick={handleSave} disabled={saving}
+                  className="rounded-md bg-primary px-6 py-2.5 text-sm font-semibold text-on-primary hover:bg-primary-deep disabled:cursor-not-allowed disabled:bg-steel">
                   {saving ? "Saving..." : "Save Profile"}
                 </button>
-                <button
-                  onClick={handleCancel}
-                  className="rounded-md border border-hairline bg-canvas px-5 py-2.5 text-sm font-medium text-ink hover:bg-cloud"
-                >
+                <button onClick={handleCancel} className="rounded-md border border-hairline bg-canvas px-5 py-2.5 text-sm font-medium text-ink hover:bg-cloud">
                   Cancel
                 </button>
-                {saved && (
-                  <span className="text-sm font-medium text-graphite">Saved!</span>
-                )}
               </div>
             </>
           )}

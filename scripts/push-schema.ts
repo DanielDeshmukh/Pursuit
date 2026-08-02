@@ -89,6 +89,9 @@ const sql = [
     cover_letter_template TEXT,
   custom_answers TEXT,
   photo TEXT,
+  summary TEXT,
+  work_experience TEXT,
+  projects TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
   )`,
