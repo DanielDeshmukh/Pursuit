@@ -129,38 +129,39 @@ export function KanbanBoard() {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="flex items-center justify-between px-6 py-4">
-        <h2 className="text-lg font-medium text-ink">
-          Applications ({applications.length})
-        </h2>
-        <div className="flex gap-2">
-          <button
-            onClick={exportCSV}
-            className="rounded-md border border-hairline bg-canvas px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-cloud"
-          >
-            Export CSV
-          </button>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-semibold tracking-wide text-on-primary transition-colors hover:bg-primary-deep"
-          >
-            + Add Application
-          </button>
+      <div className="flex flex-col gap-3 px-4 py-4 sm:px-6">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-lg font-medium text-ink">
+            Applications ({applications.length})
+          </h2>
+          <div className="flex gap-2">
+            <button
+              onClick={exportCSV}
+              className="rounded-md border border-hairline bg-canvas px-3 py-2 text-xs font-medium text-ink transition-colors hover:bg-cloud sm:px-4 sm:text-sm"
+            >
+              Export CSV
+            </button>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="rounded-md bg-primary px-3 py-2 text-xs font-semibold tracking-wide text-on-primary transition-colors hover:bg-primary-deep sm:px-4 sm:text-sm"
+            >
+              + Add Application
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className="flex items-center gap-3 px-6 pb-3">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search by title or company..."
-          className="w-64 rounded-md border border-steel bg-canvas px-3 py-1.5 text-sm text-ink placeholder:text-graphite focus:border-ink focus:outline-none"
-        />
-        <select
-          value={sourceFilter}
-          onChange={(e) => setSourceFilter(e.target.value)}
-          className="rounded-md border border-steel bg-canvas px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none"
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by title or company..."
+            className="w-full rounded-md border border-steel bg-canvas px-3 py-1.5 text-sm text-ink placeholder:text-graphite focus:border-ink focus:outline-none sm:w-64"
+          />
+          <select
+            value={sourceFilter}
+            onChange={(e) => setSourceFilter(e.target.value)}
+            className="w-full rounded-md border border-steel bg-canvas px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none sm:w-auto"
         >
           {sources.map((s) => (
             <option key={s} value={s}>
@@ -171,13 +172,13 @@ export function KanbanBoard() {
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex gap-3 overflow-x-auto px-4 pb-4">
+        <div className="flex gap-3 overflow-x-auto px-2 pb-4 sm:px-4">
           {STATUS_COLUMNS.map((col) => {
             const apps = getAppsByStatus(col.id);
             return (
               <div
                 key={col.id}
-                className="flex w-64 min-w-64 flex-col rounded-xl bg-cloud/50"
+                className="flex w-56 min-w-56 flex-col rounded-xl bg-cloud/50 sm:w-64 sm:min-w-64"
               >
                 <div className="flex items-center justify-between px-3 py-2.5">
                   <h3 className="text-xs font-semibold uppercase tracking-wide text-charcoal">
@@ -383,7 +384,7 @@ function DetailPanel({
   }
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-96 border-l border-hairline bg-paper shadow-modal">
+    <div className="fixed inset-y-0 right-0 z-50 w-full border-l border-hairline bg-paper shadow-modal sm:w-96">
       <div className="flex h-full flex-col">
         <div className="flex items-center justify-between border-b border-hairline px-4 py-3">
           <h3 className="font-medium text-ink">Application Details</h3>
@@ -643,8 +644,8 @@ function AddModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-xl border border-hairline bg-paper p-6 shadow-modal">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-xl border border-hairline bg-paper p-4 shadow-modal sm:p-6">
         <h3 className="mb-4 text-lg font-medium text-ink">
           Add Application
         </h3>

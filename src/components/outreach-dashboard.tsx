@@ -89,7 +89,7 @@ export function OutreachDashboard() {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="flex items-center justify-between px-6 py-4">
+      <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="flex items-center gap-3">
           <h2 className="text-lg font-medium text-ink">Outreach</h2>
           <div className="flex gap-2 text-xs text-graphite">
@@ -102,13 +102,13 @@ export function OutreachDashboard() {
         </div>
         <button
           onClick={() => setShowDraftModal(true)}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-semibold tracking-wide text-on-primary transition-colors hover:bg-primary-deep"
+          className="rounded-md bg-primary px-3 py-2 text-xs font-semibold tracking-wide text-on-primary transition-colors hover:bg-primary-deep sm:px-4 sm:text-sm"
         >
           + Draft Message
         </button>
       </div>
 
-      <div className="flex gap-2 px-6 pb-3">
+      <div className="flex flex-wrap gap-2 px-4 pb-3 sm:px-6">
         {(["all", "drafted", "sent", "replied"] as const).map((f) => (
           <button
             key={f}
@@ -122,7 +122,7 @@ export function OutreachDashboard() {
         ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 pb-4">
+      <div className="flex-1 overflow-y-auto px-4 pb-4 sm:px-6">
         {filtered.length === 0 ? (
           <div className="py-12 text-center text-sm text-graphite">
             No messages {filter !== "all" ? `(${filter})` : ""}
@@ -269,11 +269,11 @@ function DraftModal({
   const contactId = selectedApp?.contactId ?? selectedApp?.contact?.id ?? "";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-xl border border-hairline bg-paper p-6 shadow-modal">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-xl border border-hairline bg-paper p-4 shadow-modal sm:p-6">
         <h3 className="mb-4 text-lg font-medium text-ink">Draft Outreach Message</h3>
         <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-xs font-medium text-graphite">Application</label>
               <select
@@ -385,8 +385,8 @@ function EditModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-xl border border-hairline bg-paper p-6 shadow-modal">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-xl border border-hairline bg-paper p-4 shadow-modal sm:p-6">
         <h3 className="mb-4 text-lg font-medium text-ink">Edit Message</h3>
         <div className="space-y-3">
           <div>

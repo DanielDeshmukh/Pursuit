@@ -87,7 +87,7 @@ export function RemindersList() {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="flex items-center justify-between px-6 py-4">
+      <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="flex items-center gap-3">
           <h2 className="text-lg font-medium text-ink">Reminders</h2>
           <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
@@ -96,13 +96,13 @@ export function RemindersList() {
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-semibold tracking-wide text-on-primary transition-colors hover:bg-primary-deep"
+          className="rounded-md bg-primary px-3 py-2 text-xs font-semibold tracking-wide text-on-primary transition-colors hover:bg-primary-deep sm:px-4 sm:text-sm"
         >
           + Add Reminder
         </button>
       </div>
 
-      <div className="flex gap-2 px-6 pb-3">
+      <div className="flex gap-2 px-4 pb-3 sm:px-6">
         {(["all", "pending", "done"] as const).map((f) => (
           <button
             key={f}
@@ -118,7 +118,7 @@ export function RemindersList() {
         ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 pb-4">
+      <div className="flex-1 overflow-y-auto px-4 pb-4 sm:px-6">
         {filtered.length === 0 ? (
           <div className="py-12 text-center text-sm text-graphite">
             No reminders {filter !== "all" ? `(${filter})` : ""}
@@ -287,8 +287,8 @@ function AddReminderModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-xl border border-hairline bg-paper p-6 shadow-modal">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-xl border border-hairline bg-paper p-4 shadow-modal sm:p-6">
         <h3 className="mb-4 text-lg font-medium text-ink">Add Reminder</h3>
 
         <div className="space-y-4">
@@ -410,8 +410,8 @@ function EditReminderModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-xl border border-hairline bg-paper p-6 shadow-modal">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-xl border border-hairline bg-paper p-4 shadow-modal sm:p-6">
         <h3 className="mb-4 text-lg font-medium text-ink">Edit Reminder</h3>
 
         <div className="space-y-4">

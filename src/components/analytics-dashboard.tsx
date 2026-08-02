@@ -64,7 +64,7 @@ export function AnalyticsDashboard() {
   const tickColor = "var(--color-graphite)";
 
   return (
-    <div className="flex flex-1 flex-col overflow-y-auto p-6">
+    <div className="flex flex-1 flex-col overflow-y-auto p-4 sm:p-6">
       <h2 className="mb-6 text-lg font-medium text-ink">Analytics</h2>
 
       <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">

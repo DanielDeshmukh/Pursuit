@@ -110,7 +110,7 @@ export function ContactsList() {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      <div className="flex items-center justify-between px-6 py-4">
+      <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="flex items-center gap-3">
           <h2 className="text-lg font-medium text-ink">Contacts</h2>
           <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
@@ -119,23 +119,23 @@ export function ContactsList() {
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-semibold tracking-wide text-on-primary transition-colors hover:bg-primary-deep"
+          className="rounded-md bg-primary px-3 py-2 text-xs font-semibold tracking-wide text-on-primary transition-colors hover:bg-primary-deep sm:px-4 sm:text-sm"
         >
           + Add Contact
         </button>
       </div>
 
-      <div className="px-6 pb-3">
+      <div className="px-4 pb-3 sm:px-6">
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search by name, company, email, or role..."
-          className="w-80 rounded-md border border-steel bg-canvas px-3 py-1.5 text-sm text-ink placeholder:text-graphite focus:border-ink focus:outline-none"
+          className="w-full rounded-md border border-steel bg-canvas px-3 py-1.5 text-sm text-ink placeholder:text-graphite focus:border-ink focus:outline-none sm:w-80"
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 pb-4">
+      <div className="flex-1 overflow-y-auto px-4 pb-4 sm:px-6">
         {filtered.length === 0 ? (
           <div className="py-12 text-center text-sm text-graphite">
             {contacts.length === 0
@@ -263,8 +263,8 @@ function ContactModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-xl border border-hairline bg-paper p-6 shadow-modal">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-xl border border-hairline bg-paper p-4 shadow-modal sm:p-6">
         <h3 className="mb-4 text-lg font-medium text-ink">
           {contact ? "Edit Contact" : "Add Contact"}
         </h3>
