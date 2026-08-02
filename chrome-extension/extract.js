@@ -29,6 +29,64 @@ function extractFromJsonLd() {
   return null;
 }
 
+function extractFromTitle() {
+  const title = document.title;
+  if (!title) return {};
+  const result = {};
+  const parts = title.split(" | ");
+  if (parts.length >= 2) {
+    result.jobTitle = clean(parts[0]);
+    result.companyName = clean(parts[parts.length - 1]);
+  } else {
+    const atParts = title.split(" at ");
+    if (atParts.length === 2) {
+      result.jobTitle = clean(atParts[0]);
+      result.companyName = clean(atParts[1]);
+    } else {
+      result.jobTitle = clean(title);
+    }
+  }
+  return result;
+}
+
+function extractFromUrl() {
+  const url = window.location.href;
+  const result = {};
+
+  const workdayMatch = url.match(/myworkdayjobs\.com\/[^/]+\/([^/]+)\/job\/([^/]+)\/([^/]+)/);
+  if (workdayMatch) {
+    result.companyName = clean(workdayMatch[1].replace(/_/g, " "));
+    const jobPart = workdayMatch[3].replace(/--/g, " - ").replace(/_/g, " ");
+    const locationJob = jobPart.split("/");
+    if (locationJob.length >= 2) {
+      result.location = clean(locationJob[0]);
+      result.jobTitle = clean(locationJob[1].replace(/_R\d+-\d+/, ""));
+    } else {
+      result.jobTitle = clean(locationJob[0]);
+    }
+    result.source = "Workday";
+    return result;
+  }
+
+  const leverMatch = url.match(/lever\.co\/([^/]+)\/(.+)/);
+  if (leverMatch) {
+    result.companyName = clean(leverMatch[1].replace(/-/g, " "));
+    const slug = leverMatch[2].split("/").pop().replace(/-/g, " ");
+    result.jobTitle = clean(slug);
+    result.source = "Lever";
+    return result;
+  }
+
+  const greenhouseMatch = url.match(/greenhouse\.io\/([^/]+)\/jobs\/(\d+)/);
+  if (greenhouseMatch) {
+    result.companyName = clean(greenhouseMatch[1].replace(/-/g, " "));
+    result.source = "Greenhouse";
+    return result;
+  }
+
+  return result;
+}
+
 function extractFromDom() {
   const result = {};
   const host = window.location.hostname;
@@ -127,6 +185,66 @@ function extractFromDom() {
     result.source = "Naukri";
   }
 
+  else if (host.includes("myworkdayjobs.com")) {
+    const titleEl =
+      document.querySelector("[data-automation-id='jobPosting-header']") ||
+      document.querySelector("h1") ||
+      document.querySelector("[class*='job-title']");
+    if (titleEl) result.jobTitle = clean(titleEl.textContent);
+
+    const companyEl =
+      document.querySelector("[data-automation-id='companyName']") ||
+      document.querySelector("[class*='company']");
+    if (companyEl) result.companyName = clean(companyEl.textContent);
+
+    const locationEl =
+      document.querySelector("[data-automation-id='location']") ||
+      document.querySelector("[class*='location']");
+    if (locationEl) result.location = clean(locationEl.textContent);
+
+    result.source = "Workday";
+  }
+
+  else if (host.includes("greenhouse.io") || host.includes("boards.greenhouse")) {
+    const titleEl =
+      document.querySelector("#header h1") ||
+      document.querySelector(".section-title h1") ||
+      document.querySelector("h1");
+    if (titleEl) result.jobTitle = clean(titleEl.textContent);
+
+    const companyEl =
+      document.querySelector("#header .company-name") ||
+      document.querySelector(".section-title .company-name");
+    if (companyEl) result.companyName = clean(companyEl.textContent);
+
+    const locationEl =
+      document.querySelector("#header .location") ||
+      document.querySelector(".section-title .location");
+    if (locationEl) result.location = clean(locationEl.textContent);
+
+    result.source = "Greenhouse";
+  }
+
+  else if (host.includes("lever.co")) {
+    const titleEl =
+      document.querySelector(".posting-headline h2") ||
+      document.querySelector("h2") ||
+      document.querySelector("h1");
+    if (titleEl) result.jobTitle = clean(titleEl.textContent);
+
+    const companyEl =
+      document.querySelector(".posting-headline .company-name") ||
+      document.querySelector(".content a[href='/']");
+    if (companyEl) result.companyName = clean(companyEl.textContent);
+
+    const locationEl =
+      document.querySelector(".posting-headline .sort-location") ||
+      document.querySelector(".location");
+    if (locationEl) result.location = clean(locationEl.textContent);
+
+    result.source = "Lever";
+  }
+
   else {
     const titleEl = document.querySelector("h1");
     if (titleEl) result.jobTitle = clean(titleEl.textContent);
@@ -164,7 +282,9 @@ function extractFromDom() {
 function extractJobData() {
   const jsonLd = extractFromJsonLd();
   const dom = extractFromDom();
-  return { ...dom, ...jsonLd, url: window.location.href };
+  const title = extractFromTitle();
+  const urlData = extractFromUrl();
+  return { ...urlData, ...title, ...dom, ...jsonLd, url: window.location.href };
 }
 
 return extractJobData();
