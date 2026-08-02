@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SidebarLayout } from "@/components/sidebar-layout";
 import { getProfile, upsertProfile } from "@/lib/actions/profile";
 
@@ -8,6 +8,9 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [parsing, setParsing] = useState(false);
+  const [parseStatus, setParseStatus] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -96,6 +99,38 @@ export default function ProfilePage() {
     }
   }
 
+  async function handleResumeUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setParsing(true);
+    setParseStatus("Parsing resume...");
+    try {
+      const formData = new FormData();
+      formData.append("resume", file);
+      const resp = await fetch("/api/resume/parse", { method: "POST", body: formData });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error);
+      const p = data.profile;
+      if (p.firstName) setFirstName(p.firstName);
+      if (p.lastName) setLastName(p.lastName);
+      if (p.email) setEmail(p.email);
+      if (p.phone) setPhone(p.phone);
+      if (p.linkedinUrl) setLinkedinUrl(p.linkedinUrl);
+      if (p.portfolioUrl) setPortfolioUrl(p.portfolioUrl);
+      if (p.city) setCity(p.city);
+      if (p.education) setEducation(p.education);
+      if (p.skills) setSkills(p.skills);
+      if (p.bio) setBio(p.bio);
+      setParseStatus("Resume parsed! Review and save your profile.");
+      setTimeout(() => setParseStatus(""), 5000);
+    } catch (err) {
+      setParseStatus(`Error: ${err instanceof Error ? err.message : "Failed to parse"}`);
+    } finally {
+      setParsing(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
   if (loading) {
     return (
       <SidebarLayout>
@@ -117,6 +152,33 @@ export default function ProfilePage() {
         </div>
 
         <div className="mx-auto w-full max-w-3xl space-y-8">
+          <section className="rounded-xl border border-hairline bg-paper p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-medium text-ink">Resume Import</h3>
+                <p className="mt-1 text-xs text-graphite">Upload a PDF resume to auto-fill your profile fields.</p>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf"
+                onChange={handleResumeUpload}
+                className="hidden"
+                id="resume-upload"
+              />
+              <label
+                htmlFor="resume-upload"
+                className="cursor-pointer rounded-md border border-hairline bg-canvas px-4 py-2 text-xs font-medium text-ink transition-colors hover:bg-cloud"
+              >
+                {parsing ? "Parsing..." : "Upload Resume"}
+              </label>
+            </div>
+            {parseStatus && (
+              <p className={`mt-3 text-xs ${parseStatus.startsWith("Error") ? "text-error" : "text-primary"}`}>
+                {parseStatus}
+              </p>
+            )}
+          </section>
           <section>
             <h3 className="mb-3 text-sm font-medium text-ink">Personal Info</h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
