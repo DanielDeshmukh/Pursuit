@@ -230,12 +230,13 @@ function DraftModal({
 }: {
   applications: ApplicationWithRelations[];
   onClose: () => void;
-  onAdd: (data: { applicationId: string; contactId: string; channel: string; subject?: string; body: string }) => void;
+  onAdd: (data: { applicationId: string; contactId: string; channel: string; subject?: string; body: string }) => Promise<void>;
 }) {
   const [applicationId, setApplicationId] = useState(applications[0]?.id ?? "");
   const [channel, setChannel] = useState("email");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const selectedApp = applications.find((a) => a.id === applicationId);
 
@@ -331,15 +332,20 @@ function DraftModal({
             Cancel
           </button>
           <button
-            onClick={() => {
+            onClick={async () => {
               if (applicationId && contactId && body) {
-                onAdd({ applicationId, contactId, channel, subject, body });
+                setSaving(true);
+                try {
+                  await onAdd({ applicationId, contactId, channel, subject, body });
+                } finally {
+                  setSaving(false);
+                }
               }
             }}
-            disabled={!applicationId || !contactId || !body}
+            disabled={!applicationId || !contactId || !body || saving}
             className="flex-1 rounded-md bg-primary py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-deep disabled:cursor-not-allowed disabled:bg-steel"
           >
-            Save Draft
+            {saving ? "Saving..." : "Save Draft"}
           </button>
         </div>
       </div>

@@ -614,7 +614,7 @@ function AddModal({
     salaryMax?: string;
     source?: string;
     notes?: string;
-  }) => void;
+  }) => Promise<void>;
 }) {
   const [jobTitle, setJobTitle] = useState("");
   const [companyName, setCompanyName] = useState("");
@@ -623,6 +623,7 @@ function AddModal({
   const [salaryMax, setSalaryMax] = useState("");
   const [source, setSource] = useState("");
   const [notes, setNotes] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const sources = [
     "LinkedIn",
@@ -745,23 +746,28 @@ function AddModal({
             Cancel
           </button>
           <button
-            onClick={() => {
+            onClick={async () => {
               if (jobTitle && companyName) {
-                onAdd({
-                  jobTitle,
-                  companyName,
-                  jobUrl,
-                  salaryMin,
-                  salaryMax,
-                  source,
-                  notes,
-                });
+                setSaving(true);
+                try {
+                  await onAdd({
+                    jobTitle,
+                    companyName,
+                    jobUrl,
+                    salaryMin,
+                    salaryMax,
+                    source,
+                    notes,
+                  });
+                } finally {
+                  setSaving(false);
+                }
               }
             }}
-            disabled={!jobTitle || !companyName}
+            disabled={!jobTitle || !companyName || saving}
             className="flex-1 rounded-md bg-primary py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-deep disabled:cursor-not-allowed disabled:bg-steel"
           >
-            Add
+            {saving ? "Adding..." : "Add"}
           </button>
         </div>
       </div>

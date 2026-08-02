@@ -259,7 +259,7 @@ function AddReminderModal({
     applicationId: string;
     type: string;
     dueAt: string;
-  }) => void;
+  }) => Promise<void>;
 }) {
   const [applicationId, setApplicationId] = useState(
     applications[0]?.id ?? ""
@@ -271,6 +271,7 @@ function AddReminderModal({
     return d.toISOString().split("T")[0];
   };
   const [dueAt, setDueAt] = useState(getDefaultDate);
+  const [saving, setSaving] = useState(false);
 
   const types = [
     { value: "follow_up", label: "Follow-up" },
@@ -337,19 +338,24 @@ function AddReminderModal({
             Cancel
           </button>
           <button
-            onClick={() => {
+            onClick={async () => {
               if (applicationId) {
-                onAdd({
-                  applicationId,
-                  type,
-                  dueAt: new Date(dueAt).toISOString(),
-                });
+                setSaving(true);
+                try {
+                  await onAdd({
+                    applicationId,
+                    type,
+                    dueAt: new Date(dueAt).toISOString(),
+                  });
+                } finally {
+                  setSaving(false);
+                }
               }
             }}
-            disabled={!applicationId}
+            disabled={!applicationId || saving}
             className="flex-1 rounded-md bg-primary py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-deep disabled:cursor-not-allowed disabled:bg-steel"
           >
-            Add
+            {saving ? "Adding..." : "Add"}
           </button>
         </div>
       </div>
