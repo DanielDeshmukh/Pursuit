@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { contacts, companies } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import { addContactSchema, updateContactSchema } from "@/lib/validation";
 
 export type ContactWithCompany = {
   id: string;
@@ -67,15 +68,16 @@ export async function addContact(data: {
   linkedinUrl?: string;
 }) {
   try {
+    const parsed = addContactSchema.parse(data);
     const [contact] = await db
       .insert(contacts)
       .values({
         id: crypto.randomUUID(),
-        companyId: data.companyId,
-        name: data.name,
-        role: data.role,
-        email: data.email,
-        linkedinUrl: data.linkedinUrl,
+        companyId: parsed.companyId,
+        name: parsed.name,
+        role: parsed.role || undefined,
+        email: parsed.email || undefined,
+        linkedinUrl: parsed.linkedinUrl || undefined,
       })
       .returning();
     return contact;
@@ -96,9 +98,15 @@ export async function updateContact(
   }
 ) {
   try {
+    const parsed = updateContactSchema.parse(data);
     await db
       .update(contacts)
-      .set(data)
+      .set({
+        ...parsed,
+        role: parsed.role || undefined,
+        email: parsed.email || undefined,
+        linkedinUrl: parsed.linkedinUrl || undefined,
+      })
       .where(eq(contacts.id, id));
   } catch (e) {
     console.error("[updateContact]", e);

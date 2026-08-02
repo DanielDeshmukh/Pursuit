@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { reminders, applications, companies } from "@/lib/schema";
 import { eq, asc } from "drizzle-orm";
+import { addReminderSchema, updateReminderSchema } from "@/lib/validation";
 
 export type ReminderWithApp = {
   id: string;
@@ -52,13 +53,14 @@ export async function addReminder(data: {
   dueAt: string;
 }) {
   try {
+    const parsed = addReminderSchema.parse(data);
     const [reminder] = await db
       .insert(reminders)
       .values({
         id: crypto.randomUUID(),
-        applicationId: data.applicationId,
-        type: data.type,
-        dueAt: data.dueAt,
+        applicationId: parsed.applicationId,
+        type: parsed.type,
+        dueAt: parsed.dueAt,
       })
       .returning();
     return reminder;
@@ -98,9 +100,10 @@ export async function updateReminder(
   }
 ) {
   try {
+    const parsed = updateReminderSchema.parse(data);
     await db
       .update(reminders)
-      .set(data)
+      .set(parsed)
       .where(eq(reminders.id, id));
   } catch (e) {
     console.error("[updateReminder]", e);

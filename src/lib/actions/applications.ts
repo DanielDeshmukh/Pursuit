@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { applications, companies, contacts } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import { addApplicationSchema, updateApplicationSchema } from "@/lib/validation";
 
 export async function getApplications() {
   try {
@@ -99,6 +100,7 @@ export async function addApplication(data: {
   status?: string;
 }) {
   try {
+    const parsed = addApplicationSchema.parse(data);
     const userId = "dev-user";
 
     const [company] = await db
@@ -106,7 +108,7 @@ export async function addApplication(data: {
       .values({
         id: crypto.randomUUID(),
         userId,
-        name: data.companyName,
+        name: parsed.companyName,
       })
       .returning();
 
@@ -116,13 +118,13 @@ export async function addApplication(data: {
         id: crypto.randomUUID(),
         userId,
         companyId: company.id,
-        jobTitle: data.jobTitle,
-        jobUrl: data.jobUrl,
-        salaryMin: data.salaryMin,
-        salaryMax: data.salaryMax,
-        source: data.source,
-        notes: data.notes,
-        status: data.status ?? "SAVED",
+        jobTitle: parsed.jobTitle,
+        jobUrl: parsed.jobUrl || undefined,
+        salaryMin: parsed.salaryMin || undefined,
+        salaryMax: parsed.salaryMax || undefined,
+        source: parsed.source || undefined,
+        notes: parsed.notes || undefined,
+        status: parsed.status ?? "SAVED",
       })
       .returning();
 
@@ -158,9 +160,10 @@ export async function updateApplication(
   }
 ) {
   try {
+    const parsed = updateApplicationSchema.parse(data);
     await db
       .update(applications)
-      .set(data)
+      .set(parsed)
       .where(eq(applications.id, id));
   } catch (e) {
     console.error("[updateApplication]", e);

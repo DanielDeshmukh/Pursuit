@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { outreachMessages, applications, companies, contacts } from "@/lib/schema";
 import { eq } from "drizzle-orm";
+import { addOutreachSchema, updateOutreachSchema } from "@/lib/validation";
 
 export type OutreachWithRelations = {
   id: string;
@@ -69,15 +70,16 @@ export async function addOutreachMessage(data: {
   body: string;
 }) {
   try {
+    const parsed = addOutreachSchema.parse(data);
     const [msg] = await db
       .insert(outreachMessages)
       .values({
         id: crypto.randomUUID(),
-        applicationId: data.applicationId,
-        contactId: data.contactId,
-        channel: data.channel,
-        subject: data.subject,
-        body: data.body,
+        applicationId: parsed.applicationId,
+        contactId: parsed.contactId,
+        channel: parsed.channel,
+        subject: parsed.subject || undefined,
+        body: parsed.body,
       })
       .returning();
     return msg;
@@ -120,9 +122,13 @@ export async function updateOutreachMessage(
   }
 ) {
   try {
+    const parsed = updateOutreachSchema.parse(data);
     await db
       .update(outreachMessages)
-      .set(data)
+      .set({
+        ...parsed,
+        subject: parsed.subject || undefined,
+      })
       .where(eq(outreachMessages.id, id));
   } catch (e) {
     console.error("[updateOutreachMessage]", e);
