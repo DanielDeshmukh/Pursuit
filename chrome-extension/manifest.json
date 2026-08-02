@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Pursuit — Job Tracker",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Capture job listings from LinkedIn, Indeed, Naukri, and more. Save directly to your Pursuit tracker.",
   "permissions": ["activeTab", "scripting", "storage"],
   "action": {
@@ -17,6 +17,21 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.linkedin.com/jobs/*",
+        "https://*.indeed.com/*",
+        "https://*.naukri.com/*",
+        "https://*.myworkdayjobs.com/*",
+        "https://*.greenhouse.io/*",
+        "https://*.lever.co/*",
+        "https://*.glassdoor.com/*"
+      ],
+      "js": ["auto-capture.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "background": {
     "service_worker": "background.js"
   }
