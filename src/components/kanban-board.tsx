@@ -17,6 +17,7 @@ import {
 import { STATUS_COLUMNS, type ApplicationWithRelations } from "@/lib/types";
 import { LoadingScreen } from "@/components/loading-screen";
 import { useEscapeKey } from "@/lib/use-escape-key";
+import { scrapeJobUrl } from "@/lib/actions/scrape-job";
 
 export function KanbanBoard() {
   const [applications, setApplications] = useState<ApplicationWithRelations[]>(
@@ -633,6 +634,7 @@ function AddModal({
   const [source, setSource] = useState("");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
+  const [scraping, setScraping] = useState(false);
 
   const sources = [
     "LinkedIn",
@@ -644,6 +646,24 @@ function AddModal({
     "Other",
   ];
 
+  async function handleFetchUrl() {
+    if (!jobUrl) return;
+    setScraping(true);
+    try {
+      const data = await scrapeJobUrl(jobUrl);
+      if (data.jobTitle) setJobTitle(data.jobTitle);
+      if (data.companyName) setCompanyName(data.companyName);
+      if (data.location) setNotes((prev) => prev ? `${prev}\nLocation: ${data.location}` : `Location: ${data.location}`);
+      if (data.salaryMin) setSalaryMin(data.salaryMin);
+      if (data.salaryMax) setSalaryMax(data.salaryMax);
+      if (data.source) setSource(data.source);
+    } catch {
+      alert("Could not extract job details from this URL.");
+    } finally {
+      setScraping(false);
+    }
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
       <div className="w-full max-w-lg rounded-xl border border-hairline bg-paper p-4 shadow-modal sm:p-6">
@@ -652,7 +672,28 @@ function AddModal({
         </h3>
 
         <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="mb-1 block text-xs font-medium text-graphite">
+              Job URL (auto-fill from link)
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="url"
+                value={jobUrl}
+                onChange={(e) => setJobUrl(e.target.value)}
+                className="flex-1 rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+                placeholder="Paste job listing URL..."
+              />
+              <button
+                onClick={handleFetchUrl}
+                disabled={!jobUrl || scraping}
+                className="shrink-0 rounded-md border border-primary bg-primary/10 px-3 py-2 text-xs font-medium text-primary transition-colors hover:bg-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {scraping ? "Fetching..." : "Fetch"}
+              </button>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-xs font-medium text-graphite">
                 Job Title *
@@ -678,19 +719,7 @@ function AddModal({
               />
             </div>
           </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-graphite">
-              Job URL
-            </label>
-            <input
-              type="url"
-              value={jobUrl}
-              onChange={(e) => setJobUrl(e.target.value)}
-              className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
-              placeholder="https://..."
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-xs font-medium text-graphite">
                 Salary Min
