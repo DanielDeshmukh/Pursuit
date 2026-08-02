@@ -95,21 +95,18 @@ export function Sidebar() {
         } ${mobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
       >
         <div className={`flex h-14 items-center border-b border-hairline ${collapsed ? "justify-center px-2" : "px-4"}`}>
-          {!collapsed && (
-            <Link href="/" className="flex items-center gap-2">
-              <img src="/favicon.png" alt="" className="h-6 w-6" />
-              <span className="text-sm font-semibold text-ink">Pursuit</span>
-            </Link>
-          )}
-          {collapsed && <img src="/favicon.png" alt="Pursuit" className="h-6 w-6" />}
           <button
-            onClick={() => setMobileOpen(false)}
-            className="ml-auto rounded-md p-1 text-charcoal hover:bg-cloud hover:text-ink lg:hidden"
+            onClick={() => {
+              if (window.innerWidth >= 1024) {
+                setCollapsed(!collapsed);
+              } else {
+                setMobileOpen(false);
+              }
+            }}
+            className="flex items-center gap-2"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
+            <img src="/favicon.png" alt="" className="h-6 w-6 shrink-0" />
+            {!collapsed && <span className="text-sm font-semibold text-ink">Pursuit</span>}
           </button>
         </div>
 
@@ -137,20 +134,6 @@ export function Sidebar() {
 
         <div className={`border-t border-hairline px-2 py-3 ${collapsed ? "flex flex-col items-center gap-2" : ""}`}>
           <ThemeToggle />
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="mt-2 hidden w-full items-center justify-center rounded-lg p-2 text-charcoal hover:bg-cloud hover:text-ink lg:flex"
-          >
-            {collapsed ? (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            ) : (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-            )}
-          </button>
         </div>
       </aside>
     </>
