@@ -50,6 +50,7 @@ export function OutreachDashboard() {
   }
 
   async function handleDelete(id: string) {
+    if (!confirm("Delete this message?")) return;
     try {
       await deleteOutreachMessage(id);
       setMessages((prev) => prev.filter((m) => m.id !== id));

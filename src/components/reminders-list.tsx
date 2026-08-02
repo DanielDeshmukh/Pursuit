@@ -43,6 +43,7 @@ export function RemindersList() {
   }
 
   async function handleDelete(id: string) {
+    if (!confirm("Delete this reminder?")) return;
     try {
       await deleteReminder(id);
       setReminders((prev) => prev.filter((r) => r.id !== id));

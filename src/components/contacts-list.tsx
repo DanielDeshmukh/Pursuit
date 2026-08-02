@@ -33,6 +33,7 @@ export function ContactsList() {
   }
 
   async function handleDelete(id: string) {
+    if (!confirm("Delete this contact?")) return;
     try {
       await deleteContact(id);
       setContacts((prev) => prev.filter((c) => c.id !== id));

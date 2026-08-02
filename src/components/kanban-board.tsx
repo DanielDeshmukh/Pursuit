@@ -259,6 +259,7 @@ export function KanbanBoard() {
           app={selectedApp}
           onClose={() => setSelectedApp(null)}
           onDelete={async () => {
+            if (!confirm("Delete this application?")) return;
             try {
               await deleteApplication(selectedApp.id);
               setApplications((prev) =>
