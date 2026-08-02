@@ -24,6 +24,130 @@ function populateForm(data) {
   document.getElementById("source").value = data.source || "";
 }
 
+function extractFromPage() {
+  function clean(text) {
+    return (text || "").replace(/\s+/g, " ").trim();
+  }
+
+  const result = {};
+  const host = window.location.hostname;
+  const url = window.location.href;
+
+  const scripts = document.querySelectorAll('script[type="application/ld+json"]');
+  for (const script of scripts) {
+    try {
+      const raw = JSON.parse(script.textContent);
+      const items = Array.isArray(raw) ? raw : [raw];
+      for (const item of items) {
+        const nodes = item["@graph"] || [item];
+        for (const n of nodes) {
+          if (n["@type"] === "JobPosting") {
+            if (n.title) result.jobTitle = clean(n.title);
+            if (n.hiringOrganization?.name) result.companyName = clean(n.hiringOrganization.name);
+            if (n.jobLocation?.address) {
+              const a = n.jobLocation.address;
+              result.location = clean([a.addressLocality, a.addressRegion, a.addressCountry].filter(Boolean).join(", "));
+            }
+            if (n.estimatedSalary?.value) result.salaryMin = String(n.estimatedSalary.value);
+            if (n.baseSalary?.value) result.salaryMin = String(n.baseSalary.value);
+          }
+        }
+      }
+    } catch {}
+  }
+
+  if (host.includes("myworkdayjobs.com")) {
+    const m = url.match(/job\/([^/]+)\/([^/]+)/);
+    if (m) {
+      if (!result.location) result.location = clean(m[1].replace(/-/g, " "));
+      const jobSlug = m[2].split("/")[0].replace(/--/g, " - ").replace(/_R\d+-\d+/, "").replace(/_/g, " ");
+      if (!result.jobTitle) result.jobTitle = clean(jobSlug);
+    }
+    const cm = url.match(/en-US\/([^/]+)\//);
+    if (cm && !result.companyName) result.companyName = clean(cm[1].replace(/_/g, " "));
+    if (!result.source) result.source = "Workday";
+  }
+
+  else if (host.includes("lever.co")) {
+    const m = url.match(/lever\.co\/([^/]+)/);
+    if (m && !result.companyName) result.companyName = clean(m[1].replace(/-/g, " "));
+    if (!result.source) result.source = "Lever";
+  }
+
+  else if (host.includes("greenhouse.io")) {
+    const m = url.match(/greenhouse\.io\/([^/]+)/);
+    if (m && !result.companyName) result.companyName = clean(m[1].replace(/-/g, " "));
+    if (!result.source) result.source = "Greenhouse";
+  }
+
+  if (!result.jobTitle || !result.companyName) {
+    const title = document.title;
+    const parts = title.split(" | ");
+    if (parts.length >= 2) {
+      if (!result.jobTitle) result.jobTitle = clean(parts[0]);
+      if (!result.companyName) result.companyName = clean(parts[parts.length - 1]);
+    } else if (title) {
+      if (!result.jobTitle) result.jobTitle = clean(title);
+    }
+  }
+
+  if (!result.jobTitle) {
+    const h1 = document.querySelector("h1");
+    if (h1) result.jobTitle = clean(h1.textContent);
+  }
+
+  if (host.includes("linkedin.com")) {
+    if (!result.jobTitle) {
+      const el = document.querySelector("h1.job-details-jobs-unified-top-card__job-title span") || document.querySelector("h1");
+      if (el) result.jobTitle = clean(el.textContent);
+    }
+    if (!result.companyName) {
+      const el = document.querySelector(".job-details-jobs-unified-top-card__company-name a") || document.querySelector(".job-details-jobs-unified-top-card__company-name");
+      if (el) result.companyName = clean(el.textContent);
+    }
+    if (!result.location) {
+      const el = document.querySelector(".job-details-jobs-unified-top-card__primary-description-container .bullet") || document.querySelector(".topcard__flavor--bullet");
+      if (el) result.location = clean(el.textContent);
+    }
+    if (!result.source) result.source = "LinkedIn";
+  }
+
+  else if (host.includes("indeed.com")) {
+    if (!result.jobTitle) {
+      const el = document.querySelector("h1.jobsearch-JobInfoHeader-title") || document.querySelector("h1");
+      if (el) result.jobTitle = clean(el.textContent);
+    }
+    if (!result.companyName) {
+      const el = document.querySelector("[data-testid='inlineHeader-companyName']") || document.querySelector(".company_name");
+      if (el) result.companyName = clean(el.textContent);
+    }
+    if (!result.location) {
+      const el = document.querySelector("[data-testid='inlineHeader-companyLocation']") || document.querySelector(".company_location");
+      if (el) result.location = clean(el.textContent);
+    }
+    if (!result.source) result.source = "Indeed";
+  }
+
+  else if (host.includes("naukri.com")) {
+    if (!result.jobTitle) {
+      const el = document.querySelector("h1.jobTitle span") || document.querySelector("h1.jobTitle") || document.querySelector("h1");
+      if (el) result.jobTitle = clean(el.textContent);
+    }
+    if (!result.companyName) {
+      const el = document.querySelector("a.companyName") || document.querySelector(".company a");
+      if (el) result.companyName = clean(el.textContent);
+    }
+    if (!result.location) {
+      const el = document.querySelector(".location .locWdth") || document.querySelector("[class*=location]");
+      if (el) result.location = clean(el.textContent);
+    }
+    if (!result.source) result.source = "Naukri";
+  }
+
+  result.url = window.location.href;
+  return result;
+}
+
 async function loadData() {
   chrome.storage.local.get(["pursuitUrl"], (result) => {
     if (result.pursuitUrl) {
@@ -39,16 +163,17 @@ async function loadData() {
 
   try {
     const results = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      files: ["extract.js"],
+      target: { tabId: tab.id, allFrames: true },
+      func: extractFromPage,
     });
 
-    if (results && results[0] && results[0].result) {
-      const data = results[0].result;
-      if (data.jobTitle || data.companyName) {
-        chrome.storage.local.set({ lastJob: data });
-        populateForm(data);
-        return;
+    if (results && results.length > 0) {
+      for (const r of results) {
+        if (r.result && (r.result.jobTitle || r.result.companyName)) {
+          chrome.storage.local.set({ lastJob: r.result });
+          populateForm(r.result);
+          return;
+        }
       }
     }
   } catch (err) {
