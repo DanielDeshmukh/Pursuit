@@ -56,8 +56,8 @@ export function KanbanBoard() {
       app.company.name,
       app.status,
       app.source ?? "",
-      app.salaryMin ?? "",
-      app.salaryMax ?? "",
+      app.salaryMin != null ? String(app.salaryMin) : "",
+      app.salaryMax != null ? String(app.salaryMax) : "",
       app.jobUrl ?? "",
       app.notes ?? "",
       app.appliedAt ?? "",
@@ -223,9 +223,9 @@ export function KanbanBoard() {
                                     {app.source}
                                   </span>
                                 )}
-                                {(app.salaryMin || app.salaryMax) && (
+                                {(app.salaryMin != null || app.salaryMax != null) && (
                                   <span className="text-[10px] text-graphite">
-                                    {app.salaryMin || "?"}–{app.salaryMax || "?"}
+                                    {app.salaryMin ?? "?"}–{app.salaryMax ?? "?"}
                                   </span>
                                 )}
                               </div>
@@ -313,8 +313,8 @@ function DetailPanel({
   const [form, setForm] = useState({
     jobTitle: app.jobTitle,
     jobUrl: app.jobUrl ?? "",
-    salaryMin: app.salaryMin ?? "",
-    salaryMax: app.salaryMax ?? "",
+    salaryMin: app.salaryMin != null ? String(app.salaryMin) : "",
+    salaryMax: app.salaryMax != null ? String(app.salaryMax) : "",
     source: app.source ?? "",
     notes: app.notes ?? "",
     resumeVersionUsed: app.resumeVersionUsed ?? "",
@@ -341,8 +341,8 @@ function DetailPanel({
       await updateApplication(app.id, {
         jobTitle: form.jobTitle,
         jobUrl: form.jobUrl || undefined,
-        salaryMin: form.salaryMin || undefined,
-        salaryMax: form.salaryMax || undefined,
+        salaryMin: form.salaryMin ? Number(form.salaryMin) : undefined,
+        salaryMax: form.salaryMax ? Number(form.salaryMax) : undefined,
         source: form.source || undefined,
         notes: form.notes || undefined,
         resumeVersionUsed: form.resumeVersionUsed || undefined,
@@ -351,8 +351,8 @@ function DetailPanel({
         ...app,
         jobTitle: form.jobTitle,
         jobUrl: form.jobUrl || null,
-        salaryMin: form.salaryMin || null,
-        salaryMax: form.salaryMax || null,
+        salaryMin: form.salaryMin ? Number(form.salaryMin) : null,
+        salaryMax: form.salaryMax ? Number(form.salaryMax) : null,
         source: form.source || null,
         notes: form.notes || null,
         resumeVersionUsed: form.resumeVersionUsed || null,
@@ -367,8 +367,8 @@ function DetailPanel({
     setForm({
       jobTitle: app.jobTitle,
       jobUrl: app.jobUrl ?? "",
-      salaryMin: app.salaryMin ?? "",
-      salaryMax: app.salaryMax ?? "",
+      salaryMin: app.salaryMin != null ? String(app.salaryMin) : "",
+      salaryMax: app.salaryMax != null ? String(app.salaryMax) : "",
       source: app.source ?? "",
       notes: app.notes ?? "",
       resumeVersionUsed: app.resumeVersionUsed ?? "",
@@ -521,15 +521,15 @@ function DetailPanel({
                     <p className="text-sm text-ink">{app.source}</p>
                   </div>
                 )}
-                {(app.salaryMin || app.salaryMax) && (
+                {(app.salaryMin != null || app.salaryMax != null) && (
                   <div>
                     <label className="text-xs font-medium text-graphite">
                       Salary Range
                     </label>
                     <p className="text-sm text-ink">
-                      {app.salaryMin && app.salaryMax
+                      {app.salaryMin != null && app.salaryMax != null
                         ? `${app.salaryMin} – ${app.salaryMax}`
-                        : app.salaryMin || app.salaryMax}
+                        : app.salaryMin ?? app.salaryMax}
                     </p>
                   </div>
                 )}
@@ -755,8 +755,8 @@ function AddModal({
                     jobTitle,
                     companyName,
                     jobUrl,
-                    salaryMin,
-                    salaryMax,
+                    salaryMin: salaryMin ? Number(salaryMin) : undefined,
+                    salaryMax: salaryMax ? Number(salaryMax) : undefined,
                     source,
                     notes,
                   });

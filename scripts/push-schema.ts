@@ -40,8 +40,8 @@ const sql = [
     job_title TEXT NOT NULL,
     job_url TEXT,
     status TEXT NOT NULL DEFAULT 'SAVED',
-    salary_min TEXT,
-    salary_max TEXT,
+    salary_min INTEGER,
+    salary_max INTEGER,
     source TEXT,
     applied_at TEXT,
     resume_version_used TEXT,
@@ -65,10 +65,13 @@ const sql = [
     due_at TEXT NOT NULL,
     done INTEGER NOT NULL DEFAULT 0
   )`,
-  // Add new columns if they don't exist
-  `ALTER TABLE applications ADD COLUMN salary_min TEXT`,
-  `ALTER TABLE applications ADD COLUMN salary_max TEXT`,
-  `ALTER TABLE applications ADD COLUMN source TEXT`,
+  // Indexes
+  `CREATE INDEX IF NOT EXISTS applications_user_id_idx ON applications(user_id)`,
+  `CREATE INDEX IF NOT EXISTS applications_status_idx ON applications(status)`,
+  `CREATE INDEX IF NOT EXISTS applications_company_id_idx ON applications(company_id)`,
+  `CREATE INDEX IF NOT EXISTS outreach_application_id_idx ON outreach_messages(application_id)`,
+  `CREATE INDEX IF NOT EXISTS reminders_application_id_idx ON reminders(application_id)`,
+  `CREATE INDEX IF NOT EXISTS reminders_done_idx ON reminders(done)`,
 ];
 
 async function main() {
@@ -78,7 +81,7 @@ async function main() {
       console.log("OK:", s.split("\n")[0].trim());
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
-      if (msg.includes("duplicate column")) {
+      if (msg.includes("duplicate column") || msg.includes("already exists")) {
         console.log("SKIP:", s.split("\n")[0].trim(), "(already exists)");
       } else {
         console.error("ERR:", s.split("\n")[0].trim(), msg);

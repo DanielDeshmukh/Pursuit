@@ -93,8 +93,8 @@ export async function addApplication(data: {
   jobTitle: string;
   companyName: string;
   jobUrl?: string;
-  salaryMin?: string;
-  salaryMax?: string;
+  salaryMin?: number;
+  salaryMax?: number;
   source?: string;
   notes?: string;
   status?: string;
@@ -150,8 +150,8 @@ export async function updateApplication(
     jobTitle?: string;
     jobUrl?: string;
     status?: string;
-    salaryMin?: string;
-    salaryMax?: string;
+    salaryMin?: number;
+    salaryMax?: number;
     source?: string;
     notes?: string;
     resumeVersionUsed?: string;

@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
@@ -34,48 +34,69 @@ export const contacts = sqliteTable("contacts", {
   lastContactedAt: text("last_contacted_at"),
 });
 
-export const applications = sqliteTable("applications", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id),
-  companyId: text("company_id")
-    .notNull()
-    .references(() => companies.id),
-  contactId: text("contact_id").references(() => contacts.id),
-  jobTitle: text("job_title").notNull(),
-  jobUrl: text("job_url"),
-  status: text("status").notNull().default("SAVED"),
-  salaryMin: text("salary_min"),
-  salaryMax: text("salary_max"),
-  source: text("source"),
-  appliedAt: text("applied_at"),
-  resumeVersionUsed: text("resume_version_used"),
-  notes: text("notes"),
-  nextFollowUpAt: text("next_follow_up_at"),
-});
+export const applications = sqliteTable(
+  "applications",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    companyId: text("company_id")
+      .notNull()
+      .references(() => companies.id),
+    contactId: text("contact_id").references(() => contacts.id),
+    jobTitle: text("job_title").notNull(),
+    jobUrl: text("job_url"),
+    status: text("status").notNull().default("SAVED"),
+    salaryMin: integer("salary_min"),
+    salaryMax: integer("salary_max"),
+    source: text("source"),
+    appliedAt: text("applied_at"),
+    resumeVersionUsed: text("resume_version_used"),
+    notes: text("notes"),
+    nextFollowUpAt: text("next_follow_up_at"),
+  },
+  (t) => [
+    index("applications_user_id_idx").on(t.userId),
+    index("applications_status_idx").on(t.status),
+    index("applications_company_id_idx").on(t.companyId),
+  ]
+);
 
-export const outreachMessages = sqliteTable("outreach_messages", {
-  id: text("id").primaryKey(),
-  applicationId: text("application_id")
-    .notNull()
-    .references(() => applications.id),
-  contactId: text("contact_id")
-    .notNull()
-    .references(() => contacts.id),
-  channel: text("channel").notNull(),
-  subject: text("subject"),
-  body: text("body").notNull(),
-  status: text("status").notNull().default("drafted"),
-  sentAt: text("sent_at"),
-});
+export const outreachMessages = sqliteTable(
+  "outreach_messages",
+  {
+    id: text("id").primaryKey(),
+    applicationId: text("application_id")
+      .notNull()
+      .references(() => applications.id),
+    contactId: text("contact_id")
+      .notNull()
+      .references(() => contacts.id),
+    channel: text("channel").notNull(),
+    subject: text("subject"),
+    body: text("body").notNull(),
+    status: text("status").notNull().default("drafted"),
+    sentAt: text("sent_at"),
+  },
+  (t) => [
+    index("outreach_application_id_idx").on(t.applicationId),
+  ]
+);
 
-export const reminders = sqliteTable("reminders", {
-  id: text("id").primaryKey(),
-  applicationId: text("application_id")
-    .notNull()
-    .references(() => applications.id),
-  type: text("type").notNull(),
-  dueAt: text("due_at").notNull(),
-  done: integer("done", { mode: "boolean" }).notNull().default(false),
-});
+export const reminders = sqliteTable(
+  "reminders",
+  {
+    id: text("id").primaryKey(),
+    applicationId: text("application_id")
+      .notNull()
+      .references(() => applications.id),
+    type: text("type").notNull(),
+    dueAt: text("due_at").notNull(),
+    done: integer("done", { mode: "boolean" }).notNull().default(false),
+  },
+  (t) => [
+    index("reminders_application_id_idx").on(t.applicationId),
+    index("reminders_done_idx").on(t.done),
+  ]
+);
