@@ -102,7 +102,7 @@ export const profiles = sqliteTable("profiles", {
   yearsExperience: text("years_experience"),
   education: text("education"),
   skills: text("skills"),
-  workAuthorization: text("work_authorship"),
+  workAuthorization: text("work_authorization"),
   salaryExpectation: text("salary_expectation"),
   bio: text("bio"),
   coverLetterTemplate: text("cover_letter_template"),
