@@ -132,8 +132,10 @@ export function Sidebar() {
           })}
         </nav>
 
-        <div className={`border-t border-hairline px-2 py-3 ${collapsed ? "flex flex-col items-center gap-2" : ""}`}>
-          <ThemeToggle />
+        <div className="mt-auto border-t border-hairline px-3 py-3">
+          <div className={collapsed ? "" : "flex justify-end"}>
+            <ThemeToggle />
+          </div>
         </div>
       </aside>
     </>
