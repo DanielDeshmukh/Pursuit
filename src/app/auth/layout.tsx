@@ -1,5 +1,6 @@
 import { ThemeToggle } from "@/components/theme-toggle";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function AuthLayout({
   children,
@@ -10,7 +11,7 @@ export default function AuthLayout({
     <div className="flex min-h-screen bg-canvas">
       <div className="hidden w-1/2 lg:flex lg:flex-col lg:items-center lg:justify-center" style={{ backgroundColor: "#0a1929" }}>
         <Link href="/" className="flex items-center gap-3 text-4xl font-semibold text-white">
-          <img src="/favicon.svg" alt="" className="h-10 w-10" />
+          <Image src="/favicon.png" alt="" width={40} height={40} />
           Pursuit
         </Link>
         <p className="mt-4 max-w-xs text-center text-sm text-blue-200/60">
@@ -27,7 +28,7 @@ export default function AuthLayout({
           href="/"
           className="mb-8 flex items-center gap-2 text-2xl font-semibold text-ink lg:hidden"
         >
-          <img src="/favicon.svg" alt="" className="h-8 w-8" />
+          <Image src="/favicon.png" alt="" width={32} height={32} />
           Pursuit
         </Link>
 

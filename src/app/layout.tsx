@@ -20,8 +20,8 @@ export const metadata: Metadata = {
   description:
     "Track applications, automate follow-ups, and land your next role.",
   icons: {
-    icon: "/favicon.svg",
-    apple: "/favicon.svg",
+    icon: "/favicon.png",
+    apple: "/favicon.png",
   },
 };
 
