@@ -1,21 +1,19 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
-import { db } from "@/lib/db";
-import { users } from "@/lib/schema";
-import { eq } from "drizzle-orm";
-import { loginSchema } from "@/lib/validation";
 
-export { signupSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from "@/lib/validation";
+const googleProvider = Google({
+  clientId: process.env.AUTH_GOOGLE_ID!,
+  clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+});
+googleProvider.token = { url: "https://oauth2.googleapis.com/token" };
+googleProvider.userinfo = { url: "https://www.googleapis.com/oauth2/v3/userinfo" };
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  secret: process.env.AUTH_SECRET,
   trustHost: true,
   providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
-    }),
+    googleProvider,
     Credentials({
       name: "credentials",
       credentials: {
@@ -25,11 +23,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
+        const { loginSchema } = await import("@/lib/validation");
         const parsed = loginSchema.safeParse({
           email: credentials.email,
           password: credentials.password,
         });
         if (!parsed.success) return null;
+
+        const bcrypt = await import("bcryptjs");
+        const { db } = await import("@/lib/db");
+        const { users } = await import("@/lib/schema");
+        const { eq } = await import("drizzle-orm");
 
         const user = await db
           .select()
@@ -56,7 +60,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: { strategy: "jwt" },
   pages: {
     signIn: "/auth/login",
-    error: "/auth/login",
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -73,3 +76,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
   },
 });
+
+export { signupSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from "@/lib/validation";

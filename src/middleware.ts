@@ -1,27 +1,10 @@
-import { auth } from "@/lib/auth-edge";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export default auth((req) => {
-  const isLoggedIn = !!req.auth;
-  const isAuthPage = req.nextUrl.pathname.startsWith("/auth");
-  const isPublicPage = req.nextUrl.pathname === "/";
-  const isApiAuth = req.nextUrl.pathname.startsWith("/api/auth");
-
-  if (isApiAuth) return NextResponse.next();
-
-  if (isLoggedIn && isAuthPage) {
-    return NextResponse.redirect(new URL("/tracker", req.url));
-  }
-
-  if (isPublicPage || isAuthPage) return NextResponse.next();
-
-  if (!isLoggedIn) {
-    return NextResponse.redirect(new URL("/auth/login", req.url));
-  }
-
+export function middleware(req: NextRequest) {
   return NextResponse.next();
-});
+}
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon\\.png|favicon\\.ico|Group 30\\.png|Group 30\\.svg|public).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon\\.png|favicon\\.ico|api/auth|Group 30\\.png|Group 30\\.svg|public).*)"],
 };
