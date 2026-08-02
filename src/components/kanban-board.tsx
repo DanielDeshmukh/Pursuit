@@ -162,13 +162,14 @@ export function KanbanBoard() {
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value)}
             className="w-full rounded-md border border-steel bg-canvas px-3 py-1.5 text-sm text-ink focus:border-ink focus:outline-none sm:w-auto"
-        >
-          {sources.map((s) => (
-            <option key={s} value={s}>
-              {s === "ALL" ? "All Sources" : s}
-            </option>
-          ))}
-        </select>
+          >
+            {sources.map((s) => (
+              <option key={s} value={s}>
+                {s === "ALL" ? "All Sources" : s}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
