@@ -58,7 +58,8 @@ function extractLocation(text: string) {
   return m ? m[0] : null;
 }
 
-const DATE_PATTERN = `(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\\s*\\d{4}`;
+const MONTHS = `(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)`;
+const DATE_PATTERN = `${MONTHS}\\s+\\d{4}`;
 const DATE_RANGE = new RegExp(`${DATE_PATTERN}\\s*[-–—]\\s*(?:${DATE_PATTERN}|Present|Current|Now)`, "i");
 
 function extractWorkExperienceRegex(text: string): { company: string; role: string; startDate: string; endDate: string; location: string; bullets: string[] }[] {
@@ -77,9 +78,9 @@ function extractWorkExperienceRegex(text: string): { company: string; role: stri
         jobs.push(currentJob);
       }
 
-      const parts = line.split(DATE_RANGE);
-      const beforeDate = clean(parts[0] || "");
       const dateStr = dateMatch[0];
+      const beforeDate = clean(line.slice(0, line.indexOf(dateStr)));
+      const afterDate = clean(line.slice(line.indexOf(dateStr) + dateStr.length));
       const dates = dateStr.split(/[-–—]/).map((d) => clean(d));
 
       let company = "";
@@ -87,27 +88,20 @@ function extractWorkExperienceRegex(text: string): { company: string; role: stri
       let location = "";
 
       const pipeParts = beforeDate.split("|").map((p) => clean(p));
-      if (pipeParts.length >= 3) {
+      if (pipeParts.length >= 2) {
         role = pipeParts[0];
         company = pipeParts[1];
-        location = pipeParts[2];
-      } else if (pipeParts.length === 2) {
-        role = pipeParts[0];
-        company = pipeParts[1];
+        if (pipeParts.length >= 3) location = pipeParts[2];
       } else if (beforeDate.includes(" at ")) {
         const atParts = beforeDate.split(/\s+at\s+/i);
         role = atParts[0];
         company = atParts[1];
-      } else if (beforeDate.includes(", ")) {
-        const commaParts = beforeDate.split(",");
-        role = commaParts[0];
-        company = commaParts.slice(1).join(",");
       } else {
         role = beforeDate;
       }
 
-      const locMatch = line.match(/\b(?:Mumbai|Delhi|Bangalore|Bengaluru|Pune|Hyderabad|Chennai|Remote|Online|On-site)\b/i);
-      if (locMatch && !location) location = locMatch[0];
+      const locFromAfter = afterDate.match(/(?:·\s*)?\b(?:Mumbai|Delhi|Bangalore|Bengaluru|Pune|Hyderabad|Chennai|Remote|Online|On-site|New York|San Francisco|London|Berlin|Toronto|Singapore|Seattle|Boston|Austin|Chicago|Los Angeles)\b/i);
+      if (locFromAfter && !location) location = clean(locFromAfter[0].replace(/^·\s*/, ""));
 
       currentJob = {
         company,
@@ -117,10 +111,8 @@ function extractWorkExperienceRegex(text: string): { company: string; role: stri
         location,
         bullets: [],
       };
-    } else if (currentJob && line.match(/^[-•*–]\s*/)) {
-      currentJob.bullets.push(clean(line.replace(/^[-•*–]\s*/, "")));
-    } else if (currentJob && line.length > 10 && !line.match(/^\d/) && !currentJob.company) {
-      if (!currentJob.role) currentJob.role = line;
+    } else if (currentJob && line.match(/^[•\-*–]\s*/)) {
+      currentJob.bullets.push(clean(line.replace(/^[•\-*–]\s*/, "")));
     }
   }
 
@@ -134,14 +126,14 @@ function extractWorkExperienceRegex(text: string): { company: string; role: stri
 function extractProjectsRegex(text: string): { name: string; description: string; tech: string; bullets: string[] }[] {
   const projects: { name: string; description: string; tech: string; bullets: string[] }[] = [];
 
-  const projectSectionMatch = text.match(/\n\s*(?:Projects?|Personal Projects?|Key Projects?|Side Projects?|Featured Projects?)\s*\n/i);
+  const projectSectionMatch = text.match(/\n\s*(?:PROJECTS?|PERSONAL PROJECTS?|KEY PROJECTS?|SIDE PROJECTS?|FEATURED PROJECTS?)\s*\n/i);
   if (!projectSectionMatch) return projects;
 
   const startIdx = projectSectionMatch.index! + projectSectionMatch[0].length;
   const remaining = text.slice(startIdx);
 
-  const nextSection = remaining.match(/\n\s*[A-Z][A-Za-z &/]{2,30}\s*\n/);
-  const endIdx = nextSection ? nextSection.index! : Math.min(remaining.length, 3000);
+  const nextSection = remaining.match(/\n\s*(?:EDUCATION|CERTIFICATIONS?|WORK EXPERIENCE|SKILLS?|TECHNICAL SKILLS|PROFESSIONAL SUMMARY|REFERENCES?|AWARDS?|PUBLICATIONS?)\s*\n/i);
+  const endIdx = nextSection ? nextSection.index! : Math.min(remaining.length, 4000);
   const section = remaining.slice(0, endIdx);
 
   const lines = section.split("\n");
@@ -151,24 +143,56 @@ function extractProjectsRegex(text: string): { name: string; description: string
     const l = line.trim();
     if (!l) continue;
 
-    if (l.match(/^[-•*–]\s*/)) {
+    if (l.match(/^[•\-*–]\s*/)) {
       if (currentProject) {
-        currentProject.bullets.push(clean(l.replace(/^[-•*–]\s*/, "")));
+        currentProject.bullets.push(clean(l.replace(/^[•\-*–]\s*/, "")));
       }
-    } else if (l.match(/\b(?:React|Node|Python|Java|TypeScript|JavaScript|Next\.js|Express|FastAPI|Django|Flask|MongoDB|PostgreSQL|SQL|Docker|AWS|GCP|Supabase|Firebase|Tailwind|HTML|CSS|Git|REST|GraphQL|Redis|Kubernetes|Machine Learning|AI|NLP|TensorFlow|PyTorch|LangChain|LangGraph|RAG|Vector|API|CLI|Web|App|Dashboard|System|Platform|Engine|Bot|Agent|Automation)\b/i) && l.length < 80) {
-      if (currentProject && !currentProject.tech) {
-        currentProject.tech = clean(l.replace(/^[-•*–]\s*/, ""));
-      }
-    } else if (l.length > 3 && l.length < 100) {
+    } else if (l.includes("—") || l.includes("–") || l.includes(" - ")) {
       if (currentProject && (currentProject.name || currentProject.description)) {
         projects.push(currentProject);
       }
-      currentProject = {
-        name: l.replace(/^[-•*–]\s*/, ""),
-        description: "",
-        tech: "",
-        bullets: [],
-      };
+
+      const dashParts = l.split(/\s*[—–]\s*|\s+-\s+/).map((p) => clean(p));
+      let name = dashParts[0] || "";
+      let description = "";
+      let tech = "";
+
+      if (dashParts.length >= 3) {
+        description = dashParts[1];
+        tech = dashParts[2].replace(/\s*(?:●|✓|✔|Deployed|Live|Active)\s*/g, "").trim();
+      } else if (dashParts.length === 2) {
+        description = dashParts[1].replace(/\s*(?:●|✓|✔|Deployed|Live|Active)\s*/g, "").trim();
+      }
+
+      currentProject = { name, description, tech, bullets: [] };
+    } else if (l.match(/^(?:Additional Projects?:?)/i)) {
+      if (currentProject && (currentProject.name || currentProject.description)) {
+        projects.push(currentProject);
+        currentProject = null;
+      }
+      const additionalText = clean(l.replace(/^Additional Projects?:?\s*/i, ""));
+      if (additionalText) {
+        const parts = additionalText.split(/[,;]/).map((p) => clean(p));
+        for (const part of parts) {
+          const nameMatch = part.match(/^([^((]+)\s*\((.+)\)/);
+          if (nameMatch) {
+            projects.push({
+              name: clean(nameMatch[1]),
+              description: clean(nameMatch[2]),
+              tech: "",
+              bullets: [],
+            });
+          } else if (part.length > 3) {
+            projects.push({ name: part, description: "", tech: "", bullets: [] });
+          }
+        }
+      }
+      currentProject = null;
+    } else if (l.length > 3 && l.length < 120 && !l.match(/^(?:Deployed|Live|Active|●|✓)/i)) {
+      if (currentProject && (currentProject.name || currentProject.description)) {
+        projects.push(currentProject);
+      }
+      currentProject = { name: l, description: "", tech: "", bullets: [] };
     }
   }
 
