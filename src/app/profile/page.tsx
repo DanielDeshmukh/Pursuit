@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { SidebarLayout } from "@/components/sidebar-layout";
 import { getProfile, upsertProfile } from "@/lib/actions/profile";
+import Badge from "@/components/badge";
 
 type Profile = Record<string, string | null>;
 type WorkEntry = { company: string; role: string; startDate: string; endDate: string; location: string; bullets: string[] };
@@ -122,106 +123,7 @@ function MapPinIcon() {
   );
 }
 
-function PlayerCard({ photo, name, initials, overall, stats }: {
-  photo: string | null;
-  name: string;
-  initials: string;
-  overall: number;
-  stats: { label: string; value: number }[];
-}) {
-  const left = stats.slice(0, 3);
-  const right = stats.slice(3, 6);
 
-  return (
-    <div className="relative w-full max-w-[280px] select-none">
-      <div
-        className="relative overflow-hidden rounded-[26px] p-[3px] shadow-2xl"
-        style={{
-          background: "linear-gradient(160deg,#f5e7a8 0%,#e9c85a 30%,#d4a938 55%,#f2dd8a 100%)",
-        }}
-      >
-        <div
-          className="relative rounded-[24px] px-5 pb-6 pt-6"
-          style={{
-            background: "linear-gradient(165deg,#e9cf6b 0%,#d9b544 45%,#c99f2e 100%)",
-          }}
-        >
-          {/* Sheen */}
-          <div className="pointer-events-none absolute inset-0 rounded-[24px] bg-gradient-to-tr from-white/0 via-white/25 to-white/0 opacity-40" />
-
-          {/* Top row: rating + portrait */}
-          <div className="relative flex items-start justify-between">
-            <div className="flex flex-col items-center pt-1 text-[#4a3608]">
-              <span className="text-[42px] font-black leading-none tracking-tight drop-shadow-sm">
-                {overall}
-              </span>
-              <span className="mt-0.5 text-sm font-extrabold tracking-widest">
-                PRO
-              </span>
-              <span className="my-2 h-px w-7 bg-[#4a3608]/40" />
-              <span className="text-2xl leading-none">🌍</span>
-              <div className="mt-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#4a3608]/15 text-[10px] font-black">
-                CS
-              </div>
-            </div>
-
-            <div className="relative -mr-1 -mt-1 h-40 w-40">
-              {photo ? (
-                <img
-                  src={photo}
-                  alt={name}
-                  className="h-full w-full object-cover object-top drop-shadow-lg"
-                  style={{ maskImage: "linear-gradient(to bottom,#000 82%,transparent)" }}
-                />
-              ) : (
-                <div
-                  className="flex h-full w-full items-center justify-center text-5xl font-bold text-[#4a3608]/40 drop-shadow-lg"
-                  style={{ maskImage: "linear-gradient(to bottom,#000 82%,transparent)" }}
-                >
-                  {initials || "?"}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Name plate */}
-          <div className="relative mt-1 border-y-2 border-[#4a3608]/30 py-2 text-center">
-            <h3 className="text-lg font-black uppercase tracking-wide text-[#3d2c06]">
-              {name}
-            </h3>
-          </div>
-
-          {/* Stats grid */}
-          <div className="relative mt-3 grid grid-cols-2 gap-x-6 gap-y-2 px-1 text-[#3d2c06]">
-            <div className="space-y-2">
-              {left.map((s) => (
-                <StatRow key={s.label} value={s.value} label={s.label} />
-              ))}
-            </div>
-            <div className="space-y-2 border-l-2 border-[#4a3608]/25 pl-6">
-              {right.map((s) => (
-                <StatRow key={s.label} value={s.value} label={s.label} />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <p className="mt-4 text-center text-xs font-medium text-graphite">
-        Career ratings — hover the stats panel for full labels.
-      </p>
-    </div>
-  );
-}
-
-function StatRow({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="flex items-center gap-2 text-[15px] font-black tabular-nums">
-      <span className="w-7 text-right">{value}</span>
-      <span className="tracking-wider">{label}</span>
-    </div>
-  );
-}
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
@@ -591,20 +493,22 @@ export default function ProfilePage() {
                   )}
                 </div>
 
-                {/* Right: PlayerCard */}
+                {/* Right: Badge */}
                 <div className="flex shrink-0 justify-center lg:justify-end">
-                  <PlayerCard
+                  <Badge
                     photo={photo}
                     name={displayName}
                     initials={initials}
                     overall={Math.min(99, (work.length * 15) + (projects.length * 10) + (String(form.skills || "").split(",").filter(Boolean).length) + Number(form.yearsExperience || 0) * 3)}
+                    position="PRO"
+                    flag={form.country || "🌍"}
                     stats={[
-                      { label: "APP", value: Math.min(99, work.length * 12 + 30) },
-                      { label: "INT", value: Math.min(99, Math.round((work.length + projects.length) * 8.5)) },
-                      { label: "RES", value: Math.min(99, 72 + (work.length * 3)) },
-                      { label: "SKL", value: Math.min(99, String(form.skills || "").split(",").filter(Boolean).length * 4) },
-                      { label: "EXP", value: Math.min(99, Number(form.yearsExperience || 0) * 12) },
-                      { label: "PRJ", value: Math.min(99, projects.length * 15 + 20) },
+                      { label: "PROJ", value: projects.length },
+                      { label: "TECH", value: String(form.skills || "").split(",").filter(Boolean).length },
+                      { label: "CONT", value: Math.min(99, work.length * 12 + 30) },
+                      { label: "YEXP", value: Number(form.yearsExperience || 0) },
+                      { label: "CERT", value: Math.min(99, 72 + (work.length * 3)) },
+                      { label: "LANG", value: String(form.languages || "").split(",").filter(Boolean).length || 1 },
                     ]}
                   />
                 </div>
