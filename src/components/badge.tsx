@@ -39,7 +39,7 @@ export default function Badge({ refreshKey }: BadgeProps) {
     const x = xMatch ? parseFloat(xMatch[1]) : 92;
     const y = yMatch ? parseFloat(yMatch[1]) : 212;
     const code = data.flag.toUpperCase().trim();
-    filled = filled.replace(tag, `<image x="${x - 18}" y="${y - 18}" width="36" height="36" href="https://flagsapi.com/${code}/flat/64.png" preserveAspectRatio="xMidYMid slice"/>`);
+    filled = filled.replace(tag, `<image x="${x - 22}" y="${y - 14}" width="44" height="44" href="https://flagsapi.com/${code}/flat/64.png" preserveAspectRatio="xMidYMid slice"/>`);
     // Remove the dark rect placeholder behind the flag
     if (flagRectMatch) {
       filled = filled.replace(flagRectMatch[0], "");
