@@ -3,6 +3,29 @@ import { NextRequest, NextResponse } from "next/server";
 const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY;
 const NVIDIA_API_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 
+function extractJson(text: string): Record<string, unknown> | null {
+  // Strip markdown code blocks
+  let cleaned = text.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+
+  // Find the first { ... } block
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+  if (start === -1 || end === -1 || end <= start) return null;
+
+  const slice = cleaned.substring(start, end + 1);
+  try {
+    return JSON.parse(slice);
+  } catch {
+    // Try fixing common issues: trailing commas, single quotes
+    try {
+      const fixed = slice.replace(/,\s*([}\]])/g, "$1").replace(/'/g, '"');
+      return JSON.parse(fixed);
+    } catch {
+      return null;
+    }
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { image } = await req.json();
@@ -37,22 +60,15 @@ export async function POST(req: NextRequest) {
               },
               {
                 type: "text",
-                text: `Look at this portrait photo. Is there any visible background BEHIND the person (walls, scenery, objects, gradient, anything)? If YES (anything that is not pure transparent/empty), set hasBackground to true. Only set hasBackground to false if the image is a transparent PNG with no background at all.
+                text: `Analyze this portrait photo. Return JSON only, no other text.
 
-Also analyze:
-- shoulderOffset: horizontal shoulder tilt from center (-1.0 left to 1.0 right, 0 = centered)
-- headPosition: vertical head position (-1.0 too high, 1.0 too low, 0 = centered)
-- recommendedCrop: {x, y, width, height} as percentages 0-100 for best headshot crop
-- quality: "good", "fair", or "poor"
-
-Return ONLY valid JSON:
-{"hasBackground":true,"backgroundType":"complex","personVisible":true,"shoulderOffset":0.1,"headPosition":-0.05,"recommendedCrop":{"x":10,"y":5,"width":80,"height":85},"quality":"good"}`,
+{"hasBackground":<true if walls/scenery/objects visible behind person, false only if transparent PNG>,"backgroundType":"<solid|gradient|complex|none>","personVisible":<true|false>,"shoulderOffset":<-1.0 to 1.0>,"headPosition":<-1.0 to 1.0>,"recommendedCrop":{"x":<0-100>,"y":<0-100>,"width":<0-100>,"height":<0-100>},"quality":"<good|fair|poor>"}`,
               },
             ],
           },
         ],
         max_tokens: 256,
-        temperature: 0.2,
+        temperature: 0.1,
       }),
     });
 
@@ -66,17 +82,34 @@ Return ONLY valid JSON:
     const content = data.choices?.[0]?.message?.content || "";
     console.log("[image-analyze] raw AI response:", content);
 
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.error("[image-analyze] no JSON found in:", content);
-      return NextResponse.json({ error: "Could not parse analysis", raw: content }, { status: 500 });
+    const parsed = extractJson(content);
+    if (parsed) {
+      console.log("[image-analyze] parsed:", parsed);
+      return NextResponse.json(parsed);
     }
 
-    const analysis = JSON.parse(jsonMatch[0]);
-    console.log("[image-analyze] parsed:", analysis);
-    return NextResponse.json(analysis);
+    // Fallback: assume background exists, default alignment
+    console.warn("[image-analyze] parse failed, using defaults");
+    return NextResponse.json({
+      hasBackground: true,
+      backgroundType: "complex",
+      personVisible: true,
+      shoulderOffset: 0,
+      headPosition: 0,
+      recommendedCrop: { x: 5, y: 0, width: 90, height: 95 },
+      quality: "fair",
+    });
   } catch (e) {
     console.error("[image-analyze]", e);
-    return NextResponse.json({ error: "Analysis failed" }, { status: 500 });
+    // Fallback instead of erroring out
+    return NextResponse.json({
+      hasBackground: true,
+      backgroundType: "complex",
+      personVisible: true,
+      shoulderOffset: 0,
+      headPosition: 0,
+      recommendedCrop: { x: 5, y: 0, width: 90, height: 95 },
+      quality: "fair",
+    });
   }
 }

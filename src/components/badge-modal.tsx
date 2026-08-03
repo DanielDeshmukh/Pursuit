@@ -96,6 +96,7 @@ export default function BadgeModal({ open, onClose, data, onSave }: BadgeModalPr
         const result: AnalysisResult = await res.json();
         setAnalysis(result);
 
+        // Even if AI failed, result will have defaults from the API
         if (result.hasBackground) {
           setProcessing("prompt-bg");
         } else {
@@ -104,9 +105,18 @@ export default function BadgeModal({ open, onClose, data, onSave }: BadgeModalPr
         }
       } catch (err: any) {
         console.error("Analysis error:", err);
-        setAnalysisError(err.message || "Analysis failed");
-        setForm((f) => ({ ...f, photo: base64 }));
-        setProcessing("ready");
+        // Don't block — use safe defaults so user can still proceed
+        const fallback: AnalysisResult = {
+          hasBackground: true,
+          backgroundType: "complex",
+          personVisible: true,
+          shoulderOffset: 0,
+          headPosition: 0,
+          recommendedCrop: { x: 5, y: 0, width: 90, height: 95 },
+          quality: "fair",
+        };
+        setAnalysis(fallback);
+        setProcessing("prompt-bg");
       }
     };
     reader.readAsDataURL(file);
