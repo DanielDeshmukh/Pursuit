@@ -10,7 +10,25 @@ export async function getProfile() {
       sql: "SELECT * FROM profiles WHERE id = ? LIMIT 1",
       args: ["default"],
     });
-    return result.rows[0] ? { ...result.rows[0] } : null;
+    if (!result.rows[0]) return null;
+    const r = result.rows[0];
+    return {
+      ...r,
+      firstName: r.first_name,
+      lastName: r.last_name,
+      zipCode: r.zip_code,
+      linkedinUrl: r.linkedin_url,
+      githubUrl: r.github_url,
+      portfolioUrl: r.portfolio_url,
+      currentTitle: r.current_title,
+      currentCompany: r.current_company,
+      yearsExperience: r.years_experience,
+      workAuthorization: r.work_authorship ?? r.work_authorization,
+      salaryExpectation: r.salary_expectation,
+      coverLetterTemplate: r.cover_letter_template,
+      customAnswers: r.custom_answers,
+      workExperience: r.work_experience,
+    };
   } catch (e) {
     console.error("[getProfile]", e);
     return null;
@@ -77,7 +95,25 @@ export async function upsertProfile(data: Record<string, string | null | undefin
       sql: "SELECT * FROM profiles WHERE id = ? LIMIT 1",
       args: ["default"],
     });
-    return result.rows[0] ? { ...result.rows[0] } : null;
+    if (!result.rows[0]) return null;
+    const r = result.rows[0];
+    return {
+      ...r,
+      firstName: r.first_name,
+      lastName: r.last_name,
+      zipCode: r.zip_code,
+      linkedinUrl: r.linkedin_url,
+      githubUrl: r.github_url,
+      portfolioUrl: r.portfolio_url,
+      currentTitle: r.current_title,
+      currentCompany: r.current_company,
+      yearsExperience: r.years_experience,
+      workAuthorization: r.work_authorship ?? r.work_authorization,
+      salaryExpectation: r.salary_expectation,
+      coverLetterTemplate: r.cover_letter_template,
+      customAnswers: r.custom_answers,
+      workExperience: r.work_experience,
+    };
   } catch (e) {
     console.error("[upsertProfile]", e);
     throw new Error("Failed to save profile");

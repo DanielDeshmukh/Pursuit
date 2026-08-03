@@ -245,7 +245,7 @@ export default function ProfilePage() {
   useEffect(() => {
     getProfile().then((raw) => {
       if (raw) {
-        const p = raw as Profile;
+        const p = raw as unknown as Profile;
         setForm(p);
         setOriginal(p);
         setPhoto(p.photo ?? null);
@@ -326,7 +326,7 @@ export default function ProfilePage() {
       toSave.projects = JSON.stringify(projectEntries.filter((e) => e.name));
       const result = await upsertProfile(toSave);
       if (result) {
-        const r = result as Profile;
+        const r = result as unknown as Profile;
         setOriginal(r);
         setForm(r);
         setPhoto(r.photo ?? null);
