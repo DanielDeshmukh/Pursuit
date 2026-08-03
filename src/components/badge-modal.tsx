@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import { upsertBadgeData, type BadgeData } from "@/lib/actions/badge";
-import { alignPhoto } from "@/lib/image-align";
 
 interface BadgeModalProps {
   open: boolean;
@@ -11,26 +10,15 @@ interface BadgeModalProps {
   onSave: (data: BadgeData) => void;
 }
 
-type AnalysisResult = {
-  hasBackground: boolean;
-  backgroundType: string;
-  shoulderOffset: number;
-  recommendedCrop: { x: number; y: number; width: number; height: number };
-};
-
-type ProcessingStep = "idle" | "analyzing" | "prompt-bg" | "removing-bg" | "aligning" | "ready";
-
-const STEP_ORDER: ProcessingStep[] = ["analyzing", "prompt-bg", "aligning", "ready"];
+type ProcessingStep = "idle" | "processing" | "ready";
 
 function StepIndicator({ current }: { current: ProcessingStep }) {
-  const idx = STEP_ORDER.indexOf(current);
-  if (idx < 0) return null;
   const steps = [
-    { key: "analyzing", label: "Analyze" },
-    { key: "prompt-bg", label: "Background" },
-    { key: "aligning", label: "Align" },
+    { key: "processing", label: "Processing" },
     { key: "ready", label: "Ready" },
   ];
+  const idx = steps.findIndex((s) => s.key === current);
+  if (idx < 0) return null;
   return (
     <div className="flex items-center gap-1 mt-2">
       {steps.map((s, i) => (
@@ -59,9 +47,7 @@ export default function BadgeModal({ open, onClose, data, onSave }: BadgeModalPr
   });
   const [saving, setSaving] = useState(false);
   const [processing, setProcessing] = useState<ProcessingStep>("idle");
-  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
-  const [analysisError, setAnalysisError] = useState<string | null>(null);
-  const [rawPhoto, setRawPhoto] = useState<string>("");
+  const [processError, setProcessError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -91,13 +77,11 @@ export default function BadgeModal({ open, onClose, data, onSave }: BadgeModalPr
     const reader = new FileReader();
     reader.onload = async () => {
       const base64 = reader.result as string;
-      setProcessing("analyzing");
-      setAnalysisError(null);
-      setAnalysis(null);
-      setRawPhoto(base64);
+      setProcessing("processing");
+      setProcessError(null);
 
       try {
-        const res = await fetch("/api/image/analyze", {
+        const res = await fetch("/api/image/process", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ image: base64 }),
@@ -105,80 +89,20 @@ export default function BadgeModal({ open, onClose, data, onSave }: BadgeModalPr
 
         if (!res.ok) {
           const err = await res.json();
-          throw new Error(err.error || "Analysis failed");
+          throw new Error(err.error || "Processing failed");
         }
 
-        const result: AnalysisResult = await res.json();
-        setAnalysis(result);
-
-        // Even if AI failed, result will have defaults from the API
-        if (result.hasBackground) {
-          setProcessing("prompt-bg");
-        } else {
-          await applyAlignment(base64, result);
-          setProcessing("ready");
-        }
+        const { image: processedPhoto } = await res.json();
+        setForm((f) => ({ ...f, photo: processedPhoto }));
+        setProcessing("ready");
       } catch (err: any) {
-        console.error("Analysis error:", err);
-        // Don't block — use safe defaults so user can still proceed
-        const fallback: AnalysisResult = {
-          hasBackground: true,
-          backgroundType: "complex",
-          shoulderOffset: 0,
-          recommendedCrop: { x: 10, y: 0, width: 80, height: 55 },
-        };
-        setAnalysis(fallback);
-        setProcessing("prompt-bg");
+        console.error("Photo processing error:", err);
+        setProcessError(err.message || "Processing failed — using original photo");
+        setForm((f) => ({ ...f, photo: base64 }));
+        setProcessing("ready");
       }
     };
     reader.readAsDataURL(file);
-  };
-
-  const applyAlignment = async (photo: string, result: AnalysisResult) => {
-    setProcessing("aligning");
-    try {
-      const aligned = await alignPhoto(photo, result);
-      setForm((f) => ({ ...f, photo: aligned }));
-    } catch {
-      setForm((f) => ({ ...f, photo }));
-    }
-  };
-
-  const handleRemoveBackground = async (originalPhoto: string) => {
-    setProcessing("removing-bg");
-
-    try {
-      const res = await fetch("/api/image/remove-bg", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: originalPhoto }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "BG removal failed");
-      }
-
-      const { image: cleanPhoto } = await res.json();
-      if (analysis) {
-        await applyAlignment(cleanPhoto, analysis);
-      } else {
-        setForm((f) => ({ ...f, photo: cleanPhoto }));
-      }
-      setProcessing("ready");
-      } catch (err: any) {
-        console.error("BG removal error:", err);
-        setAnalysisError(err.message || "BG removal failed");
-        setForm((f) => ({ ...f, photo: rawPhoto || f.photo }));
-        setProcessing("ready");
-      }
-  };
-
-  const handleSkipBgRemoval = async () => {
-    if (analysis && rawPhoto) {
-      await applyAlignment(rawPhoto, analysis);
-    }
-    setProcessing("ready");
   };
 
   const handleSave = async () => {
@@ -211,9 +135,7 @@ export default function BadgeModal({ open, onClose, data, onSave }: BadgeModalPr
 
   const resetState = () => {
     setProcessing("idle");
-    setAnalysis(null);
-    setAnalysisError(null);
-    setRawPhoto("");
+    setProcessError(null);
   };
 
   const inputClass = "w-full rounded-lg border border-hairline bg-cloud px-3 py-2 text-sm text-ink outline-none focus:border-primary focus:ring-1 focus:ring-primary";
@@ -237,78 +159,36 @@ export default function BadgeModal({ open, onClose, data, onSave }: BadgeModalPr
           <div>
             <label className={labelClass}>Photo</label>
             <div className="mt-1 flex items-center gap-3">
-              {(form.photo || rawPhoto) && (
-                <img src={form.photo || rawPhoto} alt="Preview" className="h-14 w-14 rounded-full object-cover" />
+              {form.photo && (
+                <img src={form.photo} alt="Preview" className="h-14 w-14 rounded-full object-cover" />
               )}
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                disabled={processing !== "idle" && processing !== "ready"}
+                disabled={processing === "processing"}
                 className="rounded-lg border border-dashed border-hairline px-3 py-2 text-xs font-medium text-graphite hover:border-primary hover:text-primary disabled:opacity-50"
               >
-                {processing === "analyzing" && "Analyzing..."}
-                {processing === "prompt-bg" || processing === "removing-bg" ? "Processing..." : form.photo ? "Change Photo" : "Upload Photo"}
+                {processing === "processing" ? "Processing..." : form.photo ? "Change Photo" : "Upload Photo"}
               </button>
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoSelect} />
             </div>
 
-            {(processing === "analyzing" || processing === "prompt-bg" || processing === "removing-bg" || processing === "aligning") && (
+            {(processing === "processing") && (
               <StepIndicator current={processing} />
             )}
 
-            {/* Analysis results */}
-            {processing === "analyzing" && (
+            {processing === "processing" && (
               <div className="mt-2 rounded-lg bg-primary/5 border border-primary/20 p-3">
                 <div className="flex items-center gap-2 text-xs text-primary">
                   <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"/><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" className="opacity-75"/></svg>
-                  Analyzing photo with AI...
+                  Removing background &amp; aligning photo...
                 </div>
               </div>
             )}
 
-            {analysisError && (
+            {processError && (
               <div className="mt-2 rounded-lg bg-red-500/5 border border-red-500/20 p-3">
-                <p className="text-xs text-red-500">{analysisError}</p>
-                <p className="text-xs text-graphite mt-1">Using photo as-is</p>
-              </div>
-            )}
-
-            {/* BG removal prompt */}
-            {processing === "prompt-bg" && analysis && (
-              <div className="mt-3 rounded-lg bg-cloud border border-hairline p-4 space-y-3">
-                <div className="flex items-start gap-2">
-                  <svg className="h-5 w-5 text-primary shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                  <div>
-                    <p className="text-sm font-medium text-ink">Background detected</p>
-                    <p className="text-xs text-graphite mt-1">
-                      Your photo has a <strong>{analysis.backgroundType}</strong> background. 
-                      Remove it for a cleaner badge look?
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleRemoveBackground(rawPhoto)}
-                    className="rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-white hover:bg-primary/90"
-                  >
-                    Remove Background
-                  </button>
-                  <button
-                    onClick={handleSkipBgRemoval}
-                    className="rounded-lg border border-hairline px-3 py-1.5 text-xs font-medium text-graphite hover:bg-paper"
-                  >
-                    Keep Background
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {processing === "removing-bg" && (
-              <div className="mt-2 rounded-lg bg-primary/5 border border-primary/20 p-3">
-                <div className="flex items-center gap-2 text-xs text-primary">
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"/><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" className="opacity-75"/></svg>
-                  Removing background...
-                </div>
+                <p className="text-xs text-red-500">{processError}</p>
               </div>
             )}
           </div>
@@ -374,7 +254,7 @@ export default function BadgeModal({ open, onClose, data, onSave }: BadgeModalPr
           <button onClick={() => { resetState(); onClose(); }} className="rounded-lg px-4 py-2 text-sm font-medium text-graphite hover:bg-cloud">Cancel</button>
           <button
             onClick={handleSave}
-            disabled={saving || (processing !== "idle" && processing !== "ready")}
+            disabled={saving || processing === "processing"}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary/90 disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save Badge"}
