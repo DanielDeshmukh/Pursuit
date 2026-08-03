@@ -120,6 +120,30 @@ export const profiles = sqliteTable("profiles", {
     .$defaultFn(() => new Date().toISOString()),
 });
 
+export const badgeData = sqliteTable("badge_data", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  photo: text("photo"),
+  firstName: text("first_name"),
+  overall: integer("overall"),
+  position: text("position"),
+  flag: text("flag"),
+  proj: integer("proj"),
+  tech: integer("tech"),
+  cont: integer("cont"),
+  yexp: integer("yexp"),
+  cert: integer("cert"),
+  lang: integer("lang"),
+  createdAt: text("created_at")
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+  updatedAt: text("updated_at")
+    .notNull()
+    .$defaultFn(() => new Date().toISOString()),
+});
+
 export const reminders = sqliteTable(
   "reminders",
   {

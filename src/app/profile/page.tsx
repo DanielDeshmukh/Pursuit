@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { SidebarLayout } from "@/components/sidebar-layout";
 import { getProfile, upsertProfile } from "@/lib/actions/profile";
 import Badge from "@/components/badge";
+import BadgeModal from "@/components/badge-modal";
+import { getBadgeData, type BadgeData } from "@/lib/actions/badge";
 
 type Profile = Record<string, string | null>;
 type WorkEntry = { company: string; role: string; startDate: string; endDate: string; location: string; bullets: string[] };
@@ -143,6 +145,9 @@ export default function ProfilePage() {
   const [projectEntries, setProjectEntries] = useState<ProjectEntry[]>([]);
 
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [badgeData, setBadgeData] = useState<BadgeData | null>(null);
+  const [showBadgeModal, setShowBadgeModal] = useState(false);
+  const [badgeRefreshKey, setBadgeRefreshKey] = useState(0);
 
   useEffect(() => {
     getProfile().then((raw) => {
@@ -157,6 +162,10 @@ export default function ProfilePage() {
       setLoading(false);
     });
   }, []);
+
+  useEffect(() => {
+    getBadgeData().then(setBadgeData);
+  }, [badgeRefreshKey]);
 
   function setField(key: string, val: string) {
     setForm((f) => ({ ...f, [key]: val }));
@@ -494,23 +503,14 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Right: Badge */}
-                <div className="flex shrink-0 justify-center lg:justify-end">
-                  <Badge
-                    photo={photo}
-                    name={displayName}
-                    initials={initials}
-                    overall={Math.min(99, (work.length * 15) + (projects.length * 10) + (String(form.skills || "").split(",").filter(Boolean).length) + Number(form.yearsExperience || 0) * 3)}
-                    position="PRO"
-                    flag={form.country || "🌍"}
-                    stats={[
-                      { label: "PROJ", value: projects.length },
-                      { label: "TECH", value: String(form.skills || "").split(",").filter(Boolean).length },
-                      { label: "CONT", value: Math.min(99, work.length * 12 + 30) },
-                      { label: "YEXP", value: Number(form.yearsExperience || 0) },
-                      { label: "CERT", value: Math.min(99, 72 + (work.length * 3)) },
-                      { label: "LANG", value: String(form.languages || "").split(",").filter(Boolean).length || 1 },
-                    ]}
-                  />
+                <div className="flex shrink-0 flex-col items-center gap-3 lg:items-end">
+                  <Badge refreshKey={badgeRefreshKey} />
+                  <button
+                    onClick={() => setShowBadgeModal(true)}
+                    className="rounded-lg border border-hairline bg-cloud px-3 py-1.5 text-xs font-medium text-graphite hover:border-primary/50 hover:text-ink transition"
+                  >
+                    Edit Badge
+                  </button>
                 </div>
               </section>
 
@@ -959,6 +959,16 @@ export default function ProfilePage() {
           )}
         </div>
       </div>
+
+      <BadgeModal
+        open={showBadgeModal}
+        onClose={() => setShowBadgeModal(false)}
+        data={badgeData}
+        onSave={(d) => {
+          setBadgeData(d);
+          setBadgeRefreshKey((k) => k + 1);
+        }}
+      />
     </SidebarLayout>
   );
 }
