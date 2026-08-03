@@ -29,15 +29,21 @@ export default function Badge({ refreshKey }: BadgeProps) {
   filled = filled.replace("{{OVERALL}}", String(data.overall ?? 0));
   filled = filled.replace("{{POSITION}}", (data.position || "PRO").toUpperCase());
 
-  // Replace flag text element with foreignObject for emoji support
+  // Replace flag text element with image from flagsapi.com
   const flagTextMatch = filled.match(/<text[^>]*>\{\{FLAG\}\}<\/text>/);
+  const flagRectMatch = filled.match(/<rect[^>]*x="74"[^>]*y="179"[^>]*\/>/);
   if (flagTextMatch && data.flag) {
     const tag = flagTextMatch[0];
     const xMatch = tag.match(/x="([^"]+)"/);
     const yMatch = tag.match(/y="([^"]+)"/);
     const x = xMatch ? parseFloat(xMatch[1]) : 92;
     const y = yMatch ? parseFloat(yMatch[1]) : 212;
-    filled = filled.replace(tag, `<foreignObject x="${x - 18}" y="${y - 18}" width="36" height="36"><div xmlns="http://www.w3.org/1999/xhtml" style="font-size:24px;line-height:36px;text-align:center">${data.flag}</div></foreignObject>`);
+    const code = data.flag.toUpperCase().trim();
+    filled = filled.replace(tag, `<image x="${x - 18}" y="${y - 18}" width="36" height="36" href="https://flagsapi.com/${code}/flat/64.png" preserveAspectRatio="xMidYMid slice"/>`);
+    // Remove the dark rect placeholder behind the flag
+    if (flagRectMatch) {
+      filled = filled.replace(flagRectMatch[0], "");
+    }
   } else {
     filled = filled.replace("{{FLAG}}", data.flag || "");
   }

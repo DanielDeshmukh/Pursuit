@@ -332,8 +332,8 @@ export default function BadgeModal({ open, onClose, data, onSave }: BadgeModalPr
               <input className={inputClass} type="number" min="1" max="99" value={form.overall} onChange={(e) => setForm({ ...form, overall: Number(e.target.value) })} />
             </div>
             <div>
-              <label className={labelClass}>Flag Emoji</label>
-              <input className={inputClass} value={form.flag} onChange={(e) => setForm({ ...form, flag: e.target.value })} placeholder="🇮🇳" />
+              <label className={labelClass}>Country Code</label>
+              <input className={inputClass} value={form.flag} onChange={(e) => setForm({ ...form, flag: e.target.value })} placeholder="IN, US, BE..." maxLength={2} style={{ textTransform: "uppercase" }} />
             </div>
           </div>
 
