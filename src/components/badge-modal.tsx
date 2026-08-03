@@ -190,21 +190,22 @@ export default function BadgeModal({ open, onClose, data, onSave }: BadgeModalPr
   const handleSave = async () => {
     setSaving(true);
     try {
-      const payload = {
-        ...form,
-        firstName: form.firstName || null,
-        overall: Number(form.overall) || null,
-        position: form.position || null,
-        flag: form.flag || null,
-        proj: Number(form.proj) || null,
-        tech: Number(form.tech) || null,
-        cont: Number(form.cont) || null,
-        yexp: Number(form.yexp) || null,
-        cert: Number(form.cert) || null,
-        lang: Number(form.lang) || null,
-      };
+      const orig = data || {};
+      const payload: Partial<BadgeData> = {};
+      if (form.photo !== (orig.photo || "")) payload.photo = form.photo || null;
+      if (form.firstName !== (orig.firstName || "")) payload.firstName = form.firstName || null;
+      if (Number(form.overall) !== (orig.overall ?? 0)) payload.overall = Number(form.overall) ?? null;
+      if (form.position !== (orig.position || "")) payload.position = form.position || null;
+      if (form.flag !== (orig.flag || "")) payload.flag = form.flag || null;
+      if (Number(form.proj) !== (orig.proj ?? 0)) payload.proj = Number(form.proj) ?? null;
+      if (Number(form.tech) !== (orig.tech ?? 0)) payload.tech = Number(form.tech) ?? null;
+      if (Number(form.cont) !== (orig.cont ?? 0)) payload.cont = Number(form.cont) ?? null;
+      if (Number(form.yexp) !== (orig.yexp ?? 0)) payload.yexp = Number(form.yexp) ?? null;
+      if (Number(form.cert) !== (orig.cert ?? 0)) payload.cert = Number(form.cert) ?? null;
+      if (Number(form.lang) !== (orig.lang ?? 0)) payload.lang = Number(form.lang) ?? null;
+
       const result = await upsertBadgeData(payload);
-      onSave(result || { ...payload, id: "", userId: "default", photo: form.photo || null } as BadgeData);
+      onSave(result || { ...payload, id: "", userId: "default" } as BadgeData);
       resetState();
       onClose();
     } catch (e) {
