@@ -43,14 +43,14 @@ export default function Badge({ refreshKey }: BadgeProps) {
   }
 
   // Replace photo placeholder block with actual image
-  const photoBlock = filled.match(/<!-- Player photo placeholder -->[\s\S]*?<\/g>/)?.[0] || "";
+  const photoBlock = filled.match(/<g clip-path="url\(#photoClip\)">[\s\S]*?<\/g>/)?.[0] || "";
   if (data.photo && photoBlock) {
     const photoReplacement = `<!-- Player photo -->
   <clipPath id="photoClip">
     <path d="M334.232 31.8442C334.036 29.8135 333.939 28.7981 333.433 28.1238C332.927 27.4495 332.068 27.1074 330.351 26.4232C287.557 9.37441 240.873 0 192 0C143.127 0 96.4433 9.37442 53.6492 26.4232C51.9319 27.1074 51.0732 27.4495 50.5672 28.1238C50.0612 28.7981 49.9636 29.8135 49.7683 31.8442C47.5221 55.2085 29.1964 73.8747 5.9892 76.645C3.00504 77.0012 1.51296 77.1793 0.756479 78.0315C0 78.8836 0 80.2558 0 83V324H384V83C384 80.2558 384 78.8836 383.244 78.0315C382.487 77.1793 380.995 77.0012 378.011 76.645C354.804 73.8747 336.478 55.2084 334.232 31.8442Z"/>
   </clipPath>
   <g clip-path="url(#photoClip)">
-    <image x="0" y="0" width="384" height="324" href="${data.photo}" preserveAspectRatio="xMidYMax slice"/>
+    <image x="0" y="0" width="384" height="324" href="${data.photo}" preserveAspectRatio="xMidYMid slice"/>
   </g>`;
     filled = filled.replace(photoBlock, photoReplacement);
   } else {

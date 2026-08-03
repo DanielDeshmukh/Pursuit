@@ -60,12 +60,19 @@ export async function POST(req: NextRequest) {
               },
               {
                 type: "text",
-                text: `This photo will be cropped to show ONLY the person's head and shoulders for a profile badge. Find the tightest bounding box around just the head (face) and upper shoulders. Ignore the rest of the body, background, hands, etc.
+                text: `Analyze this portrait photo for a FIFA Ultimate Team style badge card.
+
+The final image must show ONLY the person's head and upper torso (shoulders + chest), centered, with NO background. Think of a FIFA player card: the person's head is near the top, shoulders extend to the sides, and the image cuts off at mid-chest.
 
 Return JSON only:
-{"hasBackground":<true/false>,"backgroundType":"<solid|gradient|complex|none>","shoulderOffset":<-1.0 left to 1.0 right, 0=centered>,"recommendedCrop":{"x":<0-100 left edge of head+shoulders box>,"y":<0-100 top of head>,"width":<0-100 width of box>,"height":<0-100 height from top of head to bottom of shoulders>}}
+{"hasBackground":<true if walls/scenery/objects visible behind person, false if already transparent or solid color>,"backgroundType":"<solid|gradient|complex|none>","shoulderOffset":<-1.0 person is far left, 0.0 centered, 1.0 person is far right>,"recommendedCrop":{"x":<0-100 percentage, left edge of the person's body (include shoulders)>,"y":<0-100 percentage, top of the head (leave small margin)>,"width":<0-100 percentage, width from left shoulder to right shoulder>,"height":<0-100 percentage, from top of head to mid-chest level>}}
 
-The crop should be TIGHT — x/y at the top-left corner of the head+shoulders region, width/height covering just that area. Typical head+shoulders occupies the top 40-60% of a portrait photo.`,
+CRITICAL:
+- x should include BOTH shoulders (full width of body at shoulder level)
+- y should start at the TOP OF THE HEAD (not above it)
+- height should reach MID-CHEST (not the waist, not the full body)
+- width should cover the full shoulder span
+- shoulderOffset: 0.0 if the person's body is centered in the frame`,
               },
             ],
           },
