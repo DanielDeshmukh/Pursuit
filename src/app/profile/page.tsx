@@ -97,12 +97,129 @@ function FolderIcon() {
   );
 }
 
+function GithubIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+      <path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.36-2.22-.26-4.55-1.14-4.55-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82 0 .27.18.6.69.49A10.03 10.03 0 0 0 22 12.25C22 6.58 17.52 2 12 2Z" />
+    </svg>
+  );
+}
+
+function LinkedInIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+      <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.55V9h3.57v11.45ZM22.22 0H1.77C.79 0 0 .78 0 1.73v20.53C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.74V1.73C24 .78 23.2 0 22.22 0Z" />
+    </svg>
+  );
+}
+
 function MapPinIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
       <circle cx="12" cy="10" r="3" />
     </svg>
+  );
+}
+
+function PlayerCard({ photo, name, initials, overall, stats }: {
+  photo: string | null;
+  name: string;
+  initials: string;
+  overall: number;
+  stats: { label: string; value: number }[];
+}) {
+  const left = stats.slice(0, 3);
+  const right = stats.slice(3, 6);
+
+  return (
+    <div className="relative w-full max-w-[280px] select-none">
+      <div
+        className="relative overflow-hidden rounded-[26px] p-[3px] shadow-2xl"
+        style={{
+          background: "linear-gradient(160deg,#f5e7a8 0%,#e9c85a 30%,#d4a938 55%,#f2dd8a 100%)",
+        }}
+      >
+        <div
+          className="relative rounded-[24px] px-5 pb-6 pt-6"
+          style={{
+            background: "linear-gradient(165deg,#e9cf6b 0%,#d9b544 45%,#c99f2e 100%)",
+          }}
+        >
+          {/* Sheen */}
+          <div className="pointer-events-none absolute inset-0 rounded-[24px] bg-gradient-to-tr from-white/0 via-white/25 to-white/0 opacity-40" />
+
+          {/* Top row: rating + portrait */}
+          <div className="relative flex items-start justify-between">
+            <div className="flex flex-col items-center pt-1 text-[#4a3608]">
+              <span className="text-[42px] font-black leading-none tracking-tight drop-shadow-sm">
+                {overall}
+              </span>
+              <span className="mt-0.5 text-sm font-extrabold tracking-widest">
+                PRO
+              </span>
+              <span className="my-2 h-px w-7 bg-[#4a3608]/40" />
+              <span className="text-2xl leading-none">🌍</span>
+              <div className="mt-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#4a3608]/15 text-[10px] font-black">
+                CS
+              </div>
+            </div>
+
+            <div className="relative -mr-1 -mt-1 h-40 w-40">
+              {photo ? (
+                <img
+                  src={photo}
+                  alt={name}
+                  className="h-full w-full object-cover object-top drop-shadow-lg"
+                  style={{ maskImage: "linear-gradient(to bottom,#000 82%,transparent)" }}
+                />
+              ) : (
+                <div
+                  className="flex h-full w-full items-center justify-center text-5xl font-bold text-[#4a3608]/40 drop-shadow-lg"
+                  style={{ maskImage: "linear-gradient(to bottom,#000 82%,transparent)" }}
+                >
+                  {initials || "?"}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Name plate */}
+          <div className="relative mt-1 border-y-2 border-[#4a3608]/30 py-2 text-center">
+            <h3 className="text-lg font-black uppercase tracking-wide text-[#3d2c06]">
+              {name}
+            </h3>
+          </div>
+
+          {/* Stats grid */}
+          <div className="relative mt-3 grid grid-cols-2 gap-x-6 gap-y-2 px-1 text-[#3d2c06]">
+            <div className="space-y-2">
+              {left.map((s) => (
+                <StatRow key={s.label} value={s.value} label={s.label} />
+              ))}
+            </div>
+            <div className="space-y-2 border-l-2 border-[#4a3608]/25 pl-6">
+              {right.map((s) => (
+                <StatRow key={s.label} value={s.value} label={s.label} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p className="mt-4 text-center text-xs font-medium text-graphite">
+        Career ratings — hover the stats panel for full labels.
+      </p>
+    </div>
+  );
+}
+
+function StatRow({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="flex items-center gap-2 text-[15px] font-black tabular-nums">
+      <span className="w-7 text-right">{value}</span>
+      <span className="tracking-wider">{label}</span>
+    </div>
   );
 }
 
@@ -395,51 +512,106 @@ export default function ProfilePage() {
           {/* ═══════════════════════ VIEW MODE ═══════════════════════ */}
           {!editing && !isEmpty && (
             <>
-              {/* Hero Section */}
-              <section className="rounded-xl border border-hairline bg-paper overflow-hidden shadow-card">
-                <div className="h-24 bg-gradient-to-r from-primary via-primary-bright to-primary-deep sm:h-32" />
-                <div className="px-6 pb-6">
-                  <div className="-mt-10 flex flex-col items-center gap-4 sm:flex-row sm:items-end sm:gap-5">
-                    <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-paper bg-cloud text-2xl font-bold text-primary shadow-card sm:h-24 sm:w-24 sm:text-3xl">
-                      {photo ? (
-                        <img src={photo} alt="" className="h-full w-full object-cover" />
-                      ) : (
-                        initials || "?"
-                      )}
-                      <div className="absolute bottom-1 right-1 h-3 w-3 rounded-full border-2 border-paper bg-green-500" />
-                    </div>
-                    <div className="flex-1 text-center sm:text-left pb-1">
-                      <h3 className="text-xl font-bold text-ink sm:text-2xl">{displayName}</h3>
-                      {(form.currentTitle || form.currentCompany) && (
-                        <p className="mt-0.5 text-sm text-graphite">
-                          {form.currentTitle}{form.currentTitle && form.currentCompany ? " at " : ""}{form.currentCompany}
-                        </p>
-                      )}
-                      <div className="mt-2 flex flex-wrap items-center justify-center gap-3 text-xs text-graphite sm:justify-start">
-                        {form.city && (
-                          <span className="flex items-center gap-1">
-                            <MapPinIcon />
-                            {form.city}{form.country ? `, ${form.country}` : ""}
-                          </span>
-                        )}
-                        {form.email && (
-                          <span className="flex items-center gap-1">
-                            <MailIcon />{form.email}
-                          </span>
-                        )}
-                        {form.phone && (
-                          <span className="flex items-center gap-1">
-                            <PhoneIcon />{form.phone}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+          {/* ── Hero: Text Left + PlayerCard Right ── */}
+          <section className="flex flex-col gap-6 lg:flex-row">
+                {/* Left: Profile Info */}
+                <div className="flex-1 space-y-5">
+                  {/* Status Badge */}
+                  <div className="inline-flex items-center gap-2 rounded-full border border-hairline bg-paper px-3 py-1.5 shadow-card">
+                    <span className="h-2 w-2 rounded-full bg-green-500" />
+                    <span className="text-xs font-medium text-graphite">Open to select opportunities</span>
                   </div>
+
+                  {/* Name + Role + Tagline */}
+                  <div>
+                    <h1 className="text-3xl font-black tracking-tight text-ink sm:text-4xl">{displayName}</h1>
+                    {(form.currentTitle || form.currentCompany) && (
+                      <p className="mt-1 text-lg font-semibold text-primary">
+                        {form.currentTitle}{form.currentTitle && form.currentCompany ? " " : ""}{form.currentCompany}
+                      </p>
+                    )}
+                    {form.summary && (
+                      <p className="mt-3 max-w-lg text-sm leading-relaxed text-charcoal">{form.summary}</p>
+                    )}
+                  </div>
+
+                  {/* Location + Website */}
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-graphite">
+                    {form.city && (
+                      <span className="flex items-center gap-1.5">
+                        <MapPinIcon />
+                        {form.city}{form.country ? `, ${form.country}` : ""}
+                      </span>
+                    )}
+                    {form.portfolioUrl && (
+                      <a href={form.portfolioUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-primary hover:underline">
+                        <GlobeIcon />
+                        {form.portfolioUrl.replace(/^https?:\/\//, "")}
+                      </a>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-wrap gap-3">
+                    {form.email && (
+                      <a href={`mailto:${form.email}`} className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-sm hover:bg-primary-bright transition">
+                        <MailIcon />
+                        Contact me
+                      </a>
+                    )}
+                    {work.length > 0 && (
+                      <button onClick={() => document.getElementById("experience-section")?.scrollIntoView({ behavior: "smooth" })} className="inline-flex items-center gap-2 rounded-lg border border-hairline bg-paper px-5 py-2.5 text-sm font-medium text-ink hover:bg-cloud transition shadow-card">
+                        View experience
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Social Link Pills */}
+                  {(form.githubUrl || form.linkedinUrl || form.portfolioUrl) && (
+                    <div className="flex flex-wrap gap-2">
+                      {form.githubUrl && (
+                        <a href={form.githubUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-hairline bg-paper px-4 py-2 text-xs font-medium text-graphite hover:border-primary/50 hover:text-ink transition shadow-card">
+                          <GithubIcon />
+                          @{form.githubUrl.split("/").pop()}
+                        </a>
+                      )}
+                      {form.linkedinUrl && (
+                        <a href={form.linkedinUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-hairline bg-paper px-4 py-2 text-xs font-medium text-graphite hover:border-primary/50 hover:text-ink transition shadow-card">
+                          <LinkedInIcon />
+                          {form.linkedinUrl.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, "")}
+                        </a>
+                      )}
+                      {form.portfolioUrl && (
+                        <a href={form.portfolioUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-hairline bg-paper px-4 py-2 text-xs font-medium text-graphite hover:border-primary/50 hover:text-ink transition shadow-card">
+                          <GlobeIcon />
+                          {form.portfolioUrl.replace(/^https?:\/\//, "")}
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Right: PlayerCard */}
+                <div className="flex shrink-0 justify-center lg:justify-end">
+                  <PlayerCard
+                    photo={photo}
+                    name={displayName}
+                    initials={initials}
+                    overall={Math.min(99, (work.length * 15) + (projects.length * 10) + (String(form.skills || "").split(",").filter(Boolean).length) + Number(form.yearsExperience || 0) * 3)}
+                    stats={[
+                      { label: "APP", value: Math.min(99, work.length * 12 + 30) },
+                      { label: "INT", value: Math.min(99, Math.round((work.length + projects.length) * 8.5)) },
+                      { label: "RES", value: Math.min(99, 72 + (work.length * 3)) },
+                      { label: "SKL", value: Math.min(99, String(form.skills || "").split(",").filter(Boolean).length * 4) },
+                      { label: "EXP", value: Math.min(99, Number(form.yearsExperience || 0) * 12) },
+                      { label: "PRJ", value: Math.min(99, projects.length * 15 + 20) },
+                    ]}
+                  />
                 </div>
               </section>
 
-              {/* Contact Cards */}
-              {(form.email || form.phone || form.portfolioUrl || form.linkedinUrl || form.githubUrl) && (
+              {/* ── Contact Cards ── */}
+              {(form.email || form.phone || form.portfolioUrl) && (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   {form.email && (
                     <div className="group flex items-center justify-between rounded-xl border border-hairline bg-paper px-4 py-3 shadow-card transition hover:shadow-md">
@@ -469,75 +641,72 @@ export default function ProfilePage() {
                       </button>
                     </div>
                   )}
-                  {(form.portfolioUrl || form.linkedinUrl || form.githubUrl) && (
+                  {form.portfolioUrl && (
                     <div className="group flex items-center justify-between rounded-xl border border-hairline bg-paper px-4 py-3 shadow-card transition hover:shadow-md">
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10"><GlobeIcon /></div>
                         <div className="min-w-0">
-                          <p className="text-[11px] font-medium uppercase tracking-wider text-graphite">Links</p>
-                          <div className="flex gap-2">
-                            {form.linkedinUrl && <a href={form.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-primary hover:underline">LinkedIn</a>}
-                            {form.githubUrl && <a href={form.githubUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-primary hover:underline">GitHub</a>}
-                            {form.portfolioUrl && <a href={form.portfolioUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-primary hover:underline">Portfolio</a>}
-                          </div>
+                          <p className="text-[11px] font-medium uppercase tracking-wider text-graphite">Website</p>
+                          <p className="truncate text-sm font-semibold text-ink">{form.portfolioUrl.replace(/^https?:\/\//, "")}</p>
                         </div>
                       </div>
+                      <button onClick={() => handleCopy("portfolio", form.portfolioUrl || "")} className="shrink-0 ml-2 rounded-md p-1.5 text-graphite opacity-0 transition group-hover:opacity-100 hover:bg-cloud hover:text-ink">
+                        <CopyIcon copied={copiedField === "portfolio"} />
+                      </button>
                     </div>
                   )}
                 </div>
               )}
 
-              {/* About + Skills + Details */}
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                <div className="space-y-4 lg:col-span-2">
-                  {form.summary && (
-                    <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
-                      <h4 className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-ink">
-                        <span className="inline-block h-5 w-1 rounded-full bg-primary" />
-                        About
-                      </h4>
-                      <p className="text-sm leading-relaxed text-charcoal">{form.summary}</p>
-                    </section>
-                  )}
-                </div>
-                <div className="space-y-4">
-                  {form.skills && (
-                    <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
-                      <h4 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-ink">
-                        <span className="inline-block h-5 w-1 rounded-full bg-primary" />
-                        Skills
-                      </h4>
-                      <div className="flex flex-wrap gap-1.5">
-                        {form.skills.split(/[,\n]+/).filter(Boolean).map((s, i) => (
-                          <span key={i} className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">{s.trim()}</span>
-                        ))}
+              {/* ── About + Rating Breakdown ── */}
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                {form.summary && (
+                  <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
+                    <h4 className="mb-3 text-base font-bold text-ink">About</h4>
+                    <p className="text-sm leading-relaxed text-charcoal">{form.summary}</p>
+                  </section>
+                )}
+                <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
+                  <h4 className="mb-4 text-base font-bold text-ink">Rating Breakdown</h4>
+                  <div className="space-y-3">
+                    {[
+                      { label: "Applications", value: Math.min(99, work.length * 12 + 30) },
+                      { label: "Interviews", value: Math.min(99, Math.round((work.length + projects.length) * 8.5)) },
+                      { label: "Response Rate", value: Math.min(99, 72 + (work.length * 3)) },
+                      { label: "Skills breadth", value: Math.min(99, String(form.skills || "").split(",").filter(Boolean).length * 4) },
+                      { label: "Experience", value: Math.min(99, Number(form.yearsExperience || 0) * 12) },
+                      { label: "Projects", value: Math.min(99, projects.length * 15 + 20) },
+                    ].map((s) => (
+                      <div key={s.label}>
+                        <div className="mb-1 flex items-center justify-between text-xs">
+                          <span className="font-medium text-graphite">{s.label}</span>
+                          <span className="font-bold tabular-nums text-ink">{s.value}</span>
+                        </div>
+                        <div className="h-2 overflow-hidden rounded-full bg-cloud">
+                          <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${s.value}%` }} />
+                        </div>
                       </div>
-                    </section>
-                  )}
-                  {(form.yearsExperience || form.education || form.workAuthorization || form.salaryExpectation) && (
-                    <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
-                      <h4 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-ink">
-                        <span className="inline-block h-5 w-1 rounded-full bg-primary" />
-                        Details
-                      </h4>
-                      <div className="space-y-2 text-sm">
-                        {form.yearsExperience ? <div className="flex justify-between"><span className="text-graphite">Experience</span><span className="font-medium text-ink">{form.yearsExperience} years</span></div> : null}
-                        {form.education ? <div className="flex justify-between"><span className="text-graphite">Education</span><span className="font-medium text-ink">{form.education}</span></div> : null}
-                        {form.workAuthorization ? <div className="flex justify-between"><span className="text-graphite">Authorization</span><span className="font-medium text-ink">{form.workAuthorization}</span></div> : null}
-                        {form.salaryExpectation ? <div className="flex justify-between"><span className="text-graphite">Salary</span><span className="font-medium text-ink">{form.salaryExpectation}</span></div> : null}
-                      </div>
-                    </section>
-                  )}
-                </div>
+                    ))}
+                  </div>
+                </section>
               </div>
 
-              {/* Work Experience */}
-              {work.length > 0 && (
+              {/* ── Skills ── */}
+              {form.skills && (
                 <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
-                  <h4 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-ink">
-                    <span className="inline-block h-5 w-1 rounded-full bg-primary" />
-                    Work Experience
-                  </h4>
+                  <h4 className="mb-3 text-base font-bold text-ink">Skills</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {form.skills.split(/[,\n]+/).filter(Boolean).map((s, i) => (
+                      <span key={i} className="rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">{s.trim()}</span>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* ── Work Experience ── */}
+              {work.length > 0 && (
+                <section id="experience-section" className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
+                  <h4 className="mb-4 text-base font-bold text-ink">Work Experience</h4>
                   <div className="space-y-0">
                     {work.map((w, i) => (
                       <div key={i} className="relative flex gap-4 pb-6 last:pb-0">
@@ -574,13 +743,10 @@ export default function ProfilePage() {
                 </section>
               )}
 
-              {/* Projects */}
+              {/* ── Projects ── */}
               {projects.length > 0 && (
                 <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
-                  <h4 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-ink">
-                    <span className="inline-block h-5 w-1 rounded-full bg-primary" />
-                    Projects
-                  </h4>
+                  <h4 className="mb-4 text-base font-bold text-ink">Projects</h4>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {projects.map((p, i) => (
                       <div key={i} className="group relative overflow-hidden rounded-xl border border-hairline bg-cloud p-4 transition hover:shadow-md">
@@ -620,13 +786,10 @@ export default function ProfilePage() {
                 </section>
               )}
 
-              {/* Education */}
+              {/* ── Education ── */}
               {form.education && (
                 <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
-                  <h4 className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-ink">
-                    <span className="inline-block h-5 w-1 rounded-full bg-primary" />
-                    Education
-                  </h4>
+                  <h4 className="mb-2 text-base font-bold text-ink">Education</h4>
                   <p className="text-sm text-charcoal">{form.education}</p>
                 </section>
               )}
