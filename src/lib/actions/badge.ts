@@ -50,49 +50,39 @@ export async function getBadgeData(): Promise<BadgeData | null> {
 }
 
 export async function upsertBadgeData(data: Partial<BadgeData>) {
-  try {
-    const existing = await client.execute({
-      sql: "SELECT id FROM badge_data WHERE user_id = ? LIMIT 1",
-      args: ["default"],
+  const now = new Date().toISOString();
+  const photo = data.photo && data.photo.length > 50000 ? null : (data.photo ?? null);
+
+  const existing = await client.execute({
+    sql: "SELECT id FROM badge_data WHERE user_id = ? LIMIT 1",
+    args: ["default"],
+  });
+
+  if (existing.rows.length > 0) {
+    await client.execute({
+      sql: `UPDATE badge_data SET photo = ?, first_name = ?, overall = ?, position = ?, flag = ?, proj = ?, tech = ?, cont = ?, yexp = ?, cert = ?, lang = ?, updated_at = ? WHERE user_id = ?`,
+      args: [
+        photo, data.firstName ?? null, data.overall ?? null,
+        data.position ?? null, data.flag ?? null,
+        data.proj ?? null, data.tech ?? null, data.cont ?? null,
+        data.yexp ?? null, data.cert ?? null, data.lang ?? null,
+        now, "default",
+      ],
     });
-
-    const now = new Date().toISOString();
-
-    const cols = ["photo", "firstName", "overall", "position", "flag", "proj", "tech", "cont", "yexp", "cert", "lang"];
-    const colMap: Record<string, string> = {
-      photo: "photo", firstName: "first_name", overall: "overall",
-      position: "position", flag: "flag", proj: "proj", tech: "tech",
-      cont: "cont", yexp: "yexp", cert: "cert", lang: "lang",
-    };
-
-    const setClauses: string[] = [];
-    const args: (string | number | null)[] = [];
-
-    for (const key of cols) {
-      const dbCol = colMap[key];
-      setClauses.push(`${dbCol} = ?`);
-      args.push(data[key as keyof BadgeData] ?? null);
-    }
-    setClauses.push("updated_at = ?");
-    args.push(now);
-
-    if (existing.rows.length > 0) {
-      args.push("default");
-      await client.execute({
-        sql: `UPDATE badge_data SET ${setClauses.join(", ")} WHERE user_id = ?`,
-        args,
-      });
-    } else {
-      const id = crypto.randomUUID();
-      await client.execute({
-        sql: `INSERT INTO badge_data (id, user_id, ${Object.values(colMap).join(", ")}, created_at, updated_at) VALUES (?, ?, ${cols.map(() => "?").join(", ")}, ?, ?)`,
-        args: [id, "default", ...cols.map((k) => data[k as keyof BadgeData] ?? null), now, now],
-      });
-    }
-
-    return await getBadgeData();
-  } catch (e) {
-    console.error("[upsertBadgeData]", e);
-    throw new Error("Failed to save badge data");
+  } else {
+    const id = crypto.randomUUID();
+    await client.execute({
+      sql: `INSERT INTO badge_data (id, user_id, photo, first_name, overall, position, flag, proj, tech, cont, yexp, cert, lang, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [
+        id, "default",
+        photo, data.firstName ?? null, data.overall ?? null,
+        data.position ?? null, data.flag ?? null,
+        data.proj ?? null, data.tech ?? null, data.cont ?? null,
+        data.yexp ?? null, data.cert ?? null, data.lang ?? null,
+        now, now,
+      ],
+    });
   }
+
+  return await getBadgeData();
 }

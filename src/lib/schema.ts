@@ -38,9 +38,8 @@ export const applications = sqliteTable(
   "applications",
   {
     id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id),
+  userId: text("user_id")
+    .notNull(),
     companyId: text("company_id")
       .notNull()
       .references(() => companies.id),
