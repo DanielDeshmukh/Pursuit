@@ -28,7 +28,19 @@ export default function Badge({ refreshKey }: BadgeProps) {
   filled = filled.replace("{{FIRSTNAME}}", (data.firstName || "NAME").toUpperCase());
   filled = filled.replace("{{OVERALL}}", String(data.overall ?? 0));
   filled = filled.replace("{{POSITION}}", (data.position || "PRO").toUpperCase());
-  filled = filled.replace("{{FLAG}}", data.flag || "");
+
+  // Replace flag text element with foreignObject for emoji support
+  const flagTextMatch = filled.match(/<text[^>]*>\{\{FLAG\}\}<\/text>/);
+  if (flagTextMatch && data.flag) {
+    const tag = flagTextMatch[0];
+    const xMatch = tag.match(/x="([^"]+)"/);
+    const yMatch = tag.match(/y="([^"]+)"/);
+    const x = xMatch ? parseFloat(xMatch[1]) : 92;
+    const y = yMatch ? parseFloat(yMatch[1]) : 212;
+    filled = filled.replace(tag, `<foreignObject x="${x - 18}" y="${y - 18}" width="36" height="36"><div xmlns="http://www.w3.org/1999/xhtml" style="font-size:24px;line-height:36px;text-align:center">${data.flag}</div></foreignObject>`);
+  } else {
+    filled = filled.replace("{{FLAG}}", data.flag || "");
+  }
 
   // Replace photo placeholder block with actual image
   const photoBlock = filled.match(/<!-- Player photo placeholder -->[\s\S]*?<\/g>/)?.[0] || "";

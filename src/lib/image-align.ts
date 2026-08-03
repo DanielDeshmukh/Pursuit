@@ -31,7 +31,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 export async function alignPhoto(
   photoBase64: string,
   analysis: AnalysisData,
-  outputSize = 512,
+  outputSize = 200,
 ): Promise<string> {
   const img = await loadImage(photoBase64);
 
@@ -43,13 +43,10 @@ export async function alignPhoto(
   const cropH = (rc.height / 100) * img.height;
 
   // --- 2. Compute the destination rectangle inside the output canvas ---
-  // The badge circle is centered; nudge horizontally by shoulderOffset
-  // and vertically by headPosition so the shoulders line up.
-  const maxNudge = outputSize * 0.15; // max 15 % of canvas
+  const maxNudge = outputSize * 0.15;
   const nudgeX = analysis.shoulderOffset * maxNudge;
   const nudgeY = analysis.headPosition * maxNudge;
 
-  // Scale the cropped region to fill the output square
   const scale = Math.max(outputSize / cropW, outputSize / cropH);
   const scaledW = cropW * scale;
   const scaledH = cropH * scale;
@@ -63,9 +60,9 @@ export async function alignPhoto(
   canvas.height = outputSize;
   const ctx = canvas.getContext("2d")!;
 
-  // Transparent background (badge already has its own bg)
   ctx.clearRect(0, 0, outputSize, outputSize);
   ctx.drawImage(img, cropX, cropY, cropW, cropH, destX, destY, scaledW, scaledH);
 
-  return canvas.toDataURL("image/png", 0.92);
+  // Output as JPEG to keep file size small (under 50KB for DB)
+  return canvas.toDataURL("image/jpeg", 0.6);
 }

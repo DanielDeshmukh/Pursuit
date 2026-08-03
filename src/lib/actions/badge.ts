@@ -51,7 +51,7 @@ export async function getBadgeData(): Promise<BadgeData | null> {
 
 export async function upsertBadgeData(data: Partial<BadgeData>) {
   const now = new Date().toISOString();
-  const photo = data.photo && data.photo.length > 50000 ? null : (data.photo ?? undefined);
+  const photo = data.photo && data.photo.length > 200000 ? null : (data.photo ?? undefined);
 
   const existing = await client.execute({
     sql: "SELECT * FROM badge_data WHERE user_id = ? LIMIT 1",
