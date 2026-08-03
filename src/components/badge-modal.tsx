@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { upsertBadgeData, type BadgeData } from "@/lib/actions/badge";
 import { alignPhoto } from "@/lib/image-align";
 
@@ -66,6 +66,24 @@ export default function BadgeModal({ open, onClose, data, onSave }: BadgeModalPr
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [rawPhoto, setRawPhoto] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (data) {
+      setForm({
+        firstName: data.firstName || "",
+        overall: data.overall || 0,
+        position: data.position || "",
+        flag: data.flag || "",
+        photo: data.photo || "",
+        proj: data.proj || 0,
+        tech: data.tech || 0,
+        cont: data.cont || 0,
+        yexp: data.yexp || 0,
+        cert: data.cert || 0,
+        lang: data.lang || 0,
+      });
+    }
+  }, [data]);
 
   if (!open) return null;
 
@@ -172,21 +190,25 @@ export default function BadgeModal({ open, onClose, data, onSave }: BadgeModalPr
   const handleSave = async () => {
     setSaving(true);
     try {
-      const result = await upsertBadgeData({
+      const payload = {
         ...form,
-        overall: Number(form.overall),
-        proj: Number(form.proj),
-        tech: Number(form.tech),
-        cont: Number(form.cont),
-        yexp: Number(form.yexp),
-        cert: Number(form.cert),
-        lang: Number(form.lang),
-      });
-      if (result) onSave(result);
+        firstName: form.firstName || null,
+        overall: Number(form.overall) || null,
+        position: form.position || null,
+        flag: form.flag || null,
+        proj: Number(form.proj) || null,
+        tech: Number(form.tech) || null,
+        cont: Number(form.cont) || null,
+        yexp: Number(form.yexp) || null,
+        cert: Number(form.cert) || null,
+        lang: Number(form.lang) || null,
+      };
+      const result = await upsertBadgeData(payload);
+      onSave(result || { ...payload, id: "", userId: "default", photo: form.photo || null } as BadgeData);
       resetState();
       onClose();
     } catch (e) {
-      console.error(e);
+      console.error("[badge-modal] save failed:", e);
     } finally {
       setSaving(false);
     }
