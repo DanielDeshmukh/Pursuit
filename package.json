@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
+    "@imgly/background-removal": "^1.7.0",
     "@libsql/client": "^0.17.4",
     "cheerio": "^1.2.0",
     "drizzle-kit": "^0.31.10",
