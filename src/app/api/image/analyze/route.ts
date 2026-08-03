@@ -60,9 +60,12 @@ export async function POST(req: NextRequest) {
               },
               {
                 type: "text",
-                text: `Analyze this portrait photo. Return JSON only, no other text.
+                text: `This photo will be cropped to show ONLY the person's head and shoulders for a profile badge. Find the tightest bounding box around just the head (face) and upper shoulders. Ignore the rest of the body, background, hands, etc.
 
-{"hasBackground":<true if walls/scenery/objects visible behind person, false only if transparent PNG>,"backgroundType":"<solid|gradient|complex|none>","personVisible":<true|false>,"shoulderOffset":<-1.0 to 1.0>,"headPosition":<-1.0 to 1.0>,"recommendedCrop":{"x":<0-100>,"y":<0-100>,"width":<0-100>,"height":<0-100>},"quality":"<good|fair|poor>"}`,
+Return JSON only:
+{"hasBackground":<true/false>,"backgroundType":"<solid|gradient|complex|none>","shoulderOffset":<-1.0 left to 1.0 right, 0=centered>,"recommendedCrop":{"x":<0-100 left edge of head+shoulders box>,"y":<0-100 top of head>,"width":<0-100 width of box>,"height":<0-100 height from top of head to bottom of shoulders>}}
+
+The crop should be TIGHT — x/y at the top-left corner of the head+shoulders region, width/height covering just that area. Typical head+shoulders occupies the top 40-60% of a portrait photo.`,
               },
             ],
           },
@@ -93,22 +96,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       hasBackground: true,
       backgroundType: "complex",
-      personVisible: true,
       shoulderOffset: 0,
-      headPosition: 0,
-      recommendedCrop: { x: 5, y: 0, width: 90, height: 95 },
-      quality: "fair",
+      recommendedCrop: { x: 10, y: 0, width: 80, height: 55 },
     });
   } catch (e) {
     console.error("[image-analyze]", e);
-    // Fallback instead of erroring out
     return NextResponse.json({
       hasBackground: true,
       backgroundType: "complex",
-      personVisible: true,
       shoulderOffset: 0,
-      headPosition: 0,
-      recommendedCrop: { x: 5, y: 0, width: 90, height: 95 },
+      recommendedCrop: { x: 10, y: 0, width: 80, height: 55 },
       quality: "fair",
     });
   }

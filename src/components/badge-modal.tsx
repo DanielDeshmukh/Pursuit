@@ -14,11 +14,8 @@ interface BadgeModalProps {
 type AnalysisResult = {
   hasBackground: boolean;
   backgroundType: string;
-  personVisible: boolean;
   shoulderOffset: number;
-  headPosition: number;
   recommendedCrop: { x: number; y: number; width: number; height: number };
-  quality: string;
 };
 
 type ProcessingStep = "idle" | "analyzing" | "prompt-bg" | "removing-bg" | "aligning" | "ready";
@@ -127,11 +124,8 @@ export default function BadgeModal({ open, onClose, data, onSave }: BadgeModalPr
         const fallback: AnalysisResult = {
           hasBackground: true,
           backgroundType: "complex",
-          personVisible: true,
           shoulderOffset: 0,
-          headPosition: 0,
-          recommendedCrop: { x: 5, y: 0, width: 90, height: 95 },
-          quality: "fair",
+          recommendedCrop: { x: 10, y: 0, width: 80, height: 55 },
         };
         setAnalysis(fallback);
         setProcessing("prompt-bg");
@@ -290,9 +284,6 @@ export default function BadgeModal({ open, onClose, data, onSave }: BadgeModalPr
                       Your photo has a <strong>{analysis.backgroundType}</strong> background. 
                       Remove it for a cleaner badge look?
                     </p>
-                    <div className="mt-1 text-xs text-graphite">
-                      Quality: <span className={`font-medium ${analysis.quality === "good" ? "text-green-500" : analysis.quality === "fair" ? "text-yellow-500" : "text-red-500"}`}>{analysis.quality}</span>
-                    </div>
                   </div>
                 </div>
                 <div className="flex gap-2">
