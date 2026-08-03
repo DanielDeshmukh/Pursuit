@@ -38,6 +38,74 @@ function emptyProject(): ProjectEntry {
   return { name: "", description: "", tech: "", bullets: [""] };
 }
 
+function CopyIcon({ copied }: { copied: boolean }) {
+  if (copied) {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 text-green-500">
+        <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+    </svg>
+  );
+}
+
+function MailIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5 text-primary">
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="M22 7l-10 7L2 7" />
+    </svg>
+  );
+}
+
+function PhoneIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5 text-primary">
+      <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
+    </svg>
+  );
+}
+
+function GlobeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5 text-primary">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+    </svg>
+  );
+}
+
+function BriefcaseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5 text-primary">
+      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+      <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" />
+    </svg>
+  );
+}
+
+function FolderIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5 text-primary">
+      <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+    </svg>
+  );
+}
+
+function MapPinIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -55,9 +123,12 @@ export default function ProfilePage() {
   const [workEntries, setWorkEntries] = useState<WorkEntry[]>([]);
   const [projectEntries, setProjectEntries] = useState<ProjectEntry[]>([]);
 
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
   useEffect(() => {
-    getProfile().then((p) => {
-      if (p) {
+    getProfile().then((raw) => {
+      if (raw) {
+        const p = raw as Profile;
         setForm(p);
         setOriginal(p);
         setPhoto(p.photo ?? null);
@@ -120,6 +191,12 @@ export default function ProfilePage() {
     }));
   }
 
+  async function handleCopy(field: string, value: string) {
+    await navigator.clipboard.writeText(value);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+  }
+
   async function handleSave() {
     setSaving(true);
     setSaved(false);
@@ -132,11 +209,12 @@ export default function ProfilePage() {
       toSave.projects = JSON.stringify(projectEntries.filter((e) => e.name));
       const result = await upsertProfile(toSave);
       if (result) {
-        setOriginal(result);
-        setForm(result);
-        setPhoto(result.photo ?? null);
-        setWorkEntries(parseJSON<WorkEntry[]>(result.workExperience, []));
-        setProjectEntries(parseJSON<ProjectEntry[]>(result.projects, []));
+        const r = result as Profile;
+        setOriginal(r);
+        setForm(r);
+        setPhoto(r.photo ?? null);
+        setWorkEntries(parseJSON<WorkEntry[]>(r.workExperience, []));
+        setProjectEntries(parseJSON<ProjectEntry[]>(r.projects, []));
       }
       setSaved(true);
       setEditing(false);
@@ -257,9 +335,13 @@ export default function ProfilePage() {
 
           {/* ── Overwrite Warning ── */}
           {showOverwriteWarning && parseResult && (
-            <div className="rounded-xl border border-amber/30 bg-amber/5 p-5 space-y-4">
+            <div className="rounded-xl border border-amber-300 bg-amber-50 p-5 space-y-4 dark:border-amber-700 dark:bg-amber-950">
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber/20 text-sm">⚠️</div>
+                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-400">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                    <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" />
+                  </svg>
+                </div>
                 <div>
                   <h3 className="text-sm font-semibold text-ink">Profile Already Has Data</h3>
                   <p className="mt-1 text-xs text-charcoal">Choose how to apply the parsed resume data.</p>
@@ -268,7 +350,7 @@ export default function ProfilePage() {
               <div className="max-h-64 overflow-y-auto rounded-lg border border-hairline">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="border-b border-hairline bg-snow">
+                    <tr className="border-b border-hairline bg-cloud">
                       <th className="px-3 py-2 text-left font-medium text-graphite">Field</th>
                       <th className="px-3 py-2 text-left font-medium text-graphite">Current</th>
                       <th className="px-3 py-2 text-left font-medium text-graphite">From Resume</th>
@@ -279,10 +361,10 @@ export default function ProfilePage() {
                       const d = getDiff(k);
                       if (!d.new) return null;
                       return (
-                        <tr key={k} className={`border-b border-hairline ${d.changed ? "bg-amber/5" : ""}`}>
+                        <tr key={k} className={`border-b border-hairline ${d.changed ? "bg-amber-50 dark:bg-amber-950" : ""}`}>
                           <td className="px-3 py-2 font-medium text-ink">{FIELD_LABELS[k]}</td>
                           <td className="px-3 py-2 text-charcoal">{d.old || <span className="text-graphite italic">empty</span>}</td>
-                          <td className={`px-3 py-2 ${d.changed ? "font-medium text-amber-deep" : "text-charcoal"}`}>{d.new}</td>
+                          <td className={`px-3 py-2 ${d.changed ? "font-medium text-amber-700 dark:text-amber-400" : "text-charcoal"}`}>{d.new}</td>
                         </tr>
                       );
                     })}
@@ -313,68 +395,219 @@ export default function ProfilePage() {
           {/* ═══════════════════════ VIEW MODE ═══════════════════════ */}
           {!editing && !isEmpty && (
             <>
-              {/* Profile Header Card */}
-              <section className="rounded-xl border border-hairline bg-paper overflow-hidden">
-                <div className="h-20 bg-gradient-to-r from-primary/15 via-primary/8 to-transparent" />
-                <div className="px-6 pb-5">
-                  <div className="flex items-end gap-4 -mt-8">
-                    <div className="h-16 w-16 rounded-full border-3 border-paper bg-cloud overflow-hidden flex items-center justify-center shrink-0">
+              {/* Hero Section */}
+              <section className="rounded-xl border border-hairline bg-paper overflow-hidden shadow-card">
+                <div className="h-24 bg-gradient-to-r from-primary via-primary-bright to-primary-deep sm:h-32" />
+                <div className="px-6 pb-6">
+                  <div className="-mt-10 flex flex-col items-center gap-4 sm:flex-row sm:items-end sm:gap-5">
+                    <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-paper bg-cloud text-2xl font-bold text-primary shadow-card sm:h-24 sm:w-24 sm:text-3xl">
                       {photo ? (
                         <img src={photo} alt="" className="h-full w-full object-cover" />
                       ) : (
-                        <span className="text-lg font-semibold text-graphite">{initials || "?"}</span>
+                        initials || "?"
                       )}
+                      <div className="absolute bottom-1 right-1 h-3 w-3 rounded-full border-2 border-paper bg-green-500" />
                     </div>
-                    <div className="pb-0.5 min-w-0">
-                      <h3 className="text-lg font-semibold text-ink leading-tight">{displayName}</h3>
-                      {form.currentTitle && (
-                        <p className="text-sm text-charcoal mt-0.5">
-                          {form.currentTitle}{form.currentCompany ? ` at ${form.currentCompany}` : ""}
+                    <div className="flex-1 text-center sm:text-left pb-1">
+                      <h3 className="text-xl font-bold text-ink sm:text-2xl">{displayName}</h3>
+                      {(form.currentTitle || form.currentCompany) && (
+                        <p className="mt-0.5 text-sm text-graphite">
+                          {form.currentTitle}{form.currentTitle && form.currentCompany ? " at " : ""}{form.currentCompany}
                         </p>
                       )}
-                      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-graphite">
-                        {form.city && <span>{form.city}{form.country ? `, ${form.country}` : ""}</span>}
-                        {form.email && <span>{form.email}</span>}
-                        {form.phone && <span>{form.phone}</span>}
+                      <div className="mt-2 flex flex-wrap items-center justify-center gap-3 text-xs text-graphite sm:justify-start">
+                        {form.city && (
+                          <span className="flex items-center gap-1">
+                            <MapPinIcon />
+                            {form.city}{form.country ? `, ${form.country}` : ""}
+                          </span>
+                        )}
+                        {form.email && (
+                          <span className="flex items-center gap-1">
+                            <MailIcon />{form.email}
+                          </span>
+                        )}
+                        {form.phone && (
+                          <span className="flex items-center gap-1">
+                            <PhoneIcon />{form.phone}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
               </section>
 
-              {/* Summary */}
-              {form.summary && (
-                <section className="rounded-xl border border-hairline bg-paper p-5">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-graphite mb-2">About</h4>
-                  <p className="text-sm leading-relaxed text-charcoal">{form.summary}</p>
+              {/* Contact Cards */}
+              {(form.email || form.phone || form.portfolioUrl || form.linkedinUrl || form.githubUrl) && (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  {form.email && (
+                    <div className="group flex items-center justify-between rounded-xl border border-hairline bg-paper px-4 py-3 shadow-card transition hover:shadow-md">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10"><MailIcon /></div>
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-medium uppercase tracking-wider text-graphite">Email</p>
+                          <p className="truncate text-sm font-semibold text-ink">{form.email}</p>
+                        </div>
+                      </div>
+                      <button onClick={() => handleCopy("email", form.email || "")} className="shrink-0 ml-2 rounded-md p-1.5 text-graphite opacity-0 transition group-hover:opacity-100 hover:bg-cloud hover:text-ink">
+                        <CopyIcon copied={copiedField === "email"} />
+                      </button>
+                    </div>
+                  )}
+                  {form.phone && (
+                    <div className="group flex items-center justify-between rounded-xl border border-hairline bg-paper px-4 py-3 shadow-card transition hover:shadow-md">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10"><PhoneIcon /></div>
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-medium uppercase tracking-wider text-graphite">Phone</p>
+                          <p className="truncate text-sm font-semibold text-ink">{form.phone}</p>
+                        </div>
+                      </div>
+                      <button onClick={() => handleCopy("phone", form.phone || "")} className="shrink-0 ml-2 rounded-md p-1.5 text-graphite opacity-0 transition group-hover:opacity-100 hover:bg-cloud hover:text-ink">
+                        <CopyIcon copied={copiedField === "phone"} />
+                      </button>
+                    </div>
+                  )}
+                  {(form.portfolioUrl || form.linkedinUrl || form.githubUrl) && (
+                    <div className="group flex items-center justify-between rounded-xl border border-hairline bg-paper px-4 py-3 shadow-card transition hover:shadow-md">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10"><GlobeIcon /></div>
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-medium uppercase tracking-wider text-graphite">Links</p>
+                          <div className="flex gap-2">
+                            {form.linkedinUrl && <a href={form.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-primary hover:underline">LinkedIn</a>}
+                            {form.githubUrl && <a href={form.githubUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-primary hover:underline">GitHub</a>}
+                            {form.portfolioUrl && <a href={form.portfolioUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-primary hover:underline">Portfolio</a>}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* About + Skills + Details */}
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <div className="space-y-4 lg:col-span-2">
+                  {form.summary && (
+                    <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
+                      <h4 className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-ink">
+                        <span className="inline-block h-5 w-1 rounded-full bg-primary" />
+                        About
+                      </h4>
+                      <p className="text-sm leading-relaxed text-charcoal">{form.summary}</p>
+                    </section>
+                  )}
+                </div>
+                <div className="space-y-4">
+                  {form.skills && (
+                    <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
+                      <h4 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-ink">
+                        <span className="inline-block h-5 w-1 rounded-full bg-primary" />
+                        Skills
+                      </h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {form.skills.split(/[,\n]+/).filter(Boolean).map((s, i) => (
+                          <span key={i} className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">{s.trim()}</span>
+                        ))}
+                      </div>
+                    </section>
+                  )}
+                  {(form.yearsExperience || form.education || form.workAuthorization || form.salaryExpectation) && (
+                    <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
+                      <h4 className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-ink">
+                        <span className="inline-block h-5 w-1 rounded-full bg-primary" />
+                        Details
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        {form.yearsExperience ? <div className="flex justify-between"><span className="text-graphite">Experience</span><span className="font-medium text-ink">{form.yearsExperience} years</span></div> : null}
+                        {form.education ? <div className="flex justify-between"><span className="text-graphite">Education</span><span className="font-medium text-ink">{form.education}</span></div> : null}
+                        {form.workAuthorization ? <div className="flex justify-between"><span className="text-graphite">Authorization</span><span className="font-medium text-ink">{form.workAuthorization}</span></div> : null}
+                        {form.salaryExpectation ? <div className="flex justify-between"><span className="text-graphite">Salary</span><span className="font-medium text-ink">{form.salaryExpectation}</span></div> : null}
+                      </div>
+                    </section>
+                  )}
+                </div>
+              </div>
+
+              {/* Work Experience */}
+              {work.length > 0 && (
+                <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
+                  <h4 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-ink">
+                    <span className="inline-block h-5 w-1 rounded-full bg-primary" />
+                    Work Experience
+                  </h4>
+                  <div className="space-y-0">
+                    {work.map((w, i) => (
+                      <div key={i} className="relative flex gap-4 pb-6 last:pb-0">
+                        <div className="flex flex-col items-center">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-primary/10 text-primary">
+                            <BriefcaseIcon />
+                          </div>
+                          {i < work.length - 1 && <div className="mt-1 w-0.5 flex-1 rounded-full bg-hairline" />}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="rounded-xl border border-hairline bg-cloud p-4 transition hover:shadow-sm">
+                            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                              <h3 className="text-sm font-bold text-ink">{w.role || "Role"}</h3>
+                              <span className="text-xs font-medium text-primary">
+                                {w.startDate}{w.startDate && w.endDate ? " — " : ""}{w.endDate || "Present"}
+                              </span>
+                            </div>
+                            <p className="mt-0.5 text-xs font-medium text-graphite">{w.company}{w.location ? ` · ${w.location}` : ""}</p>
+                            {w.bullets.filter(Boolean).length > 0 && (
+                              <ul className="mt-2 space-y-1">
+                                {w.bullets.filter(Boolean).map((b, j) => (
+                                  <li key={j} className="flex items-start gap-2 text-xs text-charcoal">
+                                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-primary" />
+                                    <span>{b}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </section>
               )}
 
-              {/* Experience */}
-              {work.length > 0 && (
-                <section className="rounded-xl border border-hairline bg-paper p-5">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-graphite mb-4">Experience</h4>
-                  <div className="space-y-0">
-                    {work.map((w, i) => (
-                      <div key={i} className="relative flex gap-4 pb-5 last:pb-0">
-                        {i < work.length - 1 && (
-                          <div className="absolute left-[7px] top-5 bottom-0 w-px bg-hairline" />
-                        )}
-                        <div className="mt-1 h-[15px] w-[15px] shrink-0 rounded-full border-2 border-primary bg-paper" />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-baseline gap-x-2">
-                            <span className="text-sm font-semibold text-ink">{w.role || "Role"}</span>
-                            {w.company && <span className="text-sm text-charcoal">@ {w.company}</span>}
+              {/* Projects */}
+              {projects.length > 0 && (
+                <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
+                  <h4 className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-ink">
+                    <span className="inline-block h-5 w-1 rounded-full bg-primary" />
+                    Projects
+                  </h4>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {projects.map((p, i) => (
+                      <div key={i} className="group relative overflow-hidden rounded-xl border border-hairline bg-cloud p-4 transition hover:shadow-md">
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/0 opacity-0 transition group-hover:opacity-100" />
+                        <div className="relative">
+                          <div className="mb-2 flex items-start justify-between">
+                            <FolderIcon />
+                            {p.bullets.filter(Boolean).length > 0 && (
+                              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                                {p.bullets.filter(Boolean).length} bullets
+                              </span>
+                            )}
                           </div>
-                          <div className="mt-0.5 flex flex-wrap gap-x-2 text-xs text-graphite">
-                            {w.startDate && <span>{w.startDate} — {w.endDate || "Present"}</span>}
-                            {w.location && <span>{w.location}</span>}
-                          </div>
-                          {w.bullets.filter(Boolean).length > 0 && (
-                            <ul className="mt-2 space-y-1">
-                              {w.bullets.filter(Boolean).map((b, j) => (
-                                <li key={j} className="text-xs text-charcoal leading-relaxed flex gap-2">
-                                  <span className="text-graphite mt-0.5 shrink-0">•</span>
+                          <h3 className="text-sm font-bold text-ink">{p.name}</h3>
+                          {p.description && <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-graphite">{p.description}</p>}
+                          {p.tech && (
+                            <div className="mt-3 flex flex-wrap gap-1.5">
+                              {p.tech.split(",").slice(0, 5).map((t, j) => (
+                                <span key={j} className="rounded bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">{t.trim()}</span>
+                              ))}
+                            </div>
+                          )}
+                          {p.bullets.filter(Boolean).length > 0 && (
+                            <ul className="mt-2 space-y-0.5">
+                              {p.bullets.filter(Boolean).map((b, j) => (
+                                <li key={j} className="flex items-start gap-1.5 text-[11px] text-graphite leading-relaxed">
+                                  <span className="mt-0.5 shrink-0">•</span>
                                   <span>{b}</span>
                                 </li>
                               ))}
@@ -387,73 +620,14 @@ export default function ProfilePage() {
                 </section>
               )}
 
-              {/* Projects */}
-              {projects.length > 0 && (
-                <section className="rounded-xl border border-hairline bg-paper p-5">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-graphite mb-4">Projects</h4>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    {projects.map((p, i) => (
-                      <div key={i} className="rounded-lg border border-hairline bg-canvas p-4">
-                        <h5 className="text-sm font-semibold text-ink">{p.name}</h5>
-                        {p.description && <p className="mt-1 text-xs text-charcoal leading-relaxed">{p.description}</p>}
-                        {p.tech && (
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {p.tech.split(",").slice(0, 5).map((t, j) => (
-                              <span key={j} className="rounded-full bg-primary/8 px-2 py-0.5 text-[10px] font-medium text-primary-deep">{t.trim()}</span>
-                            ))}
-                          </div>
-                        )}
-                        {p.bullets.filter(Boolean).length > 0 && (
-                          <ul className="mt-2 space-y-0.5">
-                            {p.bullets.filter(Boolean).map((b, j) => (
-                              <li key={j} className="text-[11px] text-graphite leading-relaxed flex gap-1.5">
-                                <span className="mt-0.5 shrink-0">•</span>
-                                <span>{b}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* Skills */}
-              {form.skills && (
-                <section className="rounded-xl border border-hairline bg-paper p-5">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-graphite mb-3">Skills</h4>
-                  <div className="flex flex-wrap gap-1.5">
-                    {form.skills.split(/[,\n]+/).filter(Boolean).map((s, i) => (
-                      <span key={i} className="rounded-full bg-primary/8 px-2.5 py-1 text-xs font-medium text-primary-deep">{s.trim()}</span>
-                    ))}
-                  </div>
-                </section>
-              )}
-
               {/* Education */}
               {form.education && (
-                <section className="rounded-xl border border-hairline bg-paper p-5">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-graphite mb-2">Education</h4>
+                <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
+                  <h4 className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-ink">
+                    <span className="inline-block h-5 w-1 rounded-full bg-primary" />
+                    Education
+                  </h4>
                   <p className="text-sm text-charcoal">{form.education}</p>
-                </section>
-              )}
-
-              {/* Links */}
-              {(form.linkedinUrl || form.githubUrl || form.portfolioUrl) && (
-                <section className="rounded-xl border border-hairline bg-paper p-5">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-graphite mb-2">Links</h4>
-                  <div className="flex flex-wrap gap-3">
-                    {form.linkedinUrl && (
-                      <a href={form.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">LinkedIn →</a>
-                    )}
-                    {form.githubUrl && (
-                      <a href={form.githubUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">GitHub →</a>
-                    )}
-                    {form.portfolioUrl && (
-                      <a href={form.portfolioUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">Portfolio →</a>
-                    )}
-                  </div>
                 </section>
               )}
             </>
@@ -462,7 +636,9 @@ export default function ProfilePage() {
           {/* ── Empty State ── */}
           {!editing && isEmpty && (
             <section className="rounded-xl border border-dashed border-steel bg-paper p-12 text-center space-y-4">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-cloud text-2xl">👤</div>
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                <BriefcaseIcon />
+              </div>
               <div>
                 <h3 className="text-sm font-semibold text-ink">No Profile Yet</h3>
                 <p className="mt-1 text-xs text-graphite max-w-xs mx-auto">
