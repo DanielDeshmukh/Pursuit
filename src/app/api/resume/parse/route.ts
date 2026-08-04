@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import pdf from "pdf-parse";
 
-const NIM_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
-const NIM_MODEL = "meta/llama-3.1-8b-instruct";
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
 
 function clean(text: string) {
   return text.replace(/\s+/g, " ").trim();
@@ -223,6 +223,20 @@ function extractSkillsRegex(text: string) {
   return clean(remaining.slice(0, end)).split(/[,;•|·\n]/).filter((s) => s.trim().length > 1).join(", ");
 }
 
+function cleanSkills(raw: string): string {
+  const CATEGORY_PATTERN = /^(?:Languages|Frontend|Backend|Backend & Infrastructure|DevOps|Databases?|Cloud|Frameworks?|Libraries?|Tools?|Technologies|Skills?|Other|Platforms?|Operating Systems?|Soft Skills?|Domain Knowledge?)\s*:\s*/i;
+  const skills = raw.split(/[,;•|·\n]/);
+  const cleaned: string[] = [];
+  for (let s of skills) {
+    s = s.trim();
+    if (s.length < 2) continue;
+    s = s.replace(CATEGORY_PATTERN, "").trim();
+    if (s.length < 2) continue;
+    cleaned.push(...s.split(/\s{2,}/));
+  }
+  return cleaned.map((s) => s.trim()).filter((s, i, arr) => s.length > 1 && arr.indexOf(s) === i).join(", ");
+}
+
 const EXTRACT_PROMPT = `Extract ALL information from this resume and return ONLY valid JSON. No markdown, no code fences.
 
 Return this JSON:
@@ -272,25 +286,25 @@ RULES:
 RESUME:
 `;
 
-async function callNIM(text: string): Promise<Record<string, unknown> | null> {
-  const apiKey = process.env.NVIDIA_API_KEY;
+async function callLLM(text: string): Promise<Record<string, unknown> | null> {
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    console.warn("[resume-parse] NVIDIA_API_KEY not set");
+    console.warn("[resume-parse] GROQ_API_KEY not set");
     return null;
   }
 
   try {
-    const resp = await fetch(NIM_URL, {
+    const resp = await fetch(GROQ_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: NIM_MODEL,
+        model: GROQ_MODEL,
         messages: [
           { role: "system", content: "Return ONLY valid JSON." },
-          { role: "user", content: EXTRACT_PROMPT + text.slice(0, 8000) },
+          { role: "user", content: EXTRACT_PROMPT + text.slice(0, 16000) },
         ],
         temperature: 0.05,
         max_tokens: 4096,
@@ -298,18 +312,18 @@ async function callNIM(text: string): Promise<Record<string, unknown> | null> {
     });
 
     if (!resp.ok) {
-      console.error("[resume-parse] NIM HTTP error:", resp.status, await resp.text().catch(() => ""));
+      console.error("[resume-parse] Groq HTTP error:", resp.status, await resp.text().catch(() => ""));
       return null;
     }
 
     const data = await resp.json();
     const content = data.choices?.[0]?.message?.content;
     if (!content) {
-      console.error("[resume-parse] NIM empty response");
+      console.error("[resume-parse] Groq empty response");
       return null;
     }
 
-    console.log("[resume-parse] NIM raw response length:", content.length);
+    console.log("[resume-parse] Groq raw response length:", content.length);
 
     const cleaned = content.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
     const parsed = JSON.parse(cleaned);
@@ -323,7 +337,7 @@ async function callNIM(text: string): Promise<Record<string, unknown> | null> {
     if (!Array.isArray(parsed.workExperience)) parsed.workExperience = [];
     if (!Array.isArray(parsed.projects)) parsed.projects = [];
 
-    console.log("[resume-parse] NIM extracted:", {
+    console.log("[resume-parse] Groq extracted:", {
       name: `${parsed.firstName} ${parsed.lastName}`,
       workCount: parsed.workExperience.length,
       projectCount: parsed.projects.length,
@@ -333,7 +347,7 @@ async function callNIM(text: string): Promise<Record<string, unknown> | null> {
 
     return parsed;
   } catch (e) {
-    console.error("[resume-parse] NIM error:", e);
+    console.error("[resume-parse] Groq error:", e);
     return null;
   }
 }
@@ -358,45 +372,48 @@ export async function POST(req: NextRequest) {
     console.log("[resume-parse] PDF text length:", text.length);
     console.log("[resume-parse] First 500 chars:", text.slice(0, 500));
 
-    const nimResult = await callNIM(text);
+    const llmResult = await callLLM(text);
 
     const regexGithub = extractGithub(text);
     const regexPortfolio = extractPortfolio(text, regexGithub);
 
-    if (nimResult) {
-      let workExp = nimResult.workExperience as { company: string; role: string; startDate: string; endDate: string; location: string; bullets: string[] }[];
-      let projects = nimResult.projects as { name: string; description: string; tech: string; bullets: string[] }[];
+    if (llmResult) {
+      let workExp = llmResult.workExperience as { company: string; role: string; startDate: string; endDate: string; location: string; bullets: string[] }[];
+      let projects = llmResult.projects as { name: string; description: string; tech: string; bullets: string[] }[];
 
       if (workExp.length === 0) {
-        console.log("[resume-parse] NIM returned empty workExperience, trying regex");
+        console.log("[resume-parse] LLM returned empty workExperience, trying regex");
         workExp = extractWorkExperienceRegex(text);
         console.log("[resume-parse] Regex found", workExp.length, "jobs");
       }
 
       if (projects.length === 0) {
-        console.log("[resume-parse] NIM returned empty projects, trying regex");
+        console.log("[resume-parse] LLM returned empty projects, trying regex");
         projects = extractProjectsRegex(text);
         console.log("[resume-parse] Regex found", projects.length, "projects");
       }
 
+      const rawSkills = (llmResult.skills as string) || extractSkillsRegex(text);
+      const skills = rawSkills ? cleanSkills(rawSkills) : null;
+
       const profile = {
-        firstName: (nimResult.firstName as string) || null,
-        lastName: (nimResult.lastName as string) || null,
-        email: (nimResult.email as string) || extractEmail(text),
-        phone: (nimResult.phone as string) || extractPhone(text),
-        linkedinUrl: (nimResult.linkedinUrl as string) || extractLinkedIn(text),
-        githubUrl: (nimResult.githubUrl as string) || regexGithub,
-        portfolioUrl: (nimResult.portfolioUrl as string) || regexPortfolio,
-        city: (nimResult.city as string) || extractLocation(text),
-        country: (nimResult.country as string) || null,
-        currentTitle: (nimResult.currentTitle as string) || null,
-        currentCompany: (nimResult.currentCompany as string) || null,
-        yearsExperience: (nimResult.yearsExperience as string) || null,
-        education: (nimResult.education as string) || extractEducationRegex(text),
-        skills: (nimResult.skills as string) || extractSkillsRegex(text),
-        summary: (nimResult.summary as string) || null,
-        workExperience: workExp,
-        projects: projects,
+        firstName: (llmResult.firstName as string) || null,
+        lastName: (llmResult.lastName as string) || null,
+        email: (llmResult.email as string) || extractEmail(text),
+        phone: (llmResult.phone as string) || extractPhone(text),
+        linkedinUrl: (llmResult.linkedinUrl as string) || extractLinkedIn(text),
+        githubUrl: (llmResult.githubUrl as string) || regexGithub,
+        portfolioUrl: (llmResult.portfolioUrl as string) || regexPortfolio,
+        city: (llmResult.city as string) || extractLocation(text),
+        country: (llmResult.country as string) || null,
+        currentTitle: (llmResult.currentTitle as string) || null,
+        currentCompany: (llmResult.currentCompany as string) || null,
+        yearsExperience: (llmResult.yearsExperience as string) || null,
+        education: (llmResult.education as string) || extractEducationRegex(text),
+        skills,
+        summary: (llmResult.summary as string) || null,
+        workExperience: JSON.stringify(workExp),
+        projects: JSON.stringify(projects),
       };
       return NextResponse.json({ profile });
     }
@@ -423,8 +440,8 @@ export async function POST(req: NextRequest) {
       education: extractEducationRegex(text),
       skills: extractSkillsRegex(text),
       summary: null,
-      workExperience: workExp,
-      projects: projects,
+      workExperience: JSON.stringify(workExp),
+      projects: JSON.stringify(projects),
     };
     return NextResponse.json({ profile });
   } catch (e) {

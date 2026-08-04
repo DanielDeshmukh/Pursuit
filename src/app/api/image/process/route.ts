@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     const finalW = Math.round(cropW * scale);
     const finalH = Math.round(cropH * scale);
 
-    const destX = Math.round(OUTPUT_WIDTH * 0.35 + (targetSubjectWidth - finalW) / 2);
+    const destX = Math.round((OUTPUT_WIDTH - finalW) / 2);
     const destY = Math.round(OUTPUT_HEIGHT * 0.05);
 
     console.log(`[image-process] Scaled subject: ${finalW}x${finalH}, placed at (${destX}, ${destY})`);
