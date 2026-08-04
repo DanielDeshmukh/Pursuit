@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { removeBackground } from "@imgly/background-removal";
+import { removeBackground } from "@imgly/background-removal-node";
 import sharp from "sharp";
 
 const OUTPUT_WIDTH = 384;
@@ -21,7 +21,8 @@ export async function POST(req: NextRequest) {
 
     // Step 1: Remove background
     const cleanBlob = await removeBackground(inputBuffer, {
-      progress: (key, current, total) => {
+      model: "small",
+      progress: (key: string, current: number, total: number) => {
         if (total > 0) {
           console.log(`[image-process]   ${key}: ${Math.round((current / total) * 100)}%`);
         }

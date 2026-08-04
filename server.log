@@ -1,0 +1,32 @@
+
+> pursuit@0.1.0 dev
+> next dev --webpack
+
+▲ Next.js 16.2.12 (webpack)
+- Local:         http://localhost:3000
+- Network:       http://10.133.11.139:3000
+- Environments: .env
+✓ Ready in 611ms
+⚠ Attempted to load @next/swc-win32-x64-msvc, but an error occurred: \\?\D:\Vs Code\VS code\Pursuit\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node is not a valid Win32 application.
+\\?\D:\Vs Code\VS code\Pursuit\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node
+  Skipping creating a lockfile at D:\Vs Code\VS code\Pursuit\.next\dev\lock because we're using WASM bindings
+
+[browser] Photo processing error: TypeError: Failed to fetch
+    at reader.onload (webpack-internal:///(app-pages-browser)/./src/components/badge-modal.tsx:108:35) (webpack-internal:///(app-pages-browser)
+ GET /profile 200 in 2.1s (next.js: 1588ms, application-code: 525ms)
+ POST /profile 200 in 1946ms (next.js: 8ms, application-code: 1938ms)
+  └─ ƒ getProfile() in 1823ms ..//src/lib/actions/profile.ts
+ POST /profile 200 in 2.4s (next.js: 3ms, application-code: 2.4s)
+  └─ ƒ getBadgeData() in 2415ms ..//src/lib/actions/badge.ts
+ POST /profile 200 in 3.5s (next.js: 6ms, application-code: 3.5s)
+  └─ ƒ getBadgeData() in 3511ms ..//src/lib/actions/badge.ts
+ POST /profile 200 in 1120ms (next.js: 6ms, application-code: 1114ms)
+  └─ ƒ getBadgeData() in 1099ms ..//src/lib/actions/badge.ts
+[image-process] Step 1: Removing background...
+[image-process] Step 1: Removing background...
+[image-process]   fetch:/models/isnet_fp16: 0%
+[image-process]   fetch:/models/isnet_fp16: 5%
+[image-process]   fetch:/models/isnet_fp16: 10%
+ POST /api/image/process 200 in 2.0min (next.js: 2.1s, application-code: 118s)
+[image-process]   fetch:/models/isnet_fp16: 14%
+[image-process]   fetch:/models/isnet_fp16: 19%
