@@ -10,10 +10,11 @@ interface BadgeModalProps {
   onSave: (data: BadgeData) => void;
 }
 
-type ProcessingStep = "idle" | "processing" | "ready";
+type ProcessingStep = "idle" | "removing-bg" | "processing" | "ready";
 
 function StepIndicator({ current }: { current: ProcessingStep }) {
   const steps = [
+    { key: "removing-bg", label: "Background" },
     { key: "processing", label: "Processing" },
     { key: "ready", label: "Ready" },
   ];
@@ -77,14 +78,37 @@ export default function BadgeModal({ open, onClose, data, onSave }: BadgeModalPr
     const reader = new FileReader();
     reader.onload = async () => {
       const base64 = reader.result as string;
-      setProcessing("processing");
       setProcessError(null);
 
+      // Step 1: Remove background in browser (WASM)
+      setProcessing("removing-bg");
+      let cleanBase64: string;
+      try {
+        const { removeBackground } = await import("@imgly/background-removal");
+        const blob = await removeBackground(base64, {
+          model: "isnet_quint8",
+          output: { format: "image/png" },
+        });
+        const arrayBuf = await blob.arrayBuffer();
+        const cleanBytes = new Uint8Array(arrayBuf);
+        let binary = "";
+        for (let i = 0; i < cleanBytes.length; i++) {
+          binary += String.fromCharCode(cleanBytes[i]);
+        }
+        cleanBase64 = `data:image/png;base64,${btoa(binary)}`;
+      } catch (err: any) {
+        console.error("BG removal failed, using original:", err);
+        setProcessError("Background removal failed — processing original photo");
+        cleanBase64 = base64;
+      }
+
+      // Step 2: Crop, position, color-grade on server (sharp)
+      setProcessing("processing");
       try {
         const res = await fetch("/api/image/process", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ image: base64 }),
+          body: JSON.stringify({ image: cleanBase64 }),
         });
 
         if (!res.ok) {
@@ -165,10 +189,10 @@ export default function BadgeModal({ open, onClose, data, onSave }: BadgeModalPr
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                disabled={processing === "processing"}
+                disabled={processing !== "idle" && processing !== "ready"}
                 className="rounded-lg border border-dashed border-hairline px-3 py-2 text-xs font-medium text-graphite hover:border-primary hover:text-primary disabled:opacity-50"
               >
-                {processing === "processing" ? "Processing..." : form.photo ? "Change Photo" : "Upload Photo"}
+                {processing === "removing-bg" ? "Removing BG..." : processing === "processing" ? "Aligning..." : form.photo ? "Change Photo" : "Upload Photo"}
               </button>
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoSelect} />
             </div>
@@ -177,11 +201,20 @@ export default function BadgeModal({ open, onClose, data, onSave }: BadgeModalPr
               <StepIndicator current={processing} />
             )}
 
+            {processing === "removing-bg" && (
+              <div className="mt-2 rounded-lg bg-primary/5 border border-primary/20 p-3">
+                <div className="flex items-center gap-2 text-xs text-primary">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"/><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" className="opacity-75"/></svg>
+                  Removing background in browser...
+                </div>
+              </div>
+            )}
+
             {processing === "processing" && (
               <div className="mt-2 rounded-lg bg-primary/5 border border-primary/20 p-3">
                 <div className="flex items-center gap-2 text-xs text-primary">
                   <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"/><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" className="opacity-75"/></svg>
-                  Removing background &amp; aligning photo...
+                  Cropping &amp; aligning photo...
                 </div>
               </div>
             )}
@@ -254,7 +287,7 @@ export default function BadgeModal({ open, onClose, data, onSave }: BadgeModalPr
           <button onClick={() => { resetState(); onClose(); }} className="rounded-lg px-4 py-2 text-sm font-medium text-graphite hover:bg-cloud">Cancel</button>
           <button
             onClick={handleSave}
-            disabled={saving || processing === "processing"}
+            disabled={saving || (processing !== "idle" && processing !== "ready")}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary/90 disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save Badge"}
