@@ -147,6 +147,7 @@ export default function ProfilePage() {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [badgeData, setBadgeData] = useState<BadgeData | null>(null);
   const [showBadgeModal, setShowBadgeModal] = useState(false);
+  const [showBadgeView, setShowBadgeView] = useState(false);
   const [badgeRefreshKey, setBadgeRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -358,30 +359,25 @@ export default function ProfilePage() {
 
   return (
     <SidebarLayout>
-      <div className="flex flex-1 flex-col overflow-y-auto p-4 sm:p-6">
-        <div className="mx-auto w-full max-w-5xl space-y-6">
+      <div className="flex flex-1 flex-col overflow-y-auto p-4 sm:p-6 bg-[#09090b]">
+        <div className="mx-auto w-full max-w-4xl space-y-5">
 
           {/* ── Overwrite Warning ── */}
           {showOverwriteWarning && parseResult && (
-            <div className="rounded-xl border border-amber-300 bg-amber-50 p-5 space-y-4 dark:border-amber-700 dark:bg-amber-950">
+            <div className="rounded-lg border border-amber-800/50 bg-amber-950/30 p-5 space-y-4">
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-400">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
-                    <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" />
-                  </svg>
-                </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-ink">Profile Already Has Data</h3>
-                  <p className="mt-1 text-xs text-charcoal">Choose how to apply the parsed resume data.</p>
+                  <h3 className="text-sm font-medium text-amber-200">Profile Already Has Data</h3>
+                  <p className="mt-1 text-xs text-amber-300/70">Choose how to apply the parsed resume data.</p>
                 </div>
               </div>
-              <div className="max-h-64 overflow-y-auto rounded-lg border border-hairline">
+              <div className="max-h-64 overflow-y-auto rounded-lg border border-zinc-700">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="border-b border-hairline bg-cloud">
-                      <th className="px-3 py-2 text-left font-medium text-graphite">Field</th>
-                      <th className="px-3 py-2 text-left font-medium text-graphite">Current</th>
-                      <th className="px-3 py-2 text-left font-medium text-graphite">From Resume</th>
+                    <tr className="border-b border-zinc-700 bg-zinc-800">
+                      <th className="px-3 py-2 text-left font-medium text-zinc-400">Field</th>
+                      <th className="px-3 py-2 text-left font-medium text-zinc-400">Current</th>
+                      <th className="px-3 py-2 text-left font-medium text-zinc-400">From Resume</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -389,10 +385,10 @@ export default function ProfilePage() {
                       const d = getDiff(k);
                       if (!d.new) return null;
                       return (
-                        <tr key={k} className={`border-b border-hairline ${d.changed ? "bg-amber-50 dark:bg-amber-950" : ""}`}>
-                          <td className="px-3 py-2 font-medium text-ink">{FIELD_LABELS[k]}</td>
-                          <td className="px-3 py-2 text-charcoal">{d.old || <span className="text-graphite italic">empty</span>}</td>
-                          <td className={`px-3 py-2 ${d.changed ? "font-medium text-amber-700 dark:text-amber-400" : "text-charcoal"}`}>{d.new}</td>
+                        <tr key={k} className="border-b border-zinc-800">
+                          <td className="px-3 py-2 font-medium text-zinc-300">{FIELD_LABELS[k]}</td>
+                          <td className="px-3 py-2 text-zinc-500">{d.old || <span className="italic">empty</span>}</td>
+                          <td className={`px-3 py-2 ${d.changed ? "font-medium text-amber-300" : "text-zinc-400"}`}>{d.new}</td>
                         </tr>
                       );
                     })}
@@ -400,21 +396,21 @@ export default function ProfilePage() {
                 </table>
               </div>
               <div className="flex items-center gap-3">
-                <button onClick={() => applyParsedData(parseResult, false)} className="rounded-md bg-primary px-4 py-2 text-xs font-semibold text-on-primary hover:bg-primary-deep">Overwrite All</button>
-                <button onClick={() => applyParsedData(parseResult, true)} className="rounded-md border border-hairline bg-canvas px-4 py-2 text-xs font-medium text-ink hover:bg-cloud">Merge (Keep Existing)</button>
-                <button onClick={() => { setShowOverwriteWarning(false); setParseResult(null); }} className="rounded-md px-4 py-2 text-xs font-medium text-graphite hover:text-ink">Cancel</button>
+                <button onClick={() => applyParsedData(parseResult, false)} className="rounded-md bg-white px-4 py-2 text-xs font-medium text-black hover:bg-zinc-200 transition">Overwrite All</button>
+                <button onClick={() => applyParsedData(parseResult, true)} className="rounded-md border border-zinc-700 px-4 py-2 text-xs font-medium text-zinc-300 hover:bg-zinc-800 transition">Merge</button>
+                <button onClick={() => { setShowOverwriteWarning(false); setParseResult(null); }} className="px-4 py-2 text-xs text-zinc-500 hover:text-zinc-300 transition">Cancel</button>
               </div>
             </div>
           )}
 
           {/* ── Header ── */}
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-medium text-ink">Profile</h2>
-            <div className="flex items-center gap-2">
-              {saved && <span className="text-sm font-medium text-graphite animate-pulse">Saved!</span>}
+            <h2 className="text-sm font-medium text-zinc-300">Profile</h2>
+            <div className="flex items-center gap-3">
+              {saved && <span className="text-xs text-zinc-500">Saved</span>}
               {!editing && !isEmpty && (
-                <button onClick={() => setEditing(true)} className="rounded-md border border-hairline bg-canvas px-4 py-2 text-xs font-medium text-ink hover:bg-cloud">
-                  Edit Profile
+                <button onClick={() => setEditing(true)} className="text-xs text-zinc-400 hover:text-white transition-colors">
+                  Edit
                 </button>
               )}
             </div>
@@ -423,185 +419,83 @@ export default function ProfilePage() {
           {/* ═══════════════════════ VIEW MODE ═══════════════════════ */}
           {!editing && !isEmpty && (
             <>
-          {/* ── Hero: Text Left + PlayerCard Right ── */}
-          <section className="flex flex-col gap-6 lg:flex-row">
-                {/* Left: Profile Info */}
-                <div className="flex-1 space-y-5">
-                  {/* Status Badge */}
-                  <div className="inline-flex items-center gap-2 rounded-full border border-hairline bg-paper px-3 py-1.5 shadow-card">
-                    <span className="h-2 w-2 rounded-full bg-green-500" />
-                    <span className="text-xs font-medium text-graphite">Open to select opportunities</span>
-                  </div>
-
-                  {/* Name + Role + Tagline */}
+              {/* ── Hero ── */}
+              <section className="flex flex-col gap-6 lg:flex-row">
+                {/* Left: Info */}
+                <div className="flex-1 min-w-0 space-y-3">
                   <div>
-                    <h1 className="text-3xl font-black tracking-tight text-ink sm:text-4xl">{displayName}</h1>
+                    <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">{displayName}</h1>
                     {(form.currentTitle || form.currentCompany) && (
-                      <p className="mt-1 text-lg font-semibold text-primary">
-                        {form.currentTitle}{form.currentTitle && form.currentCompany ? " " : ""}{form.currentCompany}
+                      <p className="mt-1 text-sm text-zinc-400">
+                        {form.currentTitle}{form.currentTitle && form.currentCompany ? " at " : ""}{form.currentCompany}
                       </p>
                     )}
-                    {form.summary && (
-                      <p className="mt-3 max-w-lg text-sm leading-relaxed text-charcoal">{form.summary}</p>
-                    )}
                   </div>
 
-                  {/* Location + Website */}
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-graphite">
+                  {form.summary && (
+                    <p className="max-w-lg text-sm leading-relaxed text-zinc-400">{form.summary}</p>
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-500">
                     {form.city && (
                       <span className="flex items-center gap-1.5">
                         <MapPinIcon />
                         {form.city}{form.country ? `, ${form.country}` : ""}
                       </span>
                     )}
-                    {form.portfolioUrl && (
-                      <a href={form.portfolioUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-primary hover:underline">
-                        <GlobeIcon />
-                        {form.portfolioUrl.replace(/^https?:\/\//, "")}
-                      </a>
+                    {form.yearsExperience && (
+                      <span>{form.yearsExperience} years experience</span>
                     )}
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex flex-wrap gap-3">
+                  {/* Social + Contact — single clean row */}
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs">
                     {form.email && (
-                      <a href={`mailto:${form.email}`} className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-sm hover:bg-primary-bright transition">
+                      <a href={`mailto:${form.email}`} className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors">
                         <MailIcon />
-                        Contact me
+                        <span>{form.email}</span>
                       </a>
                     )}
-                    {work.length > 0 && (
-                      <button onClick={() => document.getElementById("experience-section")?.scrollIntoView({ behavior: "smooth" })} className="inline-flex items-center gap-2 rounded-lg border border-hairline bg-paper px-5 py-2.5 text-sm font-medium text-ink hover:bg-cloud transition shadow-card">
-                        View experience
-                      </button>
+                    {form.githubUrl && (
+                      <a href={form.githubUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors">
+                        <GithubIcon />
+                        <span>{form.githubUrl.split("/").pop()}</span>
+                      </a>
+                    )}
+                    {form.linkedinUrl && (
+                      <a href={form.linkedinUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors">
+                        <LinkedInIcon />
+                        <span>{form.linkedinUrl.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, "")}</span>
+                      </a>
+                    )}
+                    {form.portfolioUrl && (
+                      <a href={form.portfolioUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors">
+                        <GlobeIcon />
+                        <span>{form.portfolioUrl.replace(/^https?:\/\//, "")}</span>
+                      </a>
                     )}
                   </div>
 
-                  {/* Social Link Pills */}
-                  {(form.githubUrl || form.linkedinUrl || form.portfolioUrl) && (
-                    <div className="flex flex-wrap gap-2">
-                      {form.githubUrl && (
-                        <a href={form.githubUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-hairline bg-paper px-4 py-2 text-xs font-medium text-graphite hover:border-primary/50 hover:text-ink transition shadow-card">
-                          <GithubIcon />
-                          @{form.githubUrl.split("/").pop()}
-                        </a>
-                      )}
-                      {form.linkedinUrl && (
-                        <a href={form.linkedinUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-hairline bg-paper px-4 py-2 text-xs font-medium text-graphite hover:border-primary/50 hover:text-ink transition shadow-card">
-                          <LinkedInIcon />
-                          {form.linkedinUrl.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, "")}
-                        </a>
-                      )}
-                      {form.portfolioUrl && (
-                        <a href={form.portfolioUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-hairline bg-paper px-4 py-2 text-xs font-medium text-graphite hover:border-primary/50 hover:text-ink transition shadow-card">
-                          <GlobeIcon />
-                          {form.portfolioUrl.replace(/^https?:\/\//, "")}
-                        </a>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Right: Badge */}
-                <div className="flex shrink-0 flex-col items-center gap-3 lg:items-end">
-                  <Badge refreshKey={badgeRefreshKey} />
-                  <button
-                    onClick={() => setShowBadgeModal(true)}
-                    className="rounded-lg border border-hairline bg-cloud px-3 py-1.5 text-xs font-medium text-graphite hover:border-primary/50 hover:text-ink transition"
-                  >
-                    Edit Badge
-                  </button>
+                  <div className="pt-1">
+                    <button
+                      onClick={() => setShowBadgeView(true)}
+                      className="text-xs text-zinc-400 hover:text-white transition-colors"
+                    >
+                      Show Profile Badge
+                    </button>
+                  </div>
                 </div>
               </section>
 
-              {/* ── Contact Cards ── */}
-              {(form.email || form.phone || form.portfolioUrl) && (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  {form.email && (
-                    <div className="group flex items-center justify-between rounded-xl border border-hairline bg-paper px-4 py-3 shadow-card transition hover:shadow-md">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10"><MailIcon /></div>
-                        <div className="min-w-0">
-                          <p className="text-[11px] font-medium uppercase tracking-wider text-graphite">Email</p>
-                          <p className="truncate text-sm font-semibold text-ink">{form.email}</p>
-                        </div>
-                      </div>
-                      <button onClick={() => handleCopy("email", form.email || "")} className="shrink-0 ml-2 rounded-md p-1.5 text-graphite opacity-0 transition group-hover:opacity-100 hover:bg-cloud hover:text-ink">
-                        <CopyIcon copied={copiedField === "email"} />
-                      </button>
-                    </div>
-                  )}
-                  {form.phone && (
-                    <div className="group flex items-center justify-between rounded-xl border border-hairline bg-paper px-4 py-3 shadow-card transition hover:shadow-md">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10"><PhoneIcon /></div>
-                        <div className="min-w-0">
-                          <p className="text-[11px] font-medium uppercase tracking-wider text-graphite">Phone</p>
-                          <p className="truncate text-sm font-semibold text-ink">{form.phone}</p>
-                        </div>
-                      </div>
-                      <button onClick={() => handleCopy("phone", form.phone || "")} className="shrink-0 ml-2 rounded-md p-1.5 text-graphite opacity-0 transition group-hover:opacity-100 hover:bg-cloud hover:text-ink">
-                        <CopyIcon copied={copiedField === "phone"} />
-                      </button>
-                    </div>
-                  )}
-                  {form.portfolioUrl && (
-                    <div className="group flex items-center justify-between rounded-xl border border-hairline bg-paper px-4 py-3 shadow-card transition hover:shadow-md">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10"><GlobeIcon /></div>
-                        <div className="min-w-0">
-                          <p className="text-[11px] font-medium uppercase tracking-wider text-graphite">Website</p>
-                          <p className="truncate text-sm font-semibold text-ink">{form.portfolioUrl.replace(/^https?:\/\//, "")}</p>
-                        </div>
-                      </div>
-                      <button onClick={() => handleCopy("portfolio", form.portfolioUrl || "")} className="shrink-0 ml-2 rounded-md p-1.5 text-graphite opacity-0 transition group-hover:opacity-100 hover:bg-cloud hover:text-ink">
-                        <CopyIcon copied={copiedField === "portfolio"} />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* ── About + Rating Breakdown ── */}
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                {form.summary && (
-                  <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
-                    <h4 className="mb-3 text-base font-bold text-ink">About</h4>
-                    <p className="text-sm leading-relaxed text-charcoal">{form.summary}</p>
-                  </section>
-                )}
-                <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
-                  <h4 className="mb-4 text-base font-bold text-ink">Rating Breakdown</h4>
-                  <div className="space-y-3">
-                    {[
-                      { label: "Applications", value: Math.min(99, work.length * 12 + 30) },
-                      { label: "Interviews", value: Math.min(99, Math.round((work.length + projects.length) * 8.5)) },
-                      { label: "Response Rate", value: Math.min(99, 72 + (work.length * 3)) },
-                      { label: "Skills breadth", value: Math.min(99, String(form.skills || "").split(",").filter(Boolean).length * 4) },
-                      { label: "Experience", value: Math.min(99, Number(form.yearsExperience || 0) * 12) },
-                      { label: "Projects", value: Math.min(99, projects.length * 15 + 20) },
-                    ].map((s) => (
-                      <div key={s.label}>
-                        <div className="mb-1 flex items-center justify-between text-xs">
-                          <span className="font-medium text-graphite">{s.label}</span>
-                          <span className="font-bold tabular-nums text-ink">{s.value}</span>
-                        </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-cloud">
-                          <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${s.value}%` }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              </div>
+              <div className="h-px bg-zinc-800" />
 
               {/* ── Skills ── */}
               {form.skills && (
-                <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
-                  <h4 className="mb-3 text-base font-bold text-ink">Skills</h4>
-                  <div className="flex flex-wrap gap-2">
+                <section>
+                  <h3 className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">Skills</h3>
+                  <div className="flex flex-wrap gap-1.5">
                     {form.skills.split(/[,\n]+/).filter(Boolean).map((s, i) => (
-                      <span key={i} className="rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">{s.trim()}</span>
+                      <span key={i} className="rounded-md bg-zinc-800 px-2.5 py-1 text-xs text-zinc-300">{s.trim()}</span>
                     ))}
                   </div>
                 </section>
@@ -609,38 +503,29 @@ export default function ProfilePage() {
 
               {/* ── Work Experience ── */}
               {work.length > 0 && (
-                <section id="experience-section" className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
-                  <h4 className="mb-4 text-base font-bold text-ink">Work Experience</h4>
-                  <div className="space-y-0">
+                <section id="experience-section">
+                  <h3 className="mb-4 text-xs font-medium uppercase tracking-wider text-zinc-500">Experience</h3>
+                  <div className="space-y-4">
                     {work.map((w, i) => (
-                      <div key={i} className="relative flex gap-4 pb-6 last:pb-0">
-                        <div className="flex flex-col items-center">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-primary bg-primary/10 text-primary">
-                            <BriefcaseIcon />
-                          </div>
-                          {i < work.length - 1 && <div className="mt-1 w-0.5 flex-1 rounded-full bg-hairline" />}
+                      <div key={i} className="group">
+                        <div className="flex items-baseline justify-between gap-4">
+                          <h4 className="text-sm font-medium text-white">{w.role || "Role"}</h4>
+                          <span className="shrink-0 text-xs text-zinc-500 tabular-nums">
+                            {w.startDate}{w.startDate && w.endDate ? " — " : ""}{w.endDate || "Present"}
+                          </span>
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="rounded-xl border border-hairline bg-cloud p-4 transition hover:shadow-sm">
-                            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                              <h3 className="text-sm font-bold text-ink">{w.role || "Role"}</h3>
-                              <span className="text-xs font-medium text-primary">
-                                {w.startDate}{w.startDate && w.endDate ? " — " : ""}{w.endDate || "Present"}
-                              </span>
-                            </div>
-                            <p className="mt-0.5 text-xs font-medium text-graphite">{w.company}{w.location ? ` · ${w.location}` : ""}</p>
-                            {w.bullets.filter(Boolean).length > 0 && (
-                              <ul className="mt-2 space-y-1">
-                                {w.bullets.filter(Boolean).map((b, j) => (
-                                  <li key={j} className="flex items-start gap-2 text-xs text-charcoal">
-                                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-primary" />
-                                    <span>{b}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </div>
-                        </div>
+                        <p className="mt-0.5 text-xs text-zinc-400">{w.company}{w.location ? ` · ${w.location}` : ""}</p>
+                        {w.bullets.filter(Boolean).length > 0 && (
+                          <ul className="mt-2 space-y-1">
+                            {w.bullets.filter(Boolean).map((b, j) => (
+                              <li key={j} className="flex items-start gap-2 text-xs text-zinc-400 leading-relaxed">
+                                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-zinc-600" />
+                                <span>{b}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {i < work.length - 1 && <div className="mt-4 h-px bg-zinc-800" />}
                       </div>
                     ))}
                   </div>
@@ -649,41 +534,37 @@ export default function ProfilePage() {
 
               {/* ── Projects ── */}
               {projects.length > 0 && (
-                <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
-                  <h4 className="mb-4 text-base font-bold text-ink">Projects</h4>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <section>
+                  <h3 className="mb-4 text-xs font-medium uppercase tracking-wider text-zinc-500">Projects</h3>
+                  <div className="space-y-3">
                     {projects.map((p, i) => (
-                      <div key={i} className="group relative overflow-hidden rounded-xl border border-hairline bg-cloud p-4 transition hover:shadow-md">
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/0 opacity-0 transition group-hover:opacity-100" />
-                        <div className="relative">
-                          <div className="mb-2 flex items-start justify-between">
-                            <FolderIcon />
-                            {p.bullets.filter(Boolean).length > 0 && (
-                              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                                {p.bullets.filter(Boolean).length} bullets
-                              </span>
-                            )}
-                          </div>
-                          <h3 className="text-sm font-bold text-ink">{p.name}</h3>
-                          {p.description && <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-graphite">{p.description}</p>}
-                          {p.tech && (
-                            <div className="mt-3 flex flex-wrap gap-1.5">
-                              {p.tech.split(",").slice(0, 5).map((t, j) => (
-                                <span key={j} className="rounded bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">{t.trim()}</span>
-                              ))}
-                            </div>
-                          )}
+                      <div key={i} className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
+                        <div className="flex items-baseline justify-between gap-4">
+                          <h4 className="text-sm font-medium text-white">{p.name}</h4>
                           {p.bullets.filter(Boolean).length > 0 && (
-                            <ul className="mt-2 space-y-0.5">
-                              {p.bullets.filter(Boolean).map((b, j) => (
-                                <li key={j} className="flex items-start gap-1.5 text-[11px] text-graphite leading-relaxed">
-                                  <span className="mt-0.5 shrink-0">•</span>
-                                  <span>{b}</span>
-                                </li>
-                              ))}
-                            </ul>
+                            <span className="shrink-0 text-[10px] text-zinc-500">
+                              {p.bullets.filter(Boolean).length} bullet{p.bullets.filter(Boolean).length !== 1 ? "s" : ""}
+                            </span>
                           )}
                         </div>
+                        {p.description && <p className="mt-1 text-xs text-zinc-400 leading-relaxed">{p.description}</p>}
+                        {p.tech && (
+                          <div className="mt-2.5 flex flex-wrap gap-1.5">
+                            {p.tech.split(",").slice(0, 6).map((t, j) => (
+                              <span key={j} className="rounded bg-zinc-800 px-2 py-0.5 text-[10px] text-zinc-400">{t.trim()}</span>
+                            ))}
+                          </div>
+                        )}
+                        {p.bullets.filter(Boolean).length > 0 && (
+                          <ul className="mt-2.5 space-y-1">
+                            {p.bullets.filter(Boolean).map((b, j) => (
+                              <li key={j} className="flex items-start gap-2 text-xs text-zinc-400 leading-relaxed">
+                                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-zinc-600" />
+                                <span>{b}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -692,9 +573,9 @@ export default function ProfilePage() {
 
               {/* ── Education ── */}
               {form.education && (
-                <section className="rounded-xl border border-hairline bg-paper p-5 shadow-card">
-                  <h4 className="mb-2 text-base font-bold text-ink">Education</h4>
-                  <p className="text-sm text-charcoal">{form.education}</p>
+                <section>
+                  <h3 className="mb-2 text-xs font-medium uppercase tracking-wider text-zinc-500">Education</h3>
+                  <p className="text-sm text-zinc-300">{form.education}</p>
                 </section>
               )}
             </>
@@ -702,20 +583,20 @@ export default function ProfilePage() {
 
           {/* ── Empty State ── */}
           {!editing && isEmpty && (
-            <section className="rounded-xl border border-dashed border-steel bg-paper p-12 text-center space-y-4">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+            <section className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-12 text-center space-y-4">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-zinc-800 text-zinc-400">
                 <BriefcaseIcon />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-ink">No Profile Yet</h3>
-                <p className="mt-1 text-xs text-graphite max-w-xs mx-auto">
+                <h3 className="text-sm font-medium text-white">No Profile Yet</h3>
+                <p className="mt-1 text-xs text-zinc-500 max-w-xs mx-auto">
                   Set up your profile to auto-fill job applications with the Chrome extension.
                 </p>
               </div>
               <div className="flex items-center justify-center gap-3">
-                <button onClick={() => setEditing(true)} className="rounded-md bg-primary px-5 py-2 text-xs font-semibold text-on-primary hover:bg-primary-deep">Create Profile</button>
+                <button onClick={() => setEditing(true)} className="rounded-md bg-white px-4 py-2 text-xs font-medium text-black hover:bg-zinc-200 transition">Create Profile</button>
                 <input ref={resumeInputRef} type="file" accept=".pdf" onChange={handleResumeUpload} className="hidden" />
-                <button onClick={() => resumeInputRef.current?.click()} disabled={parsing} className="rounded-md border border-hairline bg-canvas px-5 py-2 text-xs font-medium text-ink hover:bg-cloud disabled:opacity-50">
+                <button onClick={() => resumeInputRef.current?.click()} disabled={parsing} className="rounded-md border border-zinc-700 px-4 py-2 text-xs font-medium text-zinc-300 hover:bg-zinc-800 disabled:opacity-50 transition">
                   {parsing ? "Parsing..." : "Import from Resume"}
                 </button>
               </div>
@@ -969,6 +850,62 @@ export default function ProfilePage() {
           setBadgeRefreshKey((k) => k + 1);
         }}
       />
+
+      {/* Badge View Modal */}
+      {showBadgeView && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={() => setShowBadgeView(false)}>
+          <div className="relative bg-[#09090b] border border-zinc-800 rounded-xl p-5 w-[320px] mx-4 max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-white">Profile Badge</h3>
+              <button onClick={() => setShowBadgeView(false)} className="text-zinc-500 hover:text-white transition-colors">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex justify-center overflow-hidden rounded-lg">
+              <div data-badge-modal style={{ width: "260px", height: "414px" }}>
+                <Badge refreshKey={badgeRefreshKey} />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={() => {
+                  const svgEl = document.querySelector("[data-badge-modal] svg");
+                  if (!svgEl) return;
+                  const svgData = new XMLSerializer().serializeToString(svgEl);
+                  const canvas = document.createElement("canvas");
+                  canvas.width = 384;
+                  canvas.height = 612;
+                  const ctx = canvas.getContext("2d");
+                  const img = new Image();
+                  img.onload = () => {
+                    ctx?.drawImage(img, 0, 0);
+                    const link = document.createElement("a");
+                    const name = (form.firstName || "user").toLowerCase().replace(/\s+/g, "-");
+                    link.download = `${name}-badge.png`;
+                    link.href = canvas.toDataURL("image/png");
+                    link.click();
+                  };
+                  img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+                }}
+                className="flex-1 rounded-md bg-white px-4 py-2 text-xs font-medium text-black hover:bg-zinc-200 transition"
+              >
+                Download PNG
+              </button>
+              <button
+                onClick={() => {
+                  setShowBadgeView(false);
+                  setShowBadgeModal(true);
+                }}
+                className="flex-1 rounded-md border border-zinc-700 px-4 py-2 text-xs font-medium text-zinc-300 hover:bg-zinc-800 transition"
+              >
+                Edit Badge
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </SidebarLayout>
   );
 }

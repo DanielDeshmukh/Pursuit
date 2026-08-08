@@ -79,7 +79,7 @@ export default function Badge({ refreshKey }: BadgeProps) {
 
   return (
     <div
-      className="w-full max-w-[384px]"
+      className="w-full h-full [&>svg]:w-full [&>svg]:h-full"
       dangerouslySetInnerHTML={{ __html: filled }}
     />
   );
