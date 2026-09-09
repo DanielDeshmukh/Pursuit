@@ -18,6 +18,7 @@ import { STATUS_COLUMNS, type ApplicationWithRelations } from "@/lib/types";
 import { LoadingScreen } from "@/components/loading-screen";
 import { useEscapeKey } from "@/lib/use-escape-key";
 import { scrapeJobUrl } from "@/lib/actions/scrape-job";
+import { exportApplicationsCSV } from "@/lib/csv-export";
 
 export function KanbanBoard() {
   const [applications, setApplications] = useState<ApplicationWithRelations[]>(
@@ -47,40 +48,7 @@ export function KanbanBoard() {
   ];
 
   function exportCSV() {
-    const headers = [
-      "Job Title",
-      "Company",
-      "Status",
-      "Source",
-      "Salary Min",
-      "Salary Max",
-      "Job URL",
-      "Notes",
-      "Applied At",
-    ];
-    const rows = applications.map((app) => [
-      app.jobTitle,
-      app.company.name,
-      app.status,
-      app.source ?? "",
-      app.salaryMin != null ? String(app.salaryMin) : "",
-      app.salaryMax != null ? String(app.salaryMax) : "",
-      app.jobUrl ?? "",
-      app.notes ?? "",
-      app.appliedAt ?? "",
-    ]);
-    const csv = [headers, ...rows]
-      .map((row) =>
-        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
-      )
-      .join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `pursuit-applications-${new Date().toISOString().split("T")[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    exportApplicationsCSV(applications);
   }
 
   useEffect(() => {
