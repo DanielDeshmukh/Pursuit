@@ -244,25 +244,32 @@ function DraftModal({
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [saving, setSaving] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   const selectedApp = applications.find((a) => a.id === applicationId);
 
-  function generateDraft() {
+  async function generateDraft() {
     if (!selectedApp) return;
-    const name = selectedApp.contact?.name || "there";
-    const company = selectedApp.company.name;
-    const title = selectedApp.jobTitle;
-
-    if (channel === "email") {
-      setSubject(`Following up - ${title} at ${company}`);
-      setBody(
-        `Hi ${name},\n\nI wanted to follow up on my application for the ${title} position at ${company}. I am very interested in this opportunity and would love to discuss how my skills align with your team needs.\n\nLooking forward to hearing from you.\n\nBest regards`
-      );
-    } else {
-      setSubject("");
-      setBody(
-        `Hi ${name},\n\nI recently applied for the ${title} role at ${company} and wanted to reach out directly. I would love to learn more about the position and share how my experience could contribute to your team.\n\nWould you be open to a brief chat?\n\nThank you!`
-      );
+    setGenerating(true);
+    try {
+      const res = await fetch("/api/outreach/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          company: selectedApp.company.name,
+          jobTitle: selectedApp.jobTitle,
+          contactName: selectedApp.contact?.name || "",
+          channel,
+        }),
+      });
+      if (!res.ok) throw new Error("Generation failed");
+      const data = await res.json();
+      setSubject(data.subject || "");
+      setBody(data.body || "");
+    } catch {
+      alert("AI generation failed. Please write manually.");
+    } finally {
+      setGenerating(false);
     }
   }
 
@@ -317,8 +324,12 @@ function DraftModal({
           <div>
             <div className="mb-1 flex items-center justify-between">
               <label className="text-xs font-medium text-graphite">Message Body</label>
-              <button onClick={generateDraft} className="text-xs text-primary hover:text-primary-deep">
-                Auto-generate draft
+              <button
+                onClick={generateDraft}
+                disabled={generating}
+                className="text-xs text-primary hover:text-primary-deep disabled:text-graphite"
+              >
+                {generating ? "Generating..." : "AI Generate Draft"}
               </button>
             </div>
             <textarea
