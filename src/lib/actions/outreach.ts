@@ -2,8 +2,9 @@
 
 import { db } from "@/lib/db";
 import { outreachMessages, applications, companies, contacts } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { addOutreachSchema, updateOutreachSchema } from "@/lib/validation";
+import { getCurrentUserId } from "@/lib/user";
 
 export type OutreachWithRelations = {
   id: string;
@@ -22,6 +23,7 @@ export type OutreachWithRelations = {
 
 export async function getOutreachMessages(): Promise<OutreachWithRelations[]> {
   try {
+    const userId = getCurrentUserId();
     const rows = await db
       .select({
         id: outreachMessages.id,
@@ -40,7 +42,8 @@ export async function getOutreachMessages(): Promise<OutreachWithRelations[]> {
       .from(outreachMessages)
       .leftJoin(applications, eq(outreachMessages.applicationId, applications.id))
       .leftJoin(companies, eq(applications.companyId, companies.id))
-      .leftJoin(contacts, eq(outreachMessages.contactId, contacts.id));
+      .leftJoin(contacts, eq(outreachMessages.contactId, contacts.id))
+      .where(eq(applications.userId, userId));
 
     return rows.map((r) => ({
       id: r.id,

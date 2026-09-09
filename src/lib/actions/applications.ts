@@ -2,11 +2,13 @@
 
 import { db } from "@/lib/db";
 import { applications, companies, contacts } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { addApplicationSchema, updateApplicationSchema } from "@/lib/validation";
+import { getCurrentUserId } from "@/lib/user";
 
 export async function getApplications() {
   try {
+    const userId = getCurrentUserId();
     const rows = await db
       .select({
         id: applications.id,
@@ -34,7 +36,8 @@ export async function getApplications() {
       })
       .from(applications)
       .leftJoin(companies, eq(applications.companyId, companies.id))
-      .leftJoin(contacts, eq(applications.contactId, contacts.id));
+      .leftJoin(contacts, eq(applications.contactId, contacts.id))
+      .where(eq(applications.userId, userId));
 
     return rows.map((row) => ({
       id: row.id,
@@ -101,7 +104,7 @@ export async function addApplication(data: {
 }) {
   try {
     const parsed = addApplicationSchema.parse(data);
-    const userId = "dev-user";
+    const userId = getCurrentUserId();
 
     const [company] = await db
       .insert(companies)

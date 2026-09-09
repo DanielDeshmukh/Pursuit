@@ -2,47 +2,35 @@
 
 import { db } from "@/lib/db";
 import { applications, companies } from "@/lib/schema";
-import { eq, gte, lte } from "drizzle-orm";
+import { eq, and, gte, lte } from "drizzle-orm";
+import { getCurrentUserId } from "@/lib/user";
 
 export async function getAnalytics(filters?: {
   from?: string;
   to?: string;
 }) {
   try {
-    let allApps;
+    const userId = getCurrentUserId();
+    const conditions = [eq(applications.userId, userId)];
 
-    if (filters?.from || filters?.to) {
-      let query = db
-        .select({
-          id: applications.id,
-          status: applications.status,
-          source: applications.source,
-          appliedAt: applications.appliedAt,
-          companyName: companies.name,
-        })
-        .from(applications)
-        .leftJoin(companies, eq(applications.companyId, companies.id));
-
-      if (filters.from) {
-        query = query.where(gte(applications.appliedAt, filters.from)) as typeof query;
-      }
-      if (filters.to) {
-        query = query.where(lte(applications.appliedAt, filters.to)) as typeof query;
-      }
-
-      allApps = await query;
-    } else {
-      allApps = await db
-        .select({
-          id: applications.id,
-          status: applications.status,
-          source: applications.source,
-          appliedAt: applications.appliedAt,
-          companyName: companies.name,
-        })
-        .from(applications)
-        .leftJoin(companies, eq(applications.companyId, companies.id));
+    if (filters?.from) {
+      conditions.push(gte(applications.appliedAt, filters.from));
     }
+    if (filters?.to) {
+      conditions.push(lte(applications.appliedAt, filters.to));
+    }
+
+    const allApps = await db
+      .select({
+        id: applications.id,
+        status: applications.status,
+        source: applications.source,
+        appliedAt: applications.appliedAt,
+        companyName: companies.name,
+      })
+      .from(applications)
+      .leftJoin(companies, eq(applications.companyId, companies.id))
+      .where(and(...conditions));
 
     const total = allApps.length;
     const applied = allApps.filter((a) => a.status !== "SAVED").length;

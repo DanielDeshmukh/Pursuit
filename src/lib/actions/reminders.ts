@@ -2,8 +2,9 @@
 
 import { db } from "@/lib/db";
 import { reminders, applications, companies } from "@/lib/schema";
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, and } from "drizzle-orm";
 import { addReminderSchema, updateReminderSchema } from "@/lib/validation";
+import { getCurrentUserId } from "@/lib/user";
 
 export type ReminderWithApp = {
   id: string;
@@ -17,6 +18,7 @@ export type ReminderWithApp = {
 
 export async function getReminders(): Promise<ReminderWithApp[]> {
   try {
+    const userId = getCurrentUserId();
     const rows = await db
       .select({
         id: reminders.id,
@@ -30,6 +32,7 @@ export async function getReminders(): Promise<ReminderWithApp[]> {
       .from(reminders)
       .leftJoin(applications, eq(reminders.applicationId, applications.id))
       .leftJoin(companies, eq(applications.companyId, companies.id))
+      .where(eq(applications.userId, userId))
       .orderBy(asc(reminders.dueAt));
 
     return rows.map((r) => ({

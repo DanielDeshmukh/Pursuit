@@ -2,8 +2,9 @@
 
 import { db } from "@/lib/db";
 import { contacts, companies } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { addContactSchema, updateContactSchema } from "@/lib/validation";
+import { getCurrentUserId } from "@/lib/user";
 
 export type ContactWithCompany = {
   id: string;
@@ -19,6 +20,7 @@ export type ContactWithCompany = {
 
 export async function getContacts(): Promise<ContactWithCompany[]> {
   try {
+    const userId = getCurrentUserId();
     const rows = await db
       .select({
         id: contacts.id,
@@ -32,7 +34,8 @@ export async function getContacts(): Promise<ContactWithCompany[]> {
         companyWebsite: companies.website,
       })
       .from(contacts)
-      .leftJoin(companies, eq(contacts.companyId, companies.id));
+      .leftJoin(companies, eq(contacts.companyId, companies.id))
+      .where(eq(companies.userId, userId));
 
     return rows.map((r) => ({
       id: r.id,
@@ -53,7 +56,8 @@ export async function getContacts(): Promise<ContactWithCompany[]> {
 
 export async function getCompanies() {
   try {
-    return db.select().from(companies);
+    const userId = getCurrentUserId();
+    return db.select().from(companies).where(eq(companies.userId, userId));
   } catch (e) {
     console.error("[getCompanies]", e);
     return [];
