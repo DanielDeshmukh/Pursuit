@@ -8,7 +8,7 @@ import { getCurrentUserId } from "@/lib/user";
 
 export async function getApplications() {
   try {
-    const userId = getCurrentUserId();
+    const userId = await getCurrentUserId();
     const rows = await db
       .select({
         id: applications.id,
@@ -104,7 +104,7 @@ export async function addApplication(data: {
 }) {
   try {
     const parsed = addApplicationSchema.parse(data);
-    const userId = getCurrentUserId();
+    const userId = await getCurrentUserId();
 
     const [company] = await db
       .insert(companies)

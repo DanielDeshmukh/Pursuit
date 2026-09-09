@@ -20,7 +20,7 @@ export type ContactWithCompany = {
 
 export async function getContacts(): Promise<ContactWithCompany[]> {
   try {
-    const userId = getCurrentUserId();
+    const userId = await getCurrentUserId();
     const rows = await db
       .select({
         id: contacts.id,
@@ -56,7 +56,7 @@ export async function getContacts(): Promise<ContactWithCompany[]> {
 
 export async function getCompanies() {
   try {
-    const userId = getCurrentUserId();
+    const userId = await getCurrentUserId();
     return db.select().from(companies).where(eq(companies.userId, userId));
   } catch (e) {
     console.error("[getCompanies]", e);
@@ -66,7 +66,7 @@ export async function getCompanies() {
 
 export async function addCompany(data: { name: string; website?: string; industry?: string; source?: string }) {
   try {
-    const userId = getCurrentUserId();
+    const userId = await getCurrentUserId();
     const id = crypto.randomUUID();
     await db.insert(companies).values({
       id,

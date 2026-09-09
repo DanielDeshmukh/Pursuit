@@ -23,7 +23,7 @@ export type OutreachWithRelations = {
 
 export async function getOutreachMessages(): Promise<OutreachWithRelations[]> {
   try {
-    const userId = getCurrentUserId();
+    const userId = await getCurrentUserId();
     const rows = await db
       .select({
         id: outreachMessages.id,

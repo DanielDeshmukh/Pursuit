@@ -18,7 +18,7 @@ export type ReminderWithApp = {
 
 export async function getReminders(): Promise<ReminderWithApp[]> {
   try {
-    const userId = getCurrentUserId();
+    const userId = await getCurrentUserId();
     const rows = await db
       .select({
         id: reminders.id,

@@ -10,7 +10,7 @@ export async function getAnalytics(filters?: {
   to?: string;
 }) {
   try {
-    const userId = getCurrentUserId();
+    const userId = await getCurrentUserId();
     const conditions = [eq(applications.userId, userId)];
 
     if (filters?.from) {

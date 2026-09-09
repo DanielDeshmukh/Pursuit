@@ -5,6 +5,7 @@ import { ThemeInit } from "@/components/theme-init";
 import { NotificationProvider } from "@/components/notification-provider";
 import { ShortcutsProvider } from "@/lib/use-keyboard-shortcuts";
 import { KeyboardShortcutsManager } from "@/components/keyboard-shortcuts-manager";
+import { AuthProvider } from "@/components/auth-provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -42,11 +43,13 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ThemeInit />
         <ThemeProvider>
-          <ShortcutsProvider>
-            <NotificationProvider />
-            <KeyboardShortcutsManager />
-            {children}
-          </ShortcutsProvider>
+          <AuthProvider>
+            <ShortcutsProvider>
+              <NotificationProvider />
+              <KeyboardShortcutsManager />
+              {children}
+            </ShortcutsProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
