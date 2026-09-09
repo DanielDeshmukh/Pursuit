@@ -33,10 +33,16 @@ const COLORS = [
 
 export function AnalyticsDashboard() {
   const [data, setData] = useState<AnalyticsData | null>(null);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   useEffect(() => {
-    getAnalytics().then(setData);
-  }, []);
+    const filters = {
+      ...(fromDate && { from: fromDate }),
+      ...(toDate && { to: toDate }),
+    };
+    getAnalytics(Object.keys(filters).length > 0 ? filters : undefined).then(setData);
+  }, [fromDate, toDate]);
 
   if (!data) return <LoadingScreen />;
 
@@ -62,10 +68,41 @@ export function AnalyticsDashboard() {
   ];
 
   const tickColor = "var(--color-graphite)";
+  const hasFilters = fromDate || toDate;
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto p-4 sm:p-6">
-      <h2 className="mb-6 text-lg font-medium text-ink">Analytics</h2>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-lg font-medium text-ink">Analytics</h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-graphite">From</label>
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              className="rounded-lg border border-hairline bg-surface px-3 py-1.5 text-sm text-ink focus:border-primary focus:outline-none"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-graphite">To</label>
+            <input
+              type="date"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              className="rounded-lg border border-hairline bg-surface px-3 py-1.5 text-sm text-ink focus:border-primary focus:outline-none"
+            />
+          </div>
+          {hasFilters && (
+            <button
+              onClick={() => { setFromDate(""); setToDate(""); }}
+              className="rounded-lg border border-hairline bg-surface px-3 py-1.5 text-xs text-graphite hover:text-ink"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      </div>
 
       <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
         {stats.map((s) => (
