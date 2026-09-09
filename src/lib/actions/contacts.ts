@@ -64,6 +64,46 @@ export async function getCompanies() {
   }
 }
 
+export async function addCompany(data: { name: string; website?: string; industry?: string; source?: string }) {
+  try {
+    const userId = getCurrentUserId();
+    const id = crypto.randomUUID();
+    await db.insert(companies).values({
+      id,
+      userId,
+      name: data.name,
+      website: data.website || null,
+      industry: data.industry || null,
+      source: data.source || null,
+    });
+    return { id, userId, ...data };
+  } catch (e) {
+    console.error("[addCompany]", e);
+    throw new Error("Failed to add company");
+  }
+}
+
+export async function updateCompany(
+  id: string,
+  data: { name?: string; website?: string; industry?: string; source?: string }
+) {
+  try {
+    await db.update(companies).set(data).where(eq(companies.id, id));
+  } catch (e) {
+    console.error("[updateCompany]", e);
+    throw new Error("Failed to update company");
+  }
+}
+
+export async function deleteCompany(id: string) {
+  try {
+    await db.delete(companies).where(eq(companies.id, id));
+  } catch (e) {
+    console.error("[deleteCompany]", e);
+    throw new Error("Failed to delete company");
+  }
+}
+
 export async function addContact(data: {
   companyId: string;
   name: string;
