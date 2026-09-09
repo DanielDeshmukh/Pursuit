@@ -14,6 +14,7 @@ import {
 } from "@/lib/actions/contacts";
 import { LoadingScreen } from "@/components/loading-screen";
 import { useEscapeKey } from "@/lib/use-escape-key";
+import { exportContactsCSV } from "@/lib/csv-export";
 
 type Company = { id: string; name: string; website?: string | null; industry?: string | null; source?: string | null };
 
@@ -160,12 +161,20 @@ export function ContactsList() {
             {contacts.length}
           </span>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="rounded-md bg-primary px-3 py-2 text-xs font-semibold tracking-wide text-on-primary transition-colors hover:bg-primary-deep sm:px-4 sm:text-sm"
-        >
-          + Add Contact
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => exportContactsCSV(contacts)}
+            className="rounded-md border border-hairline bg-canvas px-3 py-2 text-xs font-medium text-ink transition-colors hover:bg-cloud sm:text-sm"
+          >
+            Export CSV
+          </button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="rounded-md bg-primary px-3 py-2 text-xs font-semibold tracking-wide text-on-primary transition-colors hover:bg-primary-deep sm:px-4 sm:text-sm"
+          >
+            + Add Contact
+          </button>
+        </div>
       </div>
 
       <div className="px-4 pb-3 sm:px-6">
