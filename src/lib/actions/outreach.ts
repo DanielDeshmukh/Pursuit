@@ -94,11 +94,28 @@ export async function addOutreachMessage(data: {
 
 export async function updateOutreachStatus(id: string, status: string) {
   try {
+    const now = new Date().toISOString();
+
+    if (status === "sent") {
+      const msg = await db
+        .select({ contactId: outreachMessages.contactId })
+        .from(outreachMessages)
+        .where(eq(outreachMessages.id, id))
+        .limit(1);
+
+      if (msg[0]?.contactId) {
+        await db
+          .update(contacts)
+          .set({ lastContactedAt: now })
+          .where(eq(contacts.id, msg[0].contactId));
+      }
+    }
+
     await db
       .update(outreachMessages)
       .set({
         status,
-        sentAt: status === "sent" ? new Date().toISOString() : undefined,
+        sentAt: status === "sent" ? now : undefined,
       })
       .where(eq(outreachMessages.id, id));
   } catch (e) {
