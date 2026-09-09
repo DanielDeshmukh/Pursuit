@@ -3,6 +3,8 @@ import { Inter, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/lib/theme-provider";
 import { ThemeInit } from "@/components/theme-init";
 import { NotificationProvider } from "@/components/notification-provider";
+import { ShortcutsProvider } from "@/lib/use-keyboard-shortcuts";
+import { KeyboardShortcutsManager } from "@/components/keyboard-shortcuts-manager";
 import "./globals.css";
 
 const inter = Inter({
@@ -40,8 +42,11 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ThemeInit />
         <ThemeProvider>
-          <NotificationProvider />
-          {children}
+          <ShortcutsProvider>
+            <NotificationProvider />
+            <KeyboardShortcutsManager />
+            {children}
+          </ShortcutsProvider>
         </ThemeProvider>
       </body>
     </html>
