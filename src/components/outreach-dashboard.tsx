@@ -66,6 +66,36 @@ export function OutreachDashboard() {
     }
   }
 
+  async function handleSendEmail(msg: OutreachWithRelations) {
+    if (!msg.contactEmail) {
+      alert("No email address for this contact");
+      return;
+    }
+    if (!confirm(`Send email to ${msg.contactEmail}?`)) return;
+
+    try {
+      const res = await fetch("/api/outreach/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: msg.contactEmail,
+          subject: msg.subject || `Following up - ${msg.companyName}`,
+          body: msg.body,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Send failed");
+      }
+
+      await handleStatusChange(msg.id, "sent");
+      alert("Email sent successfully!");
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to send email");
+    }
+  }
+
   async function handleEditSave(data: {
     channel: string;
     subject: string;
@@ -187,6 +217,14 @@ export function OutreachDashboard() {
                             <path d="M10.5 1.5L12.5 3.5L4 12H2V10L10.5 1.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                           </svg>
                         </button>
+                        {m.channel === "email" && m.contactEmail && (
+                          <button
+                            onClick={() => handleSendEmail(m)}
+                            className="rounded-md bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-700"
+                          >
+                            Send Email
+                          </button>
+                        )}
                         <button
                           onClick={() => handleStatusChange(m.id, "sent")}
                           className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-on-primary hover:bg-primary-deep"
