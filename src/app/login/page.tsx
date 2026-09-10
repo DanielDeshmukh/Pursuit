@@ -15,9 +15,7 @@ function LoginForm() {
         <div className="mb-6 text-center">
           <img src="/favicon.png" alt="" className="mx-auto mb-3 h-10 w-10" />
           <h1 className="text-xl font-semibold text-ink">Welcome to Pursuit</h1>
-          <p className="mt-1 text-sm text-graphite">
-            Sign in to track your job search
-          </p>
+          <p className="mt-1 text-sm text-graphite">Sign in to track your job search</p>
         </div>
 
         {error && (
@@ -57,11 +55,13 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-canvas">
-        <div className="text-sm text-graphite">Loading...</div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-canvas">
+          <div className="text-sm text-graphite">Loading...</div>
+        </div>
+      }
+    >
       <LoginForm />
     </Suspense>
   );

@@ -49,7 +49,7 @@ export const updateApplicationSchema = z.object({
 
 export const addReminderSchema = z.object({
   applicationId: z.string().min(1, "Application is required"),
-  type: z.enum(REMINDER_TYPES, { errorMap: () => ({ message: "Invalid reminder type" }) }),
+  type: z.enum(REMINDER_TYPES, { error: "Invalid reminder type" }),
   dueAt: z.string().min(1, "Due date is required"),
 });
 
@@ -62,7 +62,7 @@ export const updateReminderSchema = z.object({
 export const addOutreachSchema = z.object({
   applicationId: z.string().min(1, "Application is required"),
   contactId: z.string().min(1, "Contact is required"),
-  channel: z.enum(OUTREACH_CHANNELS, { errorMap: () => ({ message: "Invalid channel" }) }),
+  channel: z.enum(OUTREACH_CHANNELS, { error: "Invalid channel" }),
   subject: z.string().max(200).optional().or(z.literal("")),
   body: z.string().min(1, "Message body is required").max(10000),
 });

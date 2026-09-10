@@ -95,7 +95,10 @@ export function AnalyticsDashboard() {
           </div>
           {hasFilters && (
             <button
-              onClick={() => { setFromDate(""); setToDate(""); }}
+              onClick={() => {
+                setFromDate("");
+                setToDate("");
+              }}
               className="rounded-lg border border-hairline bg-surface px-3 py-1.5 text-xs text-graphite hover:text-ink"
             >
               Clear
@@ -106,31 +109,22 @@ export function AnalyticsDashboard() {
 
       <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
         {stats.map((s) => (
-          <div
-            key={s.label}
-            className="rounded-xl border border-hairline bg-paper p-4"
-          >
+          <div key={s.label} className="rounded-xl border border-hairline bg-paper p-4">
             <p className="text-xs font-medium text-graphite">{s.label}</p>
-            <p className={`mt-1 text-2xl font-semibold ${s.color}`}>
-              {s.value}
-            </p>
+            <p className={`mt-1 text-2xl font-semibold ${s.color}`}>{s.value}</p>
           </div>
         ))}
       </div>
 
       <div className="mb-8">
-        <h3 className="mb-4 text-sm font-medium text-ink">
-          Conversion Funnel
-        </h3>
+        <h3 className="mb-4 text-sm font-medium text-ink">Conversion Funnel</h3>
         <div className="flex items-end gap-2">
           {funnelSteps.map((step, i) => {
             const maxVal = Math.max(...funnelSteps.map((s) => s.value), 1);
             const heightPct = (step.value / maxVal) * 100;
             return (
               <div key={step.label} className="flex flex-1 flex-col items-center">
-                <span className="mb-1 text-sm font-medium text-ink">
-                  {step.value}
-                </span>
+                <span className="mb-1 text-sm font-medium text-ink">{step.value}</span>
                 <div
                   className="w-full rounded-t-md transition-all"
                   style={{
@@ -139,9 +133,7 @@ export function AnalyticsDashboard() {
                     backgroundColor: COLORS[i % COLORS.length],
                   }}
                 />
-                <span className="mt-2 text-[10px] text-graphite">
-                  {step.label}
-                </span>
+                <span className="mt-2 text-[10px] text-graphite">{step.label}</span>
               </div>
             );
           })}
@@ -149,9 +141,7 @@ export function AnalyticsDashboard() {
       </div>
 
       <div className="mb-8">
-        <h3 className="mb-4 text-sm font-medium text-ink">
-          Applications Over Time
-        </h3>
+        <h3 className="mb-4 text-sm font-medium text-ink">Applications Over Time</h3>
         {data.timeSeries.length > 0 ? (
           <div className="rounded-xl border border-hairline bg-paper p-4">
             <ResponsiveContainer width="100%" height={200}>
@@ -185,17 +175,13 @@ export function AnalyticsDashboard() {
             </ResponsiveContainer>
           </div>
         ) : (
-          <p className="py-8 text-center text-sm text-graphite">
-            No timeline data yet
-          </p>
+          <p className="py-8 text-center text-sm text-graphite">No timeline data yet</p>
         )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-xl border border-hairline bg-paper p-4">
-          <h3 className="mb-4 text-sm font-medium text-ink">
-            Applications by Source
-          </h3>
+          <h3 className="mb-4 text-sm font-medium text-ink">Applications by Source</h3>
           {data.bySource.length > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
@@ -224,16 +210,12 @@ export function AnalyticsDashboard() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <p className="py-8 text-center text-sm text-graphite">
-              No data yet
-            </p>
+            <p className="py-8 text-center text-sm text-graphite">No data yet</p>
           )}
         </div>
 
         <div className="rounded-xl border border-hairline bg-paper p-4">
-          <h3 className="mb-4 text-sm font-medium text-ink">
-            Applications by Status
-          </h3>
+          <h3 className="mb-4 text-sm font-medium text-ink">Applications by Status</h3>
           {data.byStatus.length > 0 ? (
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={data.byStatus}>
@@ -261,9 +243,7 @@ export function AnalyticsDashboard() {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <p className="py-8 text-center text-sm text-graphite">
-              No data yet
-            </p>
+            <p className="py-8 text-center text-sm text-graphite">No data yet</p>
           )}
         </div>
       </div>

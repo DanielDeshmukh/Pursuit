@@ -17,9 +17,10 @@ export async function POST(req: NextRequest) {
     }
 
     const recipient = contactName || "the hiring manager";
-    const channelHint = channel === "linkedin"
-      ? "This is a LinkedIn message — keep it concise, professional, and conversational. No subject line needed."
-      : "This is a formal email — include a clear subject line and professional sign-off.";
+    const channelHint =
+      channel === "linkedin"
+        ? "This is a LinkedIn message — keep it concise, professional, and conversational. No subject line needed."
+        : "This is a formal email — include a clear subject line and professional sign-off.";
 
     const prompt = `You are an expert job seeker writing outreach messages. Generate a personalized ${channel} message for the following context:
 

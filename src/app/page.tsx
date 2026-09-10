@@ -39,9 +39,7 @@ export default function Home() {
     .sort((a, b) => new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime())
     .slice(0, 5);
 
-  const overdueCount = reminders.filter(
-    (r) => !r.done && new Date(r.dueAt) < new Date()
-  ).length;
+  const overdueCount = reminders.filter((r) => !r.done && new Date(r.dueAt) < new Date()).length;
 
   const recentApps = [...applications]
     .sort((a, b) => {
@@ -85,9 +83,7 @@ export default function Home() {
               )}
             </div>
             {pendingReminders.length === 0 ? (
-              <p className="py-6 text-center text-sm text-graphite">
-                No pending reminders
-              </p>
+              <p className="py-6 text-center text-sm text-graphite">No pending reminders</p>
             ) : (
               <div className="space-y-2">
                 {pendingReminders.map((r) => {
@@ -97,9 +93,7 @@ export default function Home() {
                       key={r.id}
                       href="/reminders"
                       className={`flex items-center justify-between rounded-lg border p-3 transition-colors hover:shadow-card ${
-                        isOverdue
-                          ? "border-error/30 bg-error/5"
-                          : "border-hairline bg-canvas"
+                        isOverdue ? "border-error/30 bg-error/5" : "border-hairline bg-canvas"
                       }`}
                     >
                       <div>
@@ -158,9 +152,7 @@ export default function Home() {
                     className="flex items-center justify-between rounded-lg border border-hairline bg-canvas p-3 transition-colors hover:shadow-card"
                   >
                     <div>
-                      <p className="text-sm font-medium text-ink">
-                        {app.jobTitle}
-                      </p>
+                      <p className="text-sm font-medium text-ink">{app.jobTitle}</p>
                       <p className="text-xs text-charcoal">{app.company.name}</p>
                     </div>
                     <span

@@ -42,7 +42,9 @@ function extractJsonLd($: cheerio.CheerioAPI): Partial<ScrapedJob> {
           if (n.hiringOrganization?.name) out.companyName = clean(n.hiringOrganization.name);
           if (n.jobLocation?.address) {
             const a = n.jobLocation.address;
-            out.location = clean([a.addressLocality, a.addressRegion, a.addressCountry].filter(Boolean).join(", "));
+            out.location = clean(
+              [a.addressLocality, a.addressRegion, a.addressCountry].filter(Boolean).join(", ")
+            );
           }
           if (n.estimatedSalary?.value) out.salaryMin = String(n.estimatedSalary.value);
         }
@@ -113,7 +115,8 @@ export async function scrapeJobUrl(url: string): Promise<ScrapedJob> {
 
   const response = await fetch(url, {
     headers: {
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
       Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
       "Accept-Language": "en-US,en;q=0.9",
     },

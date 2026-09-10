@@ -8,10 +8,7 @@ export async function POST(req: NextRequest) {
     const { jobTitle, companyName, jobDescription, resumeText } = await req.json();
 
     if (!jobTitle || !companyName) {
-      return NextResponse.json(
-        { error: "jobTitle and companyName are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "jobTitle and companyName are required" }, { status: 400 });
     }
 
     const apiKey = process.env.GROQ_API_KEY;

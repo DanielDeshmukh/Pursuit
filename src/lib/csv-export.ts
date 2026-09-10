@@ -26,7 +26,17 @@ export function exportApplicationsCSV(
     appliedAt?: string | null;
   }[]
 ) {
-  const headers = ["Job Title", "Company", "Status", "Source", "Salary Min", "Salary Max", "Job URL", "Notes", "Applied At"];
+  const headers = [
+    "Job Title",
+    "Company",
+    "Status",
+    "Source",
+    "Salary Min",
+    "Salary Max",
+    "Job URL",
+    "Notes",
+    "Applied At",
+  ];
   const rows = apps.map((app) => [
     app.jobTitle,
     app.company.name,

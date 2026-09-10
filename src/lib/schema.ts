@@ -38,8 +38,7 @@ export const applications = sqliteTable(
   "applications",
   {
     id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull(),
+    userId: text("user_id").notNull(),
     companyId: text("company_id")
       .notNull()
       .references(() => companies.id),
@@ -78,9 +77,7 @@ export const outreachMessages = sqliteTable(
     status: text("status").notNull().default("drafted"),
     sentAt: text("sent_at"),
   },
-  (t) => [
-    index("outreach_application_id_idx").on(t.applicationId),
-  ]
+  (t) => [index("outreach_application_id_idx").on(t.applicationId)]
 );
 
 export const profiles = sqliteTable("profiles", {
@@ -158,9 +155,7 @@ export const resumeVersions = sqliteTable(
       .notNull()
       .$defaultFn(() => new Date().toISOString()),
   },
-  (t) => [
-    index("resume_versions_user_id_idx").on(t.userId),
-  ]
+  (t) => [index("resume_versions_user_id_idx").on(t.userId)]
 );
 
 export const reminders = sqliteTable(

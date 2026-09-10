@@ -16,7 +16,13 @@ import { LoadingScreen } from "@/components/loading-screen";
 import { useEscapeKey } from "@/lib/use-escape-key";
 import { exportContactsCSV } from "@/lib/csv-export";
 
-type Company = { id: string; name: string; website?: string | null; industry?: string | null; source?: string | null };
+type Company = {
+  id: string;
+  name: string;
+  website?: string | null;
+  industry?: string | null;
+  source?: string | null;
+};
 
 export function ContactsList() {
   const [contacts, setContacts] = useState<ContactWithCompany[]>([]);
@@ -57,7 +63,12 @@ export function ContactsList() {
     }
   }
 
-  async function handleCompanyAdd(data: { name: string; website: string; industry: string; source: string }) {
+  async function handleCompanyAdd(data: {
+    name: string;
+    website: string;
+    industry: string;
+    source: string;
+  }) {
     await addCompany({
       name: data.name,
       website: data.website || undefined,
@@ -68,7 +79,12 @@ export function ContactsList() {
     setShowAddCompany(false);
   }
 
-  async function handleCompanyEdit(data: { name: string; website: string; industry: string; source: string }) {
+  async function handleCompanyEdit(data: {
+    name: string;
+    website: string;
+    industry: string;
+    source: string;
+  }) {
     if (!editingCompany) return;
     await updateCompany(editingCompany.id, {
       name: data.name,
@@ -76,9 +92,7 @@ export function ContactsList() {
       industry: data.industry || undefined,
       source: data.source || undefined,
     });
-    setCompanies((prev) =>
-      prev.map((c) => (c.id === editingCompany.id ? { ...c, ...data } : c))
-    );
+    setCompanies((prev) => prev.map((c) => (c.id === editingCompany.id ? { ...c, ...data } : c)));
     setEditingCompany(null);
   }
 
@@ -199,7 +213,13 @@ export function ContactsList() {
             fill="none"
             className={`transition-transform ${showCompanies ? "rotate-90" : ""}`}
           >
-            <path d="M4 2L8 6L4 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path
+              d="M4 2L8 6L4 10"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
           {companies.length} Companies
         </button>
@@ -224,7 +244,12 @@ export function ContactsList() {
                   <div className="mt-0.5 flex items-center gap-3 text-[10px] text-graphite">
                     {co.industry && <span>{co.industry}</span>}
                     {co.website && (
-                      <a href={co.website} target="_blank" rel="noopener noreferrer" className="hover:text-link">
+                      <a
+                        href={co.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-link"
+                      >
                         Website
                       </a>
                     )}
@@ -238,7 +263,13 @@ export function ContactsList() {
                     title="Edit"
                   >
                     <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                      <path d="M10.5 1.5L12.5 3.5L4 12H2V10L10.5 1.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path
+                        d="M10.5 1.5L12.5 3.5L4 12H2V10L10.5 1.5Z"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   </button>
                   <button
@@ -247,7 +278,12 @@ export function ContactsList() {
                     title="Delete"
                   >
                     <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                      <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                      <path
+                        d="M1 1L13 13M1 13L13 1"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -280,9 +316,7 @@ export function ContactsList() {
                       </span>
                     )}
                   </div>
-                  <p className="mt-0.5 text-xs text-charcoal">
-                    {c.companyName}
-                  </p>
+                  <p className="mt-0.5 text-xs text-charcoal">{c.companyName}</p>
                   <div className="mt-1 flex items-center gap-3">
                     {c.email && (
                       <a
@@ -311,7 +345,13 @@ export function ContactsList() {
                     title="Edit"
                   >
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M10.5 1.5L12.5 3.5L4 12H2V10L10.5 1.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path
+                        d="M10.5 1.5L12.5 3.5L4 12H2V10L10.5 1.5Z"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   </button>
                   <button
@@ -320,7 +360,12 @@ export function ContactsList() {
                     title="Delete"
                   >
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                      <path
+                        d="M1 1L13 13M1 13L13 1"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -348,10 +393,7 @@ export function ContactsList() {
       )}
 
       {showAddCompany && (
-        <CompanyModal
-          onClose={() => setShowAddCompany(false)}
-          onSave={handleCompanyAdd}
-        />
+        <CompanyModal onClose={() => setShowAddCompany(false)} onSave={handleCompanyAdd} />
       )}
 
       {editingCompany && (
@@ -408,9 +450,7 @@ function ContactModal({
 
         <div className="space-y-3">
           <div>
-            <label className="mb-1 block text-xs font-medium text-graphite">
-              Company *
-            </label>
+            <label className="mb-1 block text-xs font-medium text-graphite">Company *</label>
             <select
               value={companyId}
               onChange={(e) => setCompanyId(e.target.value)}
@@ -424,9 +464,7 @@ function ContactModal({
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-graphite">
-              Name *
-            </label>
+            <label className="mb-1 block text-xs font-medium text-graphite">Name *</label>
             <input
               type="text"
               value={name}
@@ -436,9 +474,7 @@ function ContactModal({
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-graphite">
-              Role
-            </label>
+            <label className="mb-1 block text-xs font-medium text-graphite">Role</label>
             <input
               type="text"
               value={role}
@@ -448,9 +484,7 @@ function ContactModal({
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-graphite">
-              Email
-            </label>
+            <label className="mb-1 block text-xs font-medium text-graphite">Email</label>
             <input
               type="email"
               value={email}
@@ -460,9 +494,7 @@ function ContactModal({
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-graphite">
-              LinkedIn URL
-            </label>
+            <label className="mb-1 block text-xs font-medium text-graphite">LinkedIn URL</label>
             <input
               type="url"
               value={linkedinUrl}

@@ -27,7 +27,9 @@
               if (n.hiringOrganization?.name) result.companyName = clean(n.hiringOrganization.name);
               if (n.jobLocation?.address) {
                 const a = n.jobLocation.address;
-                result.location = clean([a.addressLocality, a.addressRegion, a.addressCountry].filter(Boolean).join(", "));
+                result.location = clean(
+                  [a.addressLocality, a.addressRegion, a.addressCountry].filter(Boolean).join(", ")
+                );
               }
               if (n.estimatedSalary?.value) result.salaryMin = String(n.estimatedSalary.value);
               if (n.baseSalary?.value) result.salaryMin = String(n.baseSalary.value);
@@ -46,7 +48,11 @@
       const m = url.match(/job\/([^/]+)\/([^/]+)/);
       if (m) {
         if (!result.location) result.location = clean(m[1].replace(/-/g, " "));
-        const jobSlug = m[2].split("/")[0].replace(/--/g, " - ").replace(/_R\d+-\d+/, "").replace(/_/g, " ");
+        const jobSlug = m[2]
+          .split("/")[0]
+          .replace(/--/g, " - ")
+          .replace(/_R\d+-\d+/, "")
+          .replace(/_/g, " ");
         if (!result.jobTitle) result.jobTitle = clean(jobSlug);
       }
       const cm = url.match(/en-US\/([^/]+)\//);
@@ -79,25 +85,36 @@
 
     if (host.includes("linkedin.com")) {
       if (!result.jobTitle) {
-        const el = document.querySelector("h1.job-details-jobs-unified-top-card__job-title span") || document.querySelector("h1");
+        const el =
+          document.querySelector("h1.job-details-jobs-unified-top-card__job-title span") ||
+          document.querySelector("h1");
         if (el) result.jobTitle = clean(el.textContent);
       }
       if (!result.companyName) {
-        const el = document.querySelector(".job-details-jobs-unified-top-card__company-name a") || document.querySelector(".job-details-jobs-unified-top-card__company-name");
+        const el =
+          document.querySelector(".job-details-jobs-unified-top-card__company-name a") ||
+          document.querySelector(".job-details-jobs-unified-top-card__company-name");
         if (el) result.companyName = clean(el.textContent);
       }
       if (!result.location) {
-        const el = document.querySelector(".job-details-jobs-unified-top-card__primary-description-container .bullet") || document.querySelector(".topcard__flavor--bullet");
+        const el =
+          document.querySelector(
+            ".job-details-jobs-unified-top-card__primary-description-container .bullet"
+          ) || document.querySelector(".topcard__flavor--bullet");
         if (el) result.location = clean(el.textContent);
       }
       result.source = "LinkedIn";
     } else if (host.includes("indeed.com")) {
       if (!result.jobTitle) {
-        const el = document.querySelector("h1.jobsearch-JobInfoHeader-title") || document.querySelector("h1");
+        const el =
+          document.querySelector("h1.jobsearch-JobInfoHeader-title") ||
+          document.querySelector("h1");
         if (el) result.jobTitle = clean(el.textContent);
       }
       if (!result.companyName) {
-        const el = document.querySelector("[data-testid='inlineHeader-companyName']") || document.querySelector(".company_name");
+        const el =
+          document.querySelector("[data-testid='inlineHeader-companyName']") ||
+          document.querySelector(".company_name");
         if (el) result.companyName = clean(el.textContent);
       }
       result.source = "Indeed";
@@ -123,7 +140,8 @@
 
     if (l.match(/first.?name|given.?name/) && profile.firstName) return profile.firstName;
     if (l.match(/last.?name|family.?name|surname/) && profile.lastName) return profile.lastName;
-    if (l.match(/full.?name|your.?name/) && profile.firstName && profile.lastName) return `${profile.firstName} ${profile.lastName}`;
+    if (l.match(/full.?name|your.?name/) && profile.firstName && profile.lastName)
+      return `${profile.firstName} ${profile.lastName}`;
     if (l.match(/^e-?mail/) && profile.email) return profile.email;
     if (l.match(/phone|mobile|tel/) && profile.phone) return profile.phone;
     if (l.match(/address|street|address.?line/) && profile.address) return profile.address;
@@ -132,12 +150,18 @@
     if (l.match(/zip|postal/) && profile.zipCode) return profile.zipCode;
     if (l.match(/country/) && profile.country) return profile.country;
     if (l.match(/linkedin/) && profile.linkedinUrl) return profile.linkedinUrl;
-    if (l.match(/portfolio|website|github|portfolio/) && profile.portfolioUrl) return profile.portfolioUrl;
-    if (l.match(/current.?title|job.?title|position/) && profile.currentTitle) return profile.currentTitle;
-    if (l.match(/current.?company|employer/) && profile.currentCompany) return profile.currentCompany;
-    if (l.match(/year.*experience|experience/) && profile.yearsExperience) return profile.yearsExperience;
-    if (l.match(/salary|compensation|pay/) && profile.salaryExpectation) return profile.salaryExpectation;
-    if (l.match(/work.?auth|visa|sponsor|authorized|right.?to.?work/) && profile.workAuthorization) return profile.workAuthorization;
+    if (l.match(/portfolio|website|github|portfolio/) && profile.portfolioUrl)
+      return profile.portfolioUrl;
+    if (l.match(/current.?title|job.?title|position/) && profile.currentTitle)
+      return profile.currentTitle;
+    if (l.match(/current.?company|employer/) && profile.currentCompany)
+      return profile.currentCompany;
+    if (l.match(/year.*experience|experience/) && profile.yearsExperience)
+      return profile.yearsExperience;
+    if (l.match(/salary|compensation|pay/) && profile.salaryExpectation)
+      return profile.salaryExpectation;
+    if (l.match(/work.?auth|visa|sponsor|authorized|right.?to.?work/) && profile.workAuthorization)
+      return profile.workAuthorization;
 
     if (l.match(/how.?did.?you.?hear|source|referral/)) return "LinkedIn";
 
@@ -152,7 +176,9 @@
       if (el.offsetParent === null) return;
       const label = el.closest("label")?.textContent || "";
       const ariaLabel = el.getAttribute("aria-label") || "";
-      const labelledBy = el.id ? document.querySelector(`label[for="${el.id}"]`)?.textContent || "" : "";
+      const labelledBy = el.id
+        ? document.querySelector(`label[for="${el.id}"]`)?.textContent || ""
+        : "";
       const placeholder = el.getAttribute("placeholder") || "";
       const name = el.getAttribute("name") || "";
       const fieldId = el.getAttribute("id") || "";
@@ -270,7 +296,9 @@
 
     panel.style.display = "none";
 
-    jobInfo.textContent = jobData.jobTitle ? `${jobData.jobTitle}${jobData.companyName ? " at " + jobData.companyName : ""}` : "No job detected";
+    jobInfo.textContent = jobData.jobTitle
+      ? `${jobData.jobTitle}${jobData.companyName ? " at " + jobData.companyName : ""}`
+      : "No job detected";
 
     toggle.addEventListener("click", async () => {
       if (panel.style.display === "none") {
@@ -296,7 +324,8 @@
     async function populateFields() {
       const fields = detectFields();
       if (fields.length === 0) {
-        fieldsContainer.innerHTML = '<div style="text-align:center;padding:24px;color:#888;font-size:13px;">No form fields detected on this page.</div>';
+        fieldsContainer.innerHTML =
+          '<div style="text-align:center;padding:24px;color:#888;font-size:13px;">No form fields detected on this page.</div>';
         return;
       }
 
@@ -308,7 +337,8 @@
         row.style.cssText = "margin-bottom:10px;";
 
         const label = document.createElement("label");
-        label.style.cssText = "font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:3px;";
+        label.style.cssText =
+          "font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:3px;";
         label.textContent = field.label + (field.type === "select" ? " (select)" : "");
 
         let input;
@@ -329,14 +359,17 @@
           input.type = "text";
         }
 
-        input.style.cssText = "width:100%;padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;";
+        input.style.cssText =
+          "width:100%;padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:13px;box-sizing:border-box;";
         input.dataset.pursuitField = "true";
 
         if (field.suggested) {
           input.value = field.suggested;
           input.style.borderColor = "#024ad8";
           input.style.background = "#f0f7ff";
-        } else if (field.label.match(/cover|letter|about|why|describe|tell|summary|explain|motivation/i)) {
+        } else if (
+          field.label.match(/cover|letter|about|why|describe|tell|summary|explain|motivation/i)
+        ) {
           aiFields.push({ field, input, row });
         }
 
@@ -348,13 +381,15 @@
       if (aiFields.length > 0 && profile) {
         const aiHeader = document.createElement("div");
         aiHeader.style.cssText = "padding:8px 0;margin-top:8px;border-top:1px solid #eee;";
-        aiHeader.innerHTML = '<div style="font-size:11px;color:#024ad8;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">AI-Generated Suggestions</div>';
+        aiHeader.innerHTML =
+          '<div style="font-size:11px;color:#024ad8;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">AI-Generated Suggestions</div>';
         fieldsContainer.appendChild(aiHeader);
 
         for (const { field, input, row } of aiFields) {
           const btn = document.createElement("button");
           btn.textContent = "Generate";
-          btn.style.cssText = "margin-top:4px;padding:4px 10px;background:#024ad8;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer;";
+          btn.style.cssText =
+            "margin-top:4px;padding:4px 10px;background:#024ad8;color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer;";
           btn.addEventListener("click", async () => {
             btn.textContent = "Generating...";
             btn.disabled = true;
@@ -376,8 +411,9 @@
       const allFields = document.querySelectorAll("[data-pursuit-field]");
       allFields.forEach((input) => {
         if (input.value) {
-          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set
-            || Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value")?.set;
+          const nativeInputValueSetter =
+            Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set ||
+            Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value")?.set;
           if (nativeInputValueSetter) {
             nativeInputValueSetter.call(input, input.value);
           } else {
@@ -457,15 +493,20 @@
         const data = await resp.json();
         if (data.success) {
           saveBtn.style.background = "#16a34a";
-          saveBtn.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+          saveBtn.innerHTML =
+            '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
           setTimeout(() => btn.remove(), 2000);
         } else {
           saveBtn.style.background = "#ef4444";
-          setTimeout(() => { saveBtn.style.background = "#16a34a"; }, 2000);
+          setTimeout(() => {
+            saveBtn.style.background = "#16a34a";
+          }, 2000);
         }
       } catch {
         saveBtn.style.background = "#ef4444";
-        setTimeout(() => { saveBtn.style.background = "#16a34a"; }, 2000);
+        setTimeout(() => {
+          saveBtn.style.background = "#16a34a";
+        }, 2000);
       }
     });
   }

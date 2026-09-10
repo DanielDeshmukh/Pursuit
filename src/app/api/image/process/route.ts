@@ -21,13 +21,13 @@ export async function POST(req: NextRequest) {
     const imgW = meta.width || 1000;
     const imgH = meta.height || 1000;
 
-    const raw = await sharp(inputBuffer)
-      .ensureAlpha()
-      .raw()
-      .toBuffer({ resolveWithObject: true });
+    const raw = await sharp(inputBuffer).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
 
     const channels = 4;
-    let minY = imgH, maxY = 0, minX = imgW, maxX = 0;
+    let minY = imgH,
+      maxY = 0,
+      minX = imgW,
+      maxX = 0;
     let hasContent = false;
 
     for (let y = 0; y < imgH; y++) {
@@ -47,7 +47,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No subject found in image" }, { status: 400 });
     }
 
-    console.log(`[image-process] Subject bbox: x=${minX}, y=${minY}, w=${maxX - minX}, h=${maxY - minY}`);
+    console.log(
+      `[image-process] Subject bbox: x=${minX}, y=${minY}, w=${maxX - minX}, h=${maxY - minY}`
+    );
 
     const bboxW = maxX - minX;
     const bboxH = maxY - minY;
@@ -75,7 +77,9 @@ export async function POST(req: NextRequest) {
     const destX = Math.round((OUTPUT_WIDTH - finalW) / 2);
     const destY = Math.round(OUTPUT_HEIGHT * 0.05);
 
-    console.log(`[image-process] Scaled subject: ${finalW}x${finalH}, placed at (${destX}, ${destY})`);
+    console.log(
+      `[image-process] Scaled subject: ${finalW}x${finalH}, placed at (${destX}, ${destY})`
+    );
 
     const subjectResized = await sharp(croppedBuffer)
       .resize(finalW, finalH, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
@@ -93,11 +97,13 @@ export async function POST(req: NextRequest) {
         background: { r: 0, g: 0, b: 0, alpha: 0 },
       },
     })
-      .composite([{
-        input: warmBuffer,
-        left: destX,
-        top: destY,
-      }])
+      .composite([
+        {
+          input: warmBuffer,
+          left: destX,
+          top: destY,
+        },
+      ])
       .png()
       .toBuffer();
 
@@ -109,7 +115,7 @@ export async function POST(req: NextRequest) {
     console.error("[image-process]", e);
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Processing failed" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

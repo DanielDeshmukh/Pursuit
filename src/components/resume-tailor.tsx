@@ -55,9 +55,7 @@ export function ResumeTailor({
 
   if (!resumeText || !jobDescription) {
     return (
-      <p className="text-xs text-graphite">
-        Add a job description and resume to enable tailoring.
-      </p>
+      <p className="text-xs text-graphite">Add a job description and resume to enable tailoring.</p>
     );
   }
 
@@ -75,16 +73,25 @@ export function ResumeTailor({
       {loading && (
         <div className="flex items-center gap-2 py-4 text-sm text-graphite">
           <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            />
           </svg>
           Tailoring your resume...
         </div>
       )}
 
-      {error && (
-        <p className="text-sm text-error">{error}</p>
-      )}
+      {error && <p className="text-sm text-error">{error}</p>}
 
       {result && (
         <div className="space-y-4">
@@ -102,7 +109,10 @@ export function ResumeTailor({
               </h4>
               <div className="flex flex-wrap gap-1.5">
                 {result.skills.map((s, i) => (
-                  <span key={i} className="rounded-md bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                  <span
+                    key={i}
+                    className="rounded-md bg-primary/10 px-2 py-0.5 text-xs text-primary"
+                  >
                     {s}
                   </span>
                 ))}
@@ -153,10 +163,7 @@ export function ResumeTailor({
             </div>
           )}
 
-          <button
-            onClick={() => setResult(null)}
-            className="text-xs text-graphite hover:text-ink"
-          >
+          <button onClick={() => setResult(null)} className="text-xs text-graphite hover:text-ink">
             Re-generate
           </button>
         </div>

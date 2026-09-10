@@ -64,7 +64,12 @@ export async function getCompanies() {
   }
 }
 
-export async function addCompany(data: { name: string; website?: string; industry?: string; source?: string }) {
+export async function addCompany(data: {
+  name: string;
+  website?: string;
+  industry?: string;
+  source?: string;
+}) {
   try {
     const userId = await getCurrentUserId();
     const id = crypto.randomUUID();

@@ -46,7 +46,9 @@ function extractFromPage() {
             if (n.hiringOrganization?.name) result.companyName = clean(n.hiringOrganization.name);
             if (n.jobLocation?.address) {
               const a = n.jobLocation.address;
-              result.location = clean([a.addressLocality, a.addressRegion, a.addressCountry].filter(Boolean).join(", "));
+              result.location = clean(
+                [a.addressLocality, a.addressRegion, a.addressCountry].filter(Boolean).join(", ")
+              );
             }
             if (n.estimatedSalary?.value) result.salaryMin = String(n.estimatedSalary.value);
             if (n.baseSalary?.value) result.salaryMin = String(n.baseSalary.value);
@@ -60,21 +62,21 @@ function extractFromPage() {
     const m = url.match(/job\/([^/]+)\/([^/]+)/);
     if (m) {
       if (!result.location) result.location = clean(m[1].replace(/-/g, " "));
-      const jobSlug = m[2].split("/")[0].replace(/--/g, " - ").replace(/_R\d+-\d+/, "").replace(/_/g, " ");
+      const jobSlug = m[2]
+        .split("/")[0]
+        .replace(/--/g, " - ")
+        .replace(/_R\d+-\d+/, "")
+        .replace(/_/g, " ");
       if (!result.jobTitle) result.jobTitle = clean(jobSlug);
     }
     const cm = url.match(/en-US\/([^/]+)\//);
     if (cm && !result.companyName) result.companyName = clean(cm[1].replace(/_/g, " "));
     if (!result.source) result.source = "Workday";
-  }
-
-  else if (host.includes("lever.co")) {
+  } else if (host.includes("lever.co")) {
     const m = url.match(/lever\.co\/([^/]+)/);
     if (m && !result.companyName) result.companyName = clean(m[1].replace(/-/g, " "));
     if (!result.source) result.source = "Lever";
-  }
-
-  else if (host.includes("greenhouse.io")) {
+  } else if (host.includes("greenhouse.io")) {
     const m = url.match(/greenhouse\.io\/([^/]+)/);
     if (m && !result.companyName) result.companyName = clean(m[1].replace(/-/g, " "));
     if (!result.source) result.source = "Greenhouse";
@@ -98,39 +100,50 @@ function extractFromPage() {
 
   if (host.includes("linkedin.com")) {
     if (!result.jobTitle) {
-      const el = document.querySelector("h1.job-details-jobs-unified-top-card__job-title span") || document.querySelector("h1");
+      const el =
+        document.querySelector("h1.job-details-jobs-unified-top-card__job-title span") ||
+        document.querySelector("h1");
       if (el) result.jobTitle = clean(el.textContent);
     }
     if (!result.companyName) {
-      const el = document.querySelector(".job-details-jobs-unified-top-card__company-name a") || document.querySelector(".job-details-jobs-unified-top-card__company-name");
+      const el =
+        document.querySelector(".job-details-jobs-unified-top-card__company-name a") ||
+        document.querySelector(".job-details-jobs-unified-top-card__company-name");
       if (el) result.companyName = clean(el.textContent);
     }
     if (!result.location) {
-      const el = document.querySelector(".job-details-jobs-unified-top-card__primary-description-container .bullet") || document.querySelector(".topcard__flavor--bullet");
+      const el =
+        document.querySelector(
+          ".job-details-jobs-unified-top-card__primary-description-container .bullet"
+        ) || document.querySelector(".topcard__flavor--bullet");
       if (el) result.location = clean(el.textContent);
     }
     if (!result.source) result.source = "LinkedIn";
-  }
-
-  else if (host.includes("indeed.com")) {
+  } else if (host.includes("indeed.com")) {
     if (!result.jobTitle) {
-      const el = document.querySelector("h1.jobsearch-JobInfoHeader-title") || document.querySelector("h1");
+      const el =
+        document.querySelector("h1.jobsearch-JobInfoHeader-title") || document.querySelector("h1");
       if (el) result.jobTitle = clean(el.textContent);
     }
     if (!result.companyName) {
-      const el = document.querySelector("[data-testid='inlineHeader-companyName']") || document.querySelector(".company_name");
+      const el =
+        document.querySelector("[data-testid='inlineHeader-companyName']") ||
+        document.querySelector(".company_name");
       if (el) result.companyName = clean(el.textContent);
     }
     if (!result.location) {
-      const el = document.querySelector("[data-testid='inlineHeader-companyLocation']") || document.querySelector(".company_location");
+      const el =
+        document.querySelector("[data-testid='inlineHeader-companyLocation']") ||
+        document.querySelector(".company_location");
       if (el) result.location = clean(el.textContent);
     }
     if (!result.source) result.source = "Indeed";
-  }
-
-  else if (host.includes("naukri.com")) {
+  } else if (host.includes("naukri.com")) {
     if (!result.jobTitle) {
-      const el = document.querySelector("h1.jobTitle span") || document.querySelector("h1.jobTitle") || document.querySelector("h1");
+      const el =
+        document.querySelector("h1.jobTitle span") ||
+        document.querySelector("h1.jobTitle") ||
+        document.querySelector("h1");
       if (el) result.jobTitle = clean(el.textContent);
     }
     if (!result.companyName) {
@@ -138,7 +151,8 @@ function extractFromPage() {
       if (el) result.companyName = clean(el.textContent);
     }
     if (!result.location) {
-      const el = document.querySelector(".location .locWdth") || document.querySelector("[class*=location]");
+      const el =
+        document.querySelector(".location .locWdth") || document.querySelector("[class*=location]");
       if (el) result.location = clean(el.textContent);
     }
     if (!result.source) result.source = "Naukri";
@@ -250,10 +264,14 @@ copyBtn.addEventListener("click", () => {
     jobData.salaryMin && `Salary Min: ${jobData.salaryMin}`,
     jobData.salaryMax && `Salary Max: ${jobData.salaryMax}`,
     jobData.source && `Source: ${jobData.source}`,
-  ].filter(Boolean).join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   navigator.clipboard.writeText(text).then(() => {
     copyBtn.textContent = "Copied!";
-    setTimeout(() => { copyBtn.textContent = "Copy to Clipboard"; }, 2000);
+    setTimeout(() => {
+      copyBtn.textContent = "Copy to Clipboard";
+    }, 2000);
   });
 });

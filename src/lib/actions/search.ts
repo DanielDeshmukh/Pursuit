@@ -33,10 +33,7 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
         .where(
           and(
             eq(applications.userId, userId),
-            or(
-              like(applications.jobTitle, pattern),
-              like(companies.name, pattern)
-            )
+            or(like(applications.jobTitle, pattern), like(companies.name, pattern))
           )
         )
         .limit(5),
@@ -72,10 +69,7 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
         .where(
           and(
             eq(companies.userId, userId),
-            or(
-              like(companies.name, pattern),
-              like(companies.industry, pattern)
-            )
+            or(like(companies.name, pattern), like(companies.industry, pattern))
           )
         )
         .limit(5),
@@ -116,10 +110,7 @@ export async function globalSearch(query: string): Promise<SearchResult[]> {
         .where(
           and(
             eq(applications.userId, userId),
-            or(
-              like(reminders.type, pattern),
-              like(applications.jobTitle, pattern)
-            )
+            or(like(reminders.type, pattern), like(applications.jobTitle, pattern))
           )
         )
         .limit(5),

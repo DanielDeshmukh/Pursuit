@@ -40,18 +40,19 @@ export function GlobalSearch() {
     return () => document.removeEventListener("keydown", handleKey);
   }, []);
 
+  const prevOpen = useRef(open);
   useEffect(() => {
-    if (open) {
+    if (open && !prevOpen.current) {
       setQuery("");
       setResults([]);
       setSelectedIndex(0);
       setTimeout(() => inputRef.current?.focus(), 50);
     }
+    prevOpen.current = open;
   }, [open]);
 
   useEffect(() => {
     if (!query || query.length < 2) {
-      setResults([]);
       return;
     }
 
@@ -94,7 +95,15 @@ export function GlobalSearch() {
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 p-4 pt-[15vh] backdrop-blur-sm">
       <div className="w-full max-w-lg overflow-hidden rounded-xl border border-hairline bg-paper shadow-modal">
         <div className="flex items-center gap-3 border-b border-hairline px-4 py-3">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-graphite">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="shrink-0 text-graphite"
+          >
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
@@ -114,15 +123,11 @@ export function GlobalSearch() {
 
         <div className="max-h-80 overflow-y-auto">
           {loading && (
-            <div className="px-4 py-8 text-center text-sm text-graphite">
-              Searching...
-            </div>
+            <div className="px-4 py-8 text-center text-sm text-graphite">Searching...</div>
           )}
 
           {!loading && query.length >= 2 && results.length === 0 && (
-            <div className="px-4 py-8 text-center text-sm text-graphite">
-              No results found
-            </div>
+            <div className="px-4 py-8 text-center text-sm text-graphite">No results found</div>
           )}
 
           {!loading && results.length > 0 && (
@@ -137,12 +142,8 @@ export function GlobalSearch() {
                 >
                   <span className="text-base">{typeIcons[result.type]}</span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-ink">
-                      {result.title}
-                    </p>
-                    <p className="truncate text-xs text-graphite">
-                      {result.subtitle}
-                    </p>
+                    <p className="truncate text-sm font-medium text-ink">{result.title}</p>
+                    <p className="truncate text-xs text-graphite">{result.subtitle}</p>
                   </div>
                   <span className="shrink-0 rounded-full bg-surface px-2 py-0.5 text-[10px] font-medium text-graphite">
                     {typeLabels[result.type]}

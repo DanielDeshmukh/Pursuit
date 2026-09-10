@@ -17,7 +17,9 @@ function extractFromJsonLd() {
           if (n.hiringOrganization?.name) result.companyName = clean(n.hiringOrganization.name);
           if (n.jobLocation?.address) {
             const a = n.jobLocation.address;
-            result.location = clean([a.addressLocality, a.addressRegion, a.addressCountry].filter(Boolean).join(", "));
+            result.location = clean(
+              [a.addressLocality, a.addressRegion, a.addressCountry].filter(Boolean).join(", ")
+            );
           }
           if (n.estimatedSalary?.value) result.salaryMin = String(n.estimatedSalary.value);
           if (n.baseSalary?.value) result.salaryMin = String(n.baseSalary.value);
@@ -50,7 +52,9 @@ function extractFromDom() {
     if (companyEl) result.companyName = clean(companyEl.textContent);
 
     const locationEl =
-      document.querySelector(".job-details-jobs-unified-top-card__primary-description-container .bullet") ||
+      document.querySelector(
+        ".job-details-jobs-unified-top-card__primary-description-container .bullet"
+      ) ||
       document.querySelector(".job-details-jobs-unified-top-card__bullet") ||
       document.querySelector(".topcard__flavor--bullet");
     if (locationEl) result.location = clean(locationEl.textContent);
@@ -68,9 +72,7 @@ function extractFromDom() {
       }
     }
     result.source = "LinkedIn";
-  }
-
-  else if (host.includes("indeed.com")) {
+  } else if (host.includes("indeed.com")) {
     const titleEl =
       document.querySelector("h1.jobsearch-JobInfoHeader-title") ||
       document.querySelector("h1.jobsearch-JobInfoHeader-titleContainer span") ||
@@ -97,9 +99,7 @@ function extractFromDom() {
       }
     }
     result.source = "Indeed";
-  }
-
-  else if (host.includes("naukri.com")) {
+  } else if (host.includes("naukri.com")) {
     const titleEl =
       document.querySelector("h1.jobTitle span") ||
       document.querySelector("h1.jobTitle") ||
@@ -107,13 +107,11 @@ function extractFromDom() {
     if (titleEl) result.jobTitle = clean(titleEl.textContent);
 
     const companyEl =
-      document.querySelector("a.companyName") ||
-      document.querySelector(".company a");
+      document.querySelector("a.companyName") || document.querySelector(".company a");
     if (companyEl) result.companyName = clean(companyEl.textContent);
 
     const locationEl =
-      document.querySelector(".location .locWdth") ||
-      document.querySelector("[class*=location]");
+      document.querySelector(".location .locWdth") || document.querySelector("[class*=location]");
     if (locationEl) result.location = clean(locationEl.textContent);
 
     const salaryEl = document.querySelector("[class*=salary]");
@@ -125,9 +123,7 @@ function extractFromDom() {
       }
     }
     result.source = "Naukri";
-  }
-
-  else {
+  } else {
     const titleEl = document.querySelector("h1");
     if (titleEl) result.jobTitle = clean(titleEl.textContent);
 
@@ -139,7 +135,10 @@ function extractFromDom() {
     ];
     for (const sel of companySelectors) {
       const el = document.querySelector(sel);
-      if (el) { result.companyName = clean(el.textContent); break; }
+      if (el) {
+        result.companyName = clean(el.textContent);
+        break;
+      }
     }
 
     const locSelectors = [
@@ -149,7 +148,10 @@ function extractFromDom() {
     ];
     for (const sel of locSelectors) {
       const el = document.querySelector(sel);
-      if (el) { result.location = clean(el.textContent); break; }
+      if (el) {
+        result.location = clean(el.textContent);
+        break;
+      }
     }
   }
 

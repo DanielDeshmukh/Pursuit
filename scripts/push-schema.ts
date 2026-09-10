@@ -119,9 +119,7 @@ async function main() {
       }
     }
   }
-  const tables = await client.execute(
-    "SELECT name FROM sqlite_master WHERE type='table'"
-  );
+  const tables = await client.execute("SELECT name FROM sqlite_master WHERE type='table'");
   console.log("\nTables:", tables.rows.map((r) => r.name).join(", "));
 }
 

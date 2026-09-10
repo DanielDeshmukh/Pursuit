@@ -6,10 +6,7 @@ export async function POST(req: NextRequest) {
     const { to, subject, body, cc, bcc } = await req.json();
 
     if (!to || !subject || !body) {
-      return NextResponse.json(
-        { error: "to, subject, and body are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "to, subject, and body are required" }, { status: 400 });
     }
 
     const emailUser = process.env.EMAIL_USER;
@@ -48,9 +45,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (e) {
     console.error("[outreach-send]", e);
-    return NextResponse.json(
-      { error: "Failed to send email" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to send email" }, { status: 500 });
   }
 }

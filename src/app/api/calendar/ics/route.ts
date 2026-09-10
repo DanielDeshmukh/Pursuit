@@ -6,10 +6,7 @@ export async function POST(req: NextRequest) {
     const { title, description, startDate, endDate, location } = await req.json();
 
     if (!title || !startDate) {
-      return NextResponse.json(
-        { error: "title and startDate are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "title and startDate are required" }, { status: 400 });
     }
 
     const calendar = ical({ name: "Pursuit Reminders" });

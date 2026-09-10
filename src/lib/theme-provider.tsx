@@ -34,7 +34,9 @@ function getInitialTheme(): Theme {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getInitialTheme);
-  const [resolvedTheme, setResolved] = useState<"light" | "dark">(() => resolveTheme(getInitialTheme()));
+  const [resolvedTheme, setResolved] = useState<"light" | "dark">(() =>
+    resolveTheme(getInitialTheme())
+  );
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", resolvedTheme);
@@ -61,9 +63,5 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     [theme, resolvedTheme]
   );
 
-  return (
-    <ThemeContext.Provider value={ctx}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={ctx}>{children}</ThemeContext.Provider>;
 }

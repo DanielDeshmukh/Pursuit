@@ -59,20 +59,10 @@ export function ShortcutsProvider({ children }: { children: React.ReactNode }) {
 
   useKeyboardShortcuts(shortcuts);
 
-  return (
-    <ShortcutsContext.Provider value={shortcuts}>
-      {children}
-    </ShortcutsContext.Provider>
-  );
+  return <ShortcutsContext.Provider value={shortcuts}>{children}</ShortcutsContext.Provider>;
 }
 
-export function KeyboardShortcutsHelp({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+export function KeyboardShortcutsHelp({ open, onClose }: { open: boolean; onClose: () => void }) {
   const shortcuts = useShortcutsContext();
 
   useEffect(() => {

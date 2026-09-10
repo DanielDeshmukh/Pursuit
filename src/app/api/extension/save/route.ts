@@ -26,7 +26,11 @@ export async function POST(req: NextRequest) {
       } else {
         const [newCompany] = await db
           .insert(companies)
-          .values({ name: companyName })
+          .values({
+            id: crypto.randomUUID(),
+            userId: "dev-user",
+            name: companyName,
+          })
           .returning({ id: companies.id });
         companyId = newCompany.id;
       }
@@ -35,8 +39,10 @@ export async function POST(req: NextRequest) {
     const [application] = await db
       .insert(applications)
       .values({
+        id: crypto.randomUUID(),
+        userId: "dev-user",
+        companyId: companyId!,
         jobTitle,
-        companyId,
         jobUrl: jobUrl || null,
         salaryMin: salaryMin ? Number(salaryMin) : null,
         salaryMax: salaryMax ? Number(salaryMax) : null,

@@ -54,19 +54,45 @@ function extractName(text: string) {
 }
 
 function extractLocation(text: string) {
-  const m = text.match(/\b(?:Bangalore|Bengaluru|Mumbai|Delhi|Hyderabad|Pune|Chennai|Kolkata|Noida|Gurgaon|New York|San Francisco|London|Berlin|Toronto|Singapore|Seattle|Boston|Austin|Chicago|Los Angeles|Remote)\b/i);
+  const m = text.match(
+    /\b(?:Bangalore|Bengaluru|Mumbai|Delhi|Hyderabad|Pune|Chennai|Kolkata|Noida|Gurgaon|New York|San Francisco|London|Berlin|Toronto|Singapore|Seattle|Boston|Austin|Chicago|Los Angeles|Remote)\b/i
+  );
   return m ? m[0] : null;
 }
 
 const MONTHS = `(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)`;
 const DATE_PATTERN = `${MONTHS}\\s+\\d{4}`;
-const DATE_RANGE = new RegExp(`${DATE_PATTERN}\\s*[-–—]\\s*(?:${DATE_PATTERN}|Present|Current|Now)`, "i");
+const DATE_RANGE = new RegExp(
+  `${DATE_PATTERN}\\s*[-–—]\\s*(?:${DATE_PATTERN}|Present|Current|Now)`,
+  "i"
+);
 
-function extractWorkExperienceRegex(text: string): { company: string; role: string; startDate: string; endDate: string; location: string; bullets: string[] }[] {
-  const jobs: { company: string; role: string; startDate: string; endDate: string; location: string; bullets: string[] }[] = [];
+function extractWorkExperienceRegex(text: string): {
+  company: string;
+  role: string;
+  startDate: string;
+  endDate: string;
+  location: string;
+  bullets: string[];
+}[] {
+  const jobs: {
+    company: string;
+    role: string;
+    startDate: string;
+    endDate: string;
+    location: string;
+    bullets: string[];
+  }[] = [];
 
   const lines = text.split("\n");
-  let currentJob: { company: string; role: string; startDate: string; endDate: string; location: string; bullets: string[] } | null = null;
+  let currentJob: {
+    company: string;
+    role: string;
+    startDate: string;
+    endDate: string;
+    location: string;
+    bullets: string[];
+  } | null = null;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -100,7 +126,9 @@ function extractWorkExperienceRegex(text: string): { company: string; role: stri
         role = beforeDate;
       }
 
-      const locFromAfter = afterDate.match(/(?:·\s*)?\b(?:Mumbai|Delhi|Bangalore|Bengaluru|Pune|Hyderabad|Chennai|Remote|Online|On-site|New York|San Francisco|London|Berlin|Toronto|Singapore|Seattle|Boston|Austin|Chicago|Los Angeles)\b/i);
+      const locFromAfter = afterDate.match(
+        /(?:·\s*)?\b(?:Mumbai|Delhi|Bangalore|Bengaluru|Pune|Hyderabad|Chennai|Remote|Online|On-site|New York|San Francisco|London|Berlin|Toronto|Singapore|Seattle|Boston|Austin|Chicago|Los Angeles)\b/i
+      );
       if (locFromAfter && !location) location = clean(locFromAfter[0].replace(/^·\s*/, ""));
 
       currentJob = {
@@ -123,21 +151,32 @@ function extractWorkExperienceRegex(text: string): { company: string; role: stri
   return jobs;
 }
 
-function extractProjectsRegex(text: string): { name: string; description: string; tech: string; bullets: string[] }[] {
+function extractProjectsRegex(
+  text: string
+): { name: string; description: string; tech: string; bullets: string[] }[] {
   const projects: { name: string; description: string; tech: string; bullets: string[] }[] = [];
 
-  const projectSectionMatch = text.match(/\n\s*(?:PROJECTS?|PERSONAL PROJECTS?|KEY PROJECTS?|SIDE PROJECTS?|FEATURED PROJECTS?)\s*\n/i);
+  const projectSectionMatch = text.match(
+    /\n\s*(?:PROJECTS?|PERSONAL PROJECTS?|KEY PROJECTS?|SIDE PROJECTS?|FEATURED PROJECTS?)\s*\n/i
+  );
   if (!projectSectionMatch) return projects;
 
   const startIdx = projectSectionMatch.index! + projectSectionMatch[0].length;
   const remaining = text.slice(startIdx);
 
-  const nextSection = remaining.match(/\n\s*(?:EDUCATION|CERTIFICATIONS?|WORK EXPERIENCE|SKILLS?|TECHNICAL SKILLS|PROFESSIONAL SUMMARY|REFERENCES?|AWARDS?|PUBLICATIONS?)\s*\n/i);
+  const nextSection = remaining.match(
+    /\n\s*(?:EDUCATION|CERTIFICATIONS?|WORK EXPERIENCE|SKILLS?|TECHNICAL SKILLS|PROFESSIONAL SUMMARY|REFERENCES?|AWARDS?|PUBLICATIONS?)\s*\n/i
+  );
   const endIdx = nextSection ? nextSection.index! : Math.min(remaining.length, 4000);
   const section = remaining.slice(0, endIdx);
 
   const lines = section.split("\n");
-  let currentProject: { name: string; description: string; tech: string; bullets: string[] } | null = null;
+  let currentProject: {
+    name: string;
+    description: string;
+    tech: string;
+    bullets: string[];
+  } | null = null;
 
   for (const line of lines) {
     const l = line.trim();
@@ -153,7 +192,7 @@ function extractProjectsRegex(text: string): { name: string; description: string
       }
 
       const dashParts = l.split(/\s*[—–]\s*|\s+-\s+/).map((p) => clean(p));
-      let name = dashParts[0] || "";
+      const name = dashParts[0] || "";
       let description = "";
       let tech = "";
 
@@ -214,17 +253,23 @@ function extractEducationRegex(text: string) {
 }
 
 function extractSkillsRegex(text: string) {
-  const section = text.match(/\n\s*(?:Skills?|Technical Skills?|Technologies|Competencies|Tech Stack)\s*\n/i);
+  const section = text.match(
+    /\n\s*(?:Skills?|Technical Skills?|Technologies|Competencies|Tech Stack)\s*\n/i
+  );
   if (!section) return null;
   const start = section.index! + section[0].length;
   const remaining = text.slice(start);
   const nextSection = remaining.match(/\n\s*[A-Z][A-Za-z &/]{2,30}\s*\n/);
   const end = nextSection ? nextSection.index! : Math.min(remaining.length, 1500);
-  return clean(remaining.slice(0, end)).split(/[,;•|·\n]/).filter((s) => s.trim().length > 1).join(", ");
+  return clean(remaining.slice(0, end))
+    .split(/[,;•|·\n]/)
+    .filter((s) => s.trim().length > 1)
+    .join(", ");
 }
 
 function cleanSkills(raw: string): string {
-  const CATEGORY_PATTERN = /^(?:Languages|Frontend|Backend|Backend & Infrastructure|DevOps|Databases?|Cloud|Frameworks?|Libraries?|Tools?|Technologies|Skills?|Other|Platforms?|Operating Systems?|Soft Skills?|Domain Knowledge?)\s*:\s*/i;
+  const CATEGORY_PATTERN =
+    /^(?:Languages|Frontend|Backend|Backend & Infrastructure|DevOps|Databases?|Cloud|Frameworks?|Libraries?|Tools?|Technologies|Skills?|Other|Platforms?|Operating Systems?|Soft Skills?|Domain Knowledge?)\s*:\s*/i;
   const skills = raw.split(/[,;•|·\n]/);
   const cleaned: string[] = [];
   for (let s of skills) {
@@ -234,7 +279,10 @@ function cleanSkills(raw: string): string {
     if (s.length < 2) continue;
     cleaned.push(...s.split(/\s{2,}/));
   }
-  return cleaned.map((s) => s.trim()).filter((s, i, arr) => s.length > 1 && arr.indexOf(s) === i).join(", ");
+  return cleaned
+    .map((s) => s.trim())
+    .filter((s, i, arr) => s.length > 1 && arr.indexOf(s) === i)
+    .join(", ");
 }
 
 const EXTRACT_PROMPT = `Extract ALL information from this resume and return ONLY valid JSON. No markdown, no code fences.
@@ -312,7 +360,11 @@ async function callLLM(text: string): Promise<Record<string, unknown> | null> {
     });
 
     if (!resp.ok) {
-      console.error("[resume-parse] Groq HTTP error:", resp.status, await resp.text().catch(() => ""));
+      console.error(
+        "[resume-parse] Groq HTTP error:",
+        resp.status,
+        await resp.text().catch(() => "")
+      );
       return null;
     }
 
@@ -325,14 +377,25 @@ async function callLLM(text: string): Promise<Record<string, unknown> | null> {
 
     console.log("[resume-parse] Groq raw response length:", content.length);
 
-    const cleaned = content.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+    const cleaned = content
+      .replace(/```json\s*/g, "")
+      .replace(/```\s*/g, "")
+      .trim();
     const parsed = JSON.parse(cleaned);
 
     if (parsed.workExperience && typeof parsed.workExperience === "string") {
-      try { parsed.workExperience = JSON.parse(parsed.workExperience); } catch { parsed.workExperience = []; }
+      try {
+        parsed.workExperience = JSON.parse(parsed.workExperience);
+      } catch {
+        parsed.workExperience = [];
+      }
     }
     if (parsed.projects && typeof parsed.projects === "string") {
-      try { parsed.projects = JSON.parse(parsed.projects); } catch { parsed.projects = []; }
+      try {
+        parsed.projects = JSON.parse(parsed.projects);
+      } catch {
+        parsed.projects = [];
+      }
     }
     if (!Array.isArray(parsed.workExperience)) parsed.workExperience = [];
     if (!Array.isArray(parsed.projects)) parsed.projects = [];
@@ -378,8 +441,20 @@ export async function POST(req: NextRequest) {
     const regexPortfolio = extractPortfolio(text, regexGithub);
 
     if (llmResult) {
-      let workExp = llmResult.workExperience as { company: string; role: string; startDate: string; endDate: string; location: string; bullets: string[] }[];
-      let projects = llmResult.projects as { name: string; description: string; tech: string; bullets: string[] }[];
+      let workExp = llmResult.workExperience as {
+        company: string;
+        role: string;
+        startDate: string;
+        endDate: string;
+        location: string;
+        bullets: string[];
+      }[];
+      let projects = llmResult.projects as {
+        name: string;
+        description: string;
+        tech: string;
+        bullets: string[];
+      }[];
 
       if (workExp.length === 0) {
         console.log("[resume-parse] LLM returned empty workExperience, trying regex");
@@ -422,7 +497,12 @@ export async function POST(req: NextRequest) {
     const workExp = extractWorkExperienceRegex(text);
     const projects = extractProjectsRegex(text);
 
-    console.log("[resume-parse] Regex-only fallback: work=", workExp.length, "projects=", projects.length);
+    console.log(
+      "[resume-parse] Regex-only fallback: work=",
+      workExp.length,
+      "projects=",
+      projects.length
+    );
 
     const profile = {
       firstName: name?.firstName || null,

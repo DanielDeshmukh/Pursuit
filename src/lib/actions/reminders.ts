@@ -50,11 +50,7 @@ export async function getReminders(): Promise<ReminderWithApp[]> {
   }
 }
 
-export async function addReminder(data: {
-  applicationId: string;
-  type: string;
-  dueAt: string;
-}) {
+export async function addReminder(data: { applicationId: string; type: string; dueAt: string }) {
   try {
     const parsed = addReminderSchema.parse(data);
     const [reminder] = await db
@@ -75,10 +71,7 @@ export async function addReminder(data: {
 
 export async function toggleReminder(id: string, done: boolean) {
   try {
-    await db
-      .update(reminders)
-      .set({ done })
-      .where(eq(reminders.id, id));
+    await db.update(reminders).set({ done }).where(eq(reminders.id, id));
   } catch (e) {
     console.error("[toggleReminder]", e);
     throw new Error("Failed to toggle reminder");
@@ -104,10 +97,7 @@ export async function updateReminder(
 ) {
   try {
     const parsed = updateReminderSchema.parse(data);
-    await db
-      .update(reminders)
-      .set(parsed)
-      .where(eq(reminders.id, id));
+    await db.update(reminders).set(parsed).where(eq(reminders.id, id));
   } catch (e) {
     console.error("[updateReminder]", e);
     throw new Error("Failed to update reminder");

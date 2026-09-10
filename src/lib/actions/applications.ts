@@ -6,6 +6,40 @@ import { eq, and } from "drizzle-orm";
 import { addApplicationSchema, updateApplicationSchema } from "@/lib/validation";
 import { getCurrentUserId } from "@/lib/user";
 
+export interface ApplicationWithRelations {
+  id: string;
+  userId: string;
+  companyId: string;
+  contactId: string | null;
+  jobTitle: string;
+  jobUrl: string | null;
+  status: string;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  source: string | null;
+  appliedAt: string | null;
+  resumeVersionUsed: string | null;
+  notes: string | null;
+  nextFollowUpAt: string | null;
+  company: {
+    id: string;
+    userId: string;
+    name: string;
+    website: string | null;
+    industry: string | null;
+    source: string | null;
+  } | null;
+  contact: {
+    id: string;
+    companyId: string;
+    name: string;
+    role: string | null;
+    email: string | null;
+    linkedinUrl: string | null;
+    lastContactedAt: string | null;
+  } | null;
+}
+
 export async function getApplications() {
   try {
     const userId = await getCurrentUserId();
@@ -82,10 +116,7 @@ export async function getApplications() {
 
 export async function updateApplicationStatus(id: string, status: string) {
   try {
-    await db
-      .update(applications)
-      .set({ status })
-      .where(eq(applications.id, id));
+    await db.update(applications).set({ status }).where(eq(applications.id, id));
   } catch (e) {
     console.error("[updateApplicationStatus]", e);
     throw new Error("Failed to update application status");
@@ -164,10 +195,10 @@ export async function updateApplication(
 ) {
   try {
     const parsed = updateApplicationSchema.parse(data);
-    await db
-      .update(applications)
-      .set(parsed)
-      .where(eq(applications.id, id));
+    const updateData: Record<string, unknown> = { ...parsed };
+    if (updateData.salaryMin === "") updateData.salaryMin = null;
+    if (updateData.salaryMax === "") updateData.salaryMax = null;
+    await db.update(applications).set(updateData).where(eq(applications.id, id));
   } catch (e) {
     console.error("[updateApplication]", e);
     throw new Error("Failed to update application");

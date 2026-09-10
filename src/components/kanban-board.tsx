@@ -1,12 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-  type DropResult,
-} from "@hello-pangea/dnd";
+import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd";
 import {
   getApplications,
   updateApplicationStatus,
@@ -24,13 +19,10 @@ import { ResumeTailor } from "@/components/resume-tailor";
 import { InterviewPrep } from "@/components/interview-prep";
 
 export function KanbanBoard() {
-  const [applications, setApplications] = useState<ApplicationWithRelations[]>(
-    []
-  );
+  const [applications, setApplications] = useState<ApplicationWithRelations[]>([]);
   const [resumeVersions, setResumeVersions] = useState<ResumeVersion[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedApp, setSelectedApp] =
-    useState<ApplicationWithRelations | null>(null);
+  const [selectedApp, setSelectedApp] = useState<ApplicationWithRelations | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [sourceFilter, setSourceFilter] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
@@ -73,9 +65,7 @@ export function KanbanBoard() {
     const appId = result.draggableId;
 
     setApplications((prev) =>
-      prev.map((app) =>
-        app.id === appId ? { ...app, status: newStatus } : app
-      )
+      prev.map((app) => (app.id === appId ? { ...app, status: newStatus } : app))
     );
 
     try {
@@ -87,8 +77,7 @@ export function KanbanBoard() {
 
   function getAppsByStatus(status: string) {
     return applications.filter((app) => {
-      const matchesSource =
-        sourceFilter === "ALL" || app.source === sourceFilter;
+      const matchesSource = sourceFilter === "ALL" || app.source === sourceFilter;
       const matchesSearch =
         !searchQuery ||
         app.jobTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -105,9 +94,7 @@ export function KanbanBoard() {
     <div className="flex flex-1 flex-col overflow-hidden">
       <div className="flex flex-col gap-3 px-4 py-4 sm:px-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-lg font-medium text-ink">
-            Applications ({applications.length})
-          </h2>
+          <h2 className="text-lg font-medium text-ink">Applications ({applications.length})</h2>
           <div className="flex gap-2">
             <button
               onClick={exportCSV}
@@ -170,17 +157,11 @@ export function KanbanBoard() {
                       ref={provided.innerRef}
                       {...provided.droppableProps}
                       className={`mx-1.5 mb-1.5 flex max-h-[calc(100vh-180px)] flex-col gap-2 overflow-y-auto rounded-lg p-1.5 transition-colors ${
-                        snapshot.isDraggingOver
-                          ? "bg-primary/5 ring-2 ring-primary/20"
-                          : ""
+                        snapshot.isDraggingOver ? "bg-primary/5 ring-2 ring-primary/20" : ""
                       }`}
                     >
                       {apps.map((app, index) => (
-                        <Draggable
-                          key={app.id}
-                          draggableId={app.id}
-                          index={index}
-                        >
+                        <Draggable key={app.id} draggableId={app.id} index={index}>
                           {(provided, snapshot) => (
                             <div
                               ref={provided.innerRef}
@@ -188,17 +169,11 @@ export function KanbanBoard() {
                               {...provided.dragHandleProps}
                               onClick={() => setSelectedApp(app)}
                               className={`cursor-pointer rounded-lg border border-hairline bg-paper p-3 transition-all hover:border-hairline-strong hover:shadow-card ${
-                                snapshot.isDragging
-                                  ? "shadow-modal rotate-1"
-                                  : ""
+                                snapshot.isDragging ? "shadow-modal rotate-1" : ""
                               }`}
                             >
-                              <h4 className="text-sm font-medium text-ink">
-                                {app.jobTitle}
-                              </h4>
-                              <p className="mt-0.5 text-xs text-charcoal">
-                                {app.company.name}
-                              </p>
+                              <h4 className="text-sm font-medium text-ink">{app.jobTitle}</h4>
+                              <p className="mt-0.5 text-xs text-charcoal">{app.company.name}</p>
                               <div className="mt-2 flex items-center gap-2">
                                 {app.source && (
                                   <span className="rounded-full bg-cloud px-2 py-0.5 text-[10px] font-medium text-graphite">
@@ -245,18 +220,14 @@ export function KanbanBoard() {
             if (!confirm("Delete this application?")) return;
             try {
               await deleteApplication(selectedApp.id);
-              setApplications((prev) =>
-                prev.filter((a) => a.id !== selectedApp.id)
-              );
+              setApplications((prev) => prev.filter((a) => a.id !== selectedApp.id));
               setSelectedApp(null);
             } catch {
               alert("Failed to delete application");
             }
           }}
           onUpdate={(updated) => {
-            setApplications((prev) =>
-              prev.map((a) => (a.id === updated.id ? updated : a))
-            );
+            setApplications((prev) => prev.map((a) => (a.id === updated.id ? updated : a)));
             setSelectedApp(updated);
           }}
         />
@@ -397,9 +368,7 @@ function DetailPanel({
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-graphite">
-                    Job URL
-                  </label>
+                  <label className="mb-1 block text-xs font-medium text-graphite">Job URL</label>
                   <input
                     type="url"
                     value={form.jobUrl}
@@ -435,9 +404,7 @@ function DetailPanel({
                   </div>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-graphite">
-                    Source
-                  </label>
+                  <label className="mb-1 block text-xs font-medium text-graphite">Source</label>
                   <select
                     value={form.source}
                     onChange={(e) => handleChange("source", e.target.value)}
@@ -457,9 +424,7 @@ function DetailPanel({
                   </label>
                   <select
                     value={form.resumeVersionUsed}
-                    onChange={(e) =>
-                      handleChange("resumeVersionUsed", e.target.value)
-                    }
+                    onChange={(e) => handleChange("resumeVersionUsed", e.target.value)}
                     className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
                   >
                     <option value="">None</option>
@@ -471,9 +436,7 @@ function DetailPanel({
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-graphite">
-                    Notes
-                  </label>
+                  <label className="mb-1 block text-xs font-medium text-graphite">Notes</label>
                   <textarea
                     value={form.notes}
                     onChange={(e) => handleChange("notes", e.target.value)}
@@ -486,48 +449,36 @@ function DetailPanel({
             ) : (
               <>
                 <div>
-                  <label className="text-xs font-medium text-graphite">
-                    Job Title
-                  </label>
+                  <label className="text-xs font-medium text-graphite">Job Title</label>
                   <p className="text-sm text-ink">{app.jobTitle}</p>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-graphite">
-                    Company
-                  </label>
+                  <label className="text-xs font-medium text-graphite">Company</label>
                   <p className="text-sm text-ink">{app.company.name}</p>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-graphite">
-                    Status
-                  </label>
+                  <label className="text-xs font-medium text-graphite">Status</label>
                   <p className="text-sm text-ink">{app.status}</p>
                 </div>
                 {app.source && (
                   <div>
-                    <label className="text-xs font-medium text-graphite">
-                      Source
-                    </label>
+                    <label className="text-xs font-medium text-graphite">Source</label>
                     <p className="text-sm text-ink">{app.source}</p>
                   </div>
                 )}
                 {(app.salaryMin != null || app.salaryMax != null) && (
                   <div>
-                    <label className="text-xs font-medium text-graphite">
-                      Salary Range
-                    </label>
+                    <label className="text-xs font-medium text-graphite">Salary Range</label>
                     <p className="text-sm text-ink">
                       {app.salaryMin != null && app.salaryMax != null
                         ? `${app.salaryMin} – ${app.salaryMax}`
-                        : app.salaryMin ?? app.salaryMax}
+                        : (app.salaryMin ?? app.salaryMax)}
                     </p>
                   </div>
                 )}
                 {app.jobUrl && (
                   <div>
-                    <label className="text-xs font-medium text-graphite">
-                      Job URL
-                    </label>
+                    <label className="text-xs font-medium text-graphite">Job URL</label>
                     <a
                       href={app.jobUrl}
                       target="_blank"
@@ -540,19 +491,13 @@ function DetailPanel({
                 )}
                 {app.resumeVersionUsed && (
                   <div>
-                    <label className="text-xs font-medium text-graphite">
-                      Resume Version
-                    </label>
-                    <p className="text-sm text-ink">
-                      {app.resumeVersionUsed}
-                    </p>
+                    <label className="text-xs font-medium text-graphite">Resume Version</label>
+                    <p className="text-sm text-ink">{app.resumeVersionUsed}</p>
                   </div>
                 )}
                 {app.notes && (
                   <div>
-                    <label className="text-xs font-medium text-graphite">
-                      Notes
-                    </label>
+                    <label className="text-xs font-medium text-graphite">Notes</label>
                     <p className="text-sm text-ink">{app.notes}</p>
                   </div>
                 )}
@@ -619,8 +564,8 @@ function AddModal({
     jobTitle: string;
     companyName: string;
     jobUrl?: string;
-    salaryMin?: string;
-    salaryMax?: string;
+    salaryMin?: number;
+    salaryMax?: number;
     source?: string;
     notes?: string;
   }) => Promise<void>;
@@ -652,7 +597,10 @@ function AddModal({
       const data = await scrapeJobUrl(jobUrl);
       if (data.jobTitle) setJobTitle(data.jobTitle);
       if (data.companyName) setCompanyName(data.companyName);
-      if (data.location) setNotes((prev) => prev ? `${prev}\nLocation: ${data.location}` : `Location: ${data.location}`);
+      if (data.location)
+        setNotes((prev) =>
+          prev ? `${prev}\nLocation: ${data.location}` : `Location: ${data.location}`
+        );
       if (data.salaryMin) setSalaryMin(data.salaryMin);
       if (data.salaryMax) setSalaryMax(data.salaryMax);
       if (data.source) setSource(data.source);
@@ -666,9 +614,7 @@ function AddModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
       <div className="w-full max-w-lg rounded-xl border border-hairline bg-paper p-4 shadow-modal sm:p-6">
-        <h3 className="mb-4 text-lg font-medium text-ink">
-          Add Application
-        </h3>
+        <h3 className="mb-4 text-lg font-medium text-ink">Add Application</h3>
 
         <div className="space-y-3">
           <div>
@@ -694,9 +640,7 @@ function AddModal({
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-graphite">
-                Job Title *
-              </label>
+              <label className="mb-1 block text-xs font-medium text-graphite">Job Title *</label>
               <input
                 type="text"
                 value={jobTitle}
@@ -706,9 +650,7 @@ function AddModal({
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-graphite">
-                Company *
-              </label>
+              <label className="mb-1 block text-xs font-medium text-graphite">Company *</label>
               <input
                 type="text"
                 value={companyName}
@@ -720,9 +662,7 @@ function AddModal({
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-graphite">
-                Salary Min
-              </label>
+              <label className="mb-1 block text-xs font-medium text-graphite">Salary Min</label>
               <input
                 type="text"
                 value={salaryMin}
@@ -732,9 +672,7 @@ function AddModal({
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-graphite">
-                Salary Max
-              </label>
+              <label className="mb-1 block text-xs font-medium text-graphite">Salary Max</label>
               <input
                 type="text"
                 value={salaryMax}
@@ -745,9 +683,7 @@ function AddModal({
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-graphite">
-              Source
-            </label>
+            <label className="mb-1 block text-xs font-medium text-graphite">Source</label>
             <select
               value={source}
               onChange={(e) => setSource(e.target.value)}
@@ -762,9 +698,7 @@ function AddModal({
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-graphite">
-              Notes
-            </label>
+            <label className="mb-1 block text-xs font-medium text-graphite">Notes</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}

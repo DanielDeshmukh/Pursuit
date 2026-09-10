@@ -9,10 +9,7 @@ import {
   updateOutreachMessage,
   type OutreachWithRelations,
 } from "@/lib/actions/outreach";
-import {
-  getApplications,
-  type ApplicationWithRelations,
-} from "@/lib/actions/applications";
+import { getApplications, type ApplicationWithRelations } from "@/lib/actions/applications";
 import { LoadingScreen } from "@/components/loading-screen";
 import { useEscapeKey } from "@/lib/use-escape-key";
 import { exportOutreachCSV } from "@/lib/csv-export";
@@ -96,18 +93,10 @@ export function OutreachDashboard() {
     }
   }
 
-  async function handleEditSave(data: {
-    channel: string;
-    subject: string;
-    body: string;
-  }) {
+  async function handleEditSave(data: { channel: string; subject: string; body: string }) {
     if (!editingMsg) return;
     await updateOutreachMessage(editingMsg.id, data);
-    setMessages((prev) =>
-      prev.map((m) =>
-        m.id === editingMsg.id ? { ...m, ...data } : m
-      )
-    );
+    setMessages((prev) => prev.map((m) => (m.id === editingMsg.id ? { ...m, ...data } : m)));
     setEditingMsg(null);
   }
 
@@ -191,9 +180,7 @@ export function OutreachDashboard() {
                         {m.contactName} @ {m.companyName}
                       </span>
                     </div>
-                    {m.subject && (
-                      <p className="mt-1 text-sm font-medium text-ink">{m.subject}</p>
-                    )}
+                    {m.subject && <p className="mt-1 text-sm font-medium text-ink">{m.subject}</p>}
                     <p className="mt-1 line-clamp-2 text-xs text-charcoal">{m.body}</p>
                     {m.sentAt && (
                       <p className="mt-1 text-[10px] text-graphite">
@@ -214,7 +201,13 @@ export function OutreachDashboard() {
                           title="Edit"
                         >
                           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                            <path d="M10.5 1.5L12.5 3.5L4 12H2V10L10.5 1.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path
+                              d="M10.5 1.5L12.5 3.5L4 12H2V10L10.5 1.5Z"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
                           </svg>
                         </button>
                         {m.channel === "email" && m.contactEmail && (
@@ -241,9 +234,17 @@ export function OutreachDashboard() {
                         Mark Replied
                       </button>
                     )}
-                    <button onClick={() => handleDelete(m.id)} className="text-graphite hover:text-error">
+                    <button
+                      onClick={() => handleDelete(m.id)}
+                      className="text-graphite hover:text-error"
+                    >
                       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                        <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                        <path
+                          d="M1 1L13 13M1 13L13 1"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -284,7 +285,13 @@ function DraftModal({
 }: {
   applications: ApplicationWithRelations[];
   onClose: () => void;
-  onAdd: (data: { applicationId: string; contactId: string; channel: string; subject?: string; body: string }) => Promise<void>;
+  onAdd: (data: {
+    applicationId: string;
+    contactId: string;
+    channel: string;
+    subject?: string;
+    body: string;
+  }) => Promise<void>;
 }) {
   const [applicationId, setApplicationId] = useState(applications[0]?.id ?? "");
   const [channel, setChannel] = useState("email");
@@ -303,7 +310,7 @@ function DraftModal({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          company: selectedApp.company.name,
+          company: selectedApp.company?.name ?? "",
           jobTitle: selectedApp.jobTitle,
           contactName: selectedApp.contact?.name || "",
           channel,
@@ -337,7 +344,7 @@ function DraftModal({
               >
                 {applications.map((a) => (
                   <option key={a.id} value={a.id}>
-                    {a.jobTitle} @ {a.company.name}
+                    {a.jobTitle} @ {a.company?.name ?? "Unknown"}
                   </option>
                 ))}
               </select>
@@ -436,7 +443,7 @@ function EditModal({
     if (!body.trim()) return;
     setSaving(true);
     try {
-      onSave({ channel, subject: subject || undefined as unknown as string, body });
+      onSave({ channel, subject: subject || (undefined as unknown as string), body });
     } finally {
       setSaving(false);
     }

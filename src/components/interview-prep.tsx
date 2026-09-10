@@ -73,8 +73,19 @@ export function InterviewPrep({
       {loading && (
         <div className="flex items-center gap-2 py-4 text-sm text-graphite">
           <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            />
           </svg>
           Generating interview prep...
         </div>
@@ -90,9 +101,7 @@ export function InterviewPrep({
                 key={t.id}
                 onClick={() => setActiveTab(t.id)}
                 className={`shrink-0 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-                  activeTab === t.id
-                    ? "bg-ink text-on-primary"
-                    : "text-graphite hover:text-ink"
+                  activeTab === t.id ? "bg-ink text-on-primary" : "text-graphite hover:text-ink"
                 }`}
               >
                 {t.label}
@@ -107,9 +116,7 @@ export function InterviewPrep({
                   <div key={i} className="rounded-lg border border-hairline bg-surface p-3">
                     <p className="text-sm font-medium text-ink">{q.question}</p>
                     <p className="mt-1.5 text-xs text-zinc-400 leading-relaxed">{q.answer}</p>
-                    {q.tip && (
-                      <p className="mt-1 text-[10px] text-primary">💡 {q.tip}</p>
-                    )}
+                    {q.tip && <p className="mt-1 text-[10px] text-primary">💡 {q.tip}</p>}
                   </div>
                 ))}
               </div>
@@ -155,9 +162,14 @@ export function InterviewPrep({
             {activeTab === "star" && (
               <div className="space-y-3">
                 {data.starExamples.map((ex, i) => (
-                  <div key={i} className="rounded-lg border border-hairline bg-surface p-3 space-y-2">
+                  <div
+                    key={i}
+                    className="rounded-lg border border-hairline bg-surface p-3 space-y-2"
+                  >
                     <div>
-                      <span className="text-[10px] font-semibold uppercase text-primary">Situation</span>
+                      <span className="text-[10px] font-semibold uppercase text-primary">
+                        Situation
+                      </span>
                       <p className="text-xs text-zinc-400">{ex.situation}</p>
                     </div>
                     <div>
@@ -165,11 +177,15 @@ export function InterviewPrep({
                       <p className="text-xs text-zinc-400">{ex.task}</p>
                     </div>
                     <div>
-                      <span className="text-[10px] font-semibold uppercase text-primary">Action</span>
+                      <span className="text-[10px] font-semibold uppercase text-primary">
+                        Action
+                      </span>
                       <p className="text-xs text-zinc-400">{ex.action}</p>
                     </div>
                     <div>
-                      <span className="text-[10px] font-semibold uppercase text-primary">Result</span>
+                      <span className="text-[10px] font-semibold uppercase text-primary">
+                        Result
+                      </span>
                       <p className="text-xs text-zinc-400">{ex.result}</p>
                     </div>
                   </div>

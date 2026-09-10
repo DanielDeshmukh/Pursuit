@@ -5,7 +5,8 @@ const NVIDIA_API_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
 
 export async function POST(req: NextRequest) {
   try {
-    const { fieldLabel, fieldContext, jobTitle, companyName, jobDescription, profile } = await req.json();
+    const { fieldLabel, fieldContext, jobTitle, companyName, jobDescription, profile } =
+      await req.json();
 
     if (!NVIDIA_API_KEY) {
       return NextResponse.json({ error: "NVIDIA API key not configured" }, { status: 500 });
@@ -21,7 +22,9 @@ export async function POST(req: NextRequest) {
       profile.education && `Education: ${profile.education}`,
       profile.workAuthorization && `Work Authorization: ${profile.workAuthorization}`,
       profile.coverLetterTemplate && `Cover Letter Style: ${profile.coverLetterTemplate}`,
-    ].filter(Boolean).join("\n");
+    ]
+      .filter(Boolean)
+      .join("\n");
 
     const systemPrompt = `You are a job application assistant. Generate a concise, professional response for a job application form field. 
 The response should be tailored to the specific job and company.

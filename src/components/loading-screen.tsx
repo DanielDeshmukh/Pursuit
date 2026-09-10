@@ -56,9 +56,7 @@ export function LoadingScreen() {
         })}
       </div>
 
-      <p className="mt-8 text-sm font-medium tracking-wider text-charcoal">
-        Loading...
-      </p>
+      <p className="mt-8 text-sm font-medium tracking-wider text-charcoal">Loading...</p>
     </div>
   );
 }

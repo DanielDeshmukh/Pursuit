@@ -76,7 +76,11 @@ export async function upsertBadgeData(data: Partial<BadgeData>) {
 
     const cols = Object.keys(fields);
     const setClause = cols.map((c) => `${c} = ?`).join(", ");
-    const args = [...Object.values(fields), now, "default"];
+    const args: (string | number | null)[] = [
+      ...(Object.values(fields) as (string | number | null)[]),
+      now,
+      "default",
+    ];
 
     await client.execute({
       sql: `UPDATE badge_data SET ${setClause}, updated_at = ? WHERE user_id = ?`,
@@ -87,12 +91,21 @@ export async function upsertBadgeData(data: Partial<BadgeData>) {
     await client.execute({
       sql: `INSERT INTO badge_data (id, user_id, photo, first_name, overall, position, flag, proj, tech, cont, yexp, cert, lang, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
-        id, "default",
-        photo ?? null, data.firstName ?? null, data.overall ?? null,
-        data.position ?? null, data.flag ?? null,
-        data.proj ?? null, data.tech ?? null, data.cont ?? null,
-        data.yexp ?? null, data.cert ?? null, data.lang ?? null,
-        now, now,
+        id,
+        "default",
+        photo ?? null,
+        data.firstName ?? null,
+        data.overall ?? null,
+        data.position ?? null,
+        data.flag ?? null,
+        data.proj ?? null,
+        data.tech ?? null,
+        data.cont ?? null,
+        data.yexp ?? null,
+        data.cert ?? null,
+        data.lang ?? null,
+        now,
+        now,
       ],
     });
   }

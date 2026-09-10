@@ -40,9 +40,7 @@ export function RemindersList() {
   async function handleToggle(id: string, done: boolean) {
     try {
       await toggleReminder(id, done);
-      setReminders((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, done } : r))
-      );
+      setReminders((prev) => prev.map((r) => (r.id === id ? { ...r, done } : r)));
     } catch {
       alert("Failed to toggle reminder");
     }
@@ -58,20 +56,10 @@ export function RemindersList() {
     }
   }
 
-  async function handleEditSave(data: {
-    applicationId: string;
-    type: string;
-    dueAt: string;
-  }) {
+  async function handleEditSave(data: { applicationId: string; type: string; dueAt: string }) {
     if (!editingReminder) return;
     await updateReminder(editingReminder.id, data);
-    setReminders((prev) =>
-      prev.map((r) =>
-        r.id === editingReminder.id
-          ? { ...r, ...data }
-          : r
-      )
-    );
+    setReminders((prev) => prev.map((r) => (r.id === editingReminder.id ? { ...r, ...data } : r)));
     setEditingReminder(null);
   }
 
@@ -134,9 +122,7 @@ export function RemindersList() {
             key={f}
             onClick={() => setFilter(f)}
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              filter === f
-                ? "bg-ink text-on-primary"
-                : "bg-cloud text-charcoal hover:bg-fog"
+              filter === f ? "bg-ink text-on-primary" : "bg-cloud text-charcoal hover:bg-fog"
             }`}
           >
             {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -152,8 +138,7 @@ export function RemindersList() {
         ) : (
           <div className="space-y-2">
             {filtered.map((r) => {
-              const isOverdue =
-                !r.done && new Date(r.dueAt) < new Date();
+              const isOverdue = !r.done && new Date(r.dueAt) < new Date();
               return (
                 <div
                   key={r.id}
@@ -174,12 +159,7 @@ export function RemindersList() {
                     }`}
                   >
                     {r.done && (
-                      <svg
-                        width="10"
-                        height="8"
-                        viewBox="0 0 10 8"
-                        fill="none"
-                      >
+                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
                         <path
                           d="M1 4L3.5 6.5L9 1"
                           stroke="currentColor"
@@ -228,7 +208,16 @@ export function RemindersList() {
                     className="shrink-0 text-graphite hover:text-primary"
                     title="Add to Calendar"
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                       <line x1="16" y1="2" x2="16" y2="6" />
                       <line x1="8" y1="2" x2="8" y2="6" />
@@ -241,19 +230,20 @@ export function RemindersList() {
                     title="Edit"
                   >
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M10.5 1.5L12.5 3.5L4 12H2V10L10.5 1.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path
+                        d="M10.5 1.5L12.5 3.5L4 12H2V10L10.5 1.5Z"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   </button>
                   <button
                     onClick={() => handleDelete(r.id)}
                     className="shrink-0 text-graphite hover:text-error"
                   >
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 14 14"
-                      fill="none"
-                    >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                       <path
                         d="M1 1L13 13M1 13L13 1"
                         stroke="currentColor"
@@ -300,15 +290,9 @@ function AddReminderModal({
 }: {
   applications: ApplicationWithRelations[];
   onClose: () => void;
-  onAdd: (data: {
-    applicationId: string;
-    type: string;
-    dueAt: string;
-  }) => Promise<void>;
+  onAdd: (data: { applicationId: string; type: string; dueAt: string }) => Promise<void>;
 }) {
-  const [applicationId, setApplicationId] = useState(
-    applications[0]?.id ?? ""
-  );
+  const [applicationId, setApplicationId] = useState(applications[0]?.id ?? "");
   const [type, setType] = useState("follow_up");
   const getDefaultDate = () => {
     const d = new Date();
@@ -331,9 +315,7 @@ function AddReminderModal({
 
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-graphite">
-              Application
-            </label>
+            <label className="mb-1 block text-xs font-medium text-graphite">Application</label>
             <select
               value={applicationId}
               onChange={(e) => setApplicationId(e.target.value)}
@@ -341,15 +323,13 @@ function AddReminderModal({
             >
               {applications.map((a) => (
                 <option key={a.id} value={a.id}>
-                  {a.jobTitle} @ {a.company.name}
+                  {a.jobTitle} @ {a.company?.name ?? "Unknown"}
                 </option>
               ))}
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-graphite">
-              Type
-            </label>
+            <label className="mb-1 block text-xs font-medium text-graphite">Type</label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
@@ -363,9 +343,7 @@ function AddReminderModal({
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-graphite">
-              Due Date
-            </label>
+            <label className="mb-1 block text-xs font-medium text-graphite">Due Date</label>
             <input
               type="date"
               value={dueAt}
@@ -454,9 +432,7 @@ function EditReminderModal({
 
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-graphite">
-              Application
-            </label>
+            <label className="mb-1 block text-xs font-medium text-graphite">Application</label>
             <select
               value={applicationId}
               onChange={(e) => setApplicationId(e.target.value)}
@@ -464,15 +440,13 @@ function EditReminderModal({
             >
               {applications.map((a) => (
                 <option key={a.id} value={a.id}>
-                  {a.jobTitle} @ {a.company.name}
+                  {a.jobTitle} @ {a.company?.name ?? "Unknown"}
                 </option>
               ))}
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-graphite">
-              Type
-            </label>
+            <label className="mb-1 block text-xs font-medium text-graphite">Type</label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
@@ -486,9 +460,7 @@ function EditReminderModal({
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-graphite">
-              Due Date
-            </label>
+            <label className="mb-1 block text-xs font-medium text-graphite">Due Date</label>
             <input
               type="date"
               value={dueAt}

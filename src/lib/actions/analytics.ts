@@ -5,10 +5,7 @@ import { applications, companies } from "@/lib/schema";
 import { eq, and, gte, lte } from "drizzle-orm";
 import { getCurrentUserId } from "@/lib/user";
 
-export async function getAnalytics(filters?: {
-  from?: string;
-  to?: string;
-}) {
+export async function getAnalytics(filters?: { from?: string; to?: string }) {
   try {
     const userId = await getCurrentUserId();
     const conditions = [eq(applications.userId, userId)];
@@ -69,12 +66,8 @@ export async function getAnalytics(filters?: {
 
     const funnel = {
       saved: allApps.filter((a) => a.status === "SAVED").length,
-      applied: allApps.filter((a) =>
-        ["APPLIED", "WALK_IN"].includes(a.status)
-      ).length,
-      screening: allApps.filter((a) =>
-        ["PHONE_SCREEN"].includes(a.status)
-      ).length,
+      applied: allApps.filter((a) => ["APPLIED", "WALK_IN"].includes(a.status)).length,
+      screening: allApps.filter((a) => ["PHONE_SCREEN"].includes(a.status)).length,
       interview: allApps.filter((a) => a.status === "INTERVIEW").length,
       offer: allApps.filter((a) => a.status === "OFFER").length,
     };

@@ -19,17 +19,19 @@ export function ResumeVersionsManager() {
   });
 
   useEffect(() => {
-    loadVersions();
+    async function load() {
+      const v = await getResumeVersions();
+      setVersions(v);
+      setLoading(false);
+    }
+    load();
   }, []);
 
-  async function loadVersions() {
-    const v = await getResumeVersions();
-    setVersions(v);
-    setLoading(false);
-  }
-
   async function handleAdd(data: { name: string; tailoringNotes: string }) {
-    const v = await addResumeVersion({ name: data.name, tailoringNotes: data.tailoringNotes || undefined });
+    const v = await addResumeVersion({
+      name: data.name,
+      tailoringNotes: data.tailoringNotes || undefined,
+    });
     setVersions((prev) => [...prev, v]);
     setShowAdd(false);
   }
@@ -82,7 +84,12 @@ export function ResumeVersionsManager() {
                 title="Delete"
               >
                 <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                  <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  <path
+                    d="M1 1L13 13M1 13L13 1"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
                 </svg>
               </button>
             </div>
@@ -90,9 +97,7 @@ export function ResumeVersionsManager() {
         </div>
       )}
 
-      {showAdd && (
-        <AddVersionModal onClose={() => setShowAdd(false)} onAdd={handleAdd} />
-      )}
+      {showAdd && <AddVersionModal onClose={() => setShowAdd(false)} onAdd={handleAdd} />}
     </div>
   );
 }

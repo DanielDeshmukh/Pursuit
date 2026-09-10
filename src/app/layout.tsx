@@ -22,8 +22,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Pursuit — Job Search Command Center",
-  description:
-    "Track applications, automate follow-ups, and land your next role.",
+  description: "Track applications, automate follow-ups, and land your next role.",
   icons: {
     icon: "/favicon.png",
     apple: "/favicon.png",
@@ -45,12 +44,12 @@ export default function RootLayout({
         <ThemeInit />
         <ThemeProvider>
           <AuthProvider>
-          <ShortcutsProvider>
-            <NotificationProvider />
-            <KeyboardShortcutsManager />
-            <GlobalSearch />
-            {children}
-          </ShortcutsProvider>
+            <ShortcutsProvider>
+              <NotificationProvider />
+              <KeyboardShortcutsManager />
+              <GlobalSearch />
+              {children}
+            </ShortcutsProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

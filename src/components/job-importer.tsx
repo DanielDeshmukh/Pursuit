@@ -98,9 +98,7 @@ export function JobImporter() {
           <div className="mt-6">
             <div className="mb-3 flex items-center gap-4 text-sm">
               <span className="text-green-500">{successCount} imported</span>
-              {errorCount > 0 && (
-                <span className="text-error">{errorCount} failed</span>
-              )}
+              {errorCount > 0 && <span className="text-error">{errorCount} failed</span>}
             </div>
 
             <div className="space-y-2">
@@ -119,9 +117,7 @@ export function JobImporter() {
                       {r.data.jobTitle} @ {r.data.companyName}
                     </p>
                   )}
-                  {r.status === "error" && (
-                    <p className="mt-1 text-sm text-error">{r.error}</p>
-                  )}
+                  {r.status === "error" && <p className="mt-1 text-sm text-error">{r.error}</p>}
                 </div>
               ))}
             </div>
