@@ -20,6 +20,7 @@ import { useEscapeKey } from "@/lib/use-escape-key";
 import { scrapeJobUrl } from "@/lib/actions/scrape-job";
 import { exportApplicationsCSV } from "@/lib/csv-export";
 import { getResumeVersions, type ResumeVersion } from "@/lib/actions/resume-versions";
+import { ResumeTailor } from "@/components/resume-tailor";
 
 export function KanbanBoard() {
   const [applications, setApplications] = useState<ApplicationWithRelations[]>(
@@ -554,6 +555,15 @@ function DetailPanel({
                     <p className="text-sm text-ink">{app.notes}</p>
                   </div>
                 )}
+
+                <div className="rounded-lg border border-hairline bg-surface p-3">
+                  <ResumeTailor
+                    jobTitle={app.jobTitle}
+                    companyName={app.company.name}
+                    jobDescription={app.notes}
+                    resumeText={null}
+                  />
+                </div>
               </>
             )}
           </div>
