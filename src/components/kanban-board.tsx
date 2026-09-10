@@ -21,6 +21,7 @@ import { scrapeJobUrl } from "@/lib/actions/scrape-job";
 import { exportApplicationsCSV } from "@/lib/csv-export";
 import { getResumeVersions, type ResumeVersion } from "@/lib/actions/resume-versions";
 import { ResumeTailor } from "@/components/resume-tailor";
+import { InterviewPrep } from "@/components/interview-prep";
 
 export function KanbanBoard() {
   const [applications, setApplications] = useState<ApplicationWithRelations[]>(
@@ -558,6 +559,15 @@ function DetailPanel({
 
                 <div className="rounded-lg border border-hairline bg-surface p-3">
                   <ResumeTailor
+                    jobTitle={app.jobTitle}
+                    companyName={app.company.name}
+                    jobDescription={app.notes}
+                    resumeText={null}
+                  />
+                </div>
+
+                <div className="rounded-lg border border-hairline bg-surface p-3">
+                  <InterviewPrep
                     jobTitle={app.jobTitle}
                     companyName={app.company.name}
                     jobDescription={app.notes}
