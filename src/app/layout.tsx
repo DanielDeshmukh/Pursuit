@@ -6,6 +6,7 @@ import { NotificationProvider } from "@/components/notification-provider";
 import { ShortcutsProvider } from "@/lib/use-keyboard-shortcuts";
 import { KeyboardShortcutsManager } from "@/components/keyboard-shortcuts-manager";
 import { AuthProvider } from "@/components/auth-provider";
+import { GlobalSearch } from "@/components/global-search";
 import "./globals.css";
 
 const inter = Inter({
@@ -44,11 +45,12 @@ export default function RootLayout({
         <ThemeInit />
         <ThemeProvider>
           <AuthProvider>
-            <ShortcutsProvider>
-              <NotificationProvider />
-              <KeyboardShortcutsManager />
-              {children}
-            </ShortcutsProvider>
+          <ShortcutsProvider>
+            <NotificationProvider />
+            <KeyboardShortcutsManager />
+            <GlobalSearch />
+            {children}
+          </ShortcutsProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>
