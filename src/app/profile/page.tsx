@@ -6,6 +6,7 @@ import { getProfile, upsertProfile } from "@/lib/actions/profile";
 import Badge from "@/components/badge";
 import BadgeModal from "@/components/badge-modal";
 import { getBadgeData, type BadgeData } from "@/lib/actions/badge";
+import { ResumeVersionsManager } from "@/components/resume-versions-manager";
 
 type Profile = Record<string, string | null>;
 type WorkEntry = { company: string; role: string; startDate: string; endDate: string; location: string; bullets: string[] };
@@ -500,6 +501,11 @@ export default function ProfilePage() {
                   </div>
                 </section>
               )}
+
+              {/* ── Resume Versions ── */}
+              <section id="resume-versions-section" className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
+                <ResumeVersionsManager />
+              </section>
 
               {/* ── Work Experience ── */}
               {work.length > 0 && (

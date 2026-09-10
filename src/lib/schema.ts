@@ -143,6 +143,26 @@ export const badgeData = sqliteTable("badge_data", {
     .$defaultFn(() => new Date().toISOString()),
 });
 
+export const resumeVersions = sqliteTable(
+  "resume_versions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    name: text("name").notNull(),
+    fileName: text("file_name"),
+    fileUrl: text("file_url"),
+    tailoringNotes: text("tailoring_notes"),
+    createdAt: text("created_at")
+      .notNull()
+      .$defaultFn(() => new Date().toISOString()),
+  },
+  (t) => [
+    index("resume_versions_user_id_idx").on(t.userId),
+  ]
+);
+
 export const reminders = sqliteTable(
   "reminders",
   {

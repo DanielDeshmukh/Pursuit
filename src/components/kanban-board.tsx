@@ -19,11 +19,13 @@ import { LoadingScreen } from "@/components/loading-screen";
 import { useEscapeKey } from "@/lib/use-escape-key";
 import { scrapeJobUrl } from "@/lib/actions/scrape-job";
 import { exportApplicationsCSV } from "@/lib/csv-export";
+import { getResumeVersions, type ResumeVersion } from "@/lib/actions/resume-versions";
 
 export function KanbanBoard() {
   const [applications, setApplications] = useState<ApplicationWithRelations[]>(
     []
   );
+  const [resumeVersions, setResumeVersions] = useState<ResumeVersion[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedApp, setSelectedApp] =
     useState<ApplicationWithRelations | null>(null);
@@ -56,8 +58,9 @@ export function KanbanBoard() {
   }, []);
 
   async function loadApplications() {
-    const apps = await getApplications();
+    const [apps, versions] = await Promise.all([getApplications(), getResumeVersions()]);
     setApplications(apps);
+    setResumeVersions(versions);
     setLoading(false);
   }
 
@@ -234,6 +237,7 @@ export function KanbanBoard() {
       {selectedApp && (
         <DetailPanel
           app={selectedApp}
+          resumeVersions={resumeVersions}
           onClose={() => setSelectedApp(null)}
           onDelete={async () => {
             if (!confirm("Delete this application?")) return;
@@ -276,11 +280,13 @@ export function KanbanBoard() {
 
 function DetailPanel({
   app,
+  resumeVersions,
   onClose,
   onDelete,
   onUpdate,
 }: {
   app: ApplicationWithRelations;
+  resumeVersions: ResumeVersion[];
   onClose: () => void;
   onDelete: () => void;
   onUpdate: (updated: ApplicationWithRelations) => void;
@@ -447,15 +453,20 @@ function DetailPanel({
                   <label className="mb-1 block text-xs font-medium text-graphite">
                     Resume Version
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={form.resumeVersionUsed}
                     onChange={(e) =>
                       handleChange("resumeVersionUsed", e.target.value)
                     }
                     className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
-                    placeholder="e.g. v2.1"
-                  />
+                  >
+                    <option value="">None</option>
+                    {resumeVersions.map((v) => (
+                      <option key={v.id} value={v.name}>
+                        {v.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-graphite">
