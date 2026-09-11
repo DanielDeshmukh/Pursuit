@@ -135,8 +135,38 @@ export function RemindersList() {
 
       <div className="flex-1 overflow-y-auto px-4 pb-4 sm:px-6">
         {filtered.length === 0 ? (
-          <div className="py-12 text-center text-sm text-graphite">
-            No reminders {filter !== "all" ? `(${filter})` : ""}
+          <div className="py-12 text-center">
+            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-cloud text-graphite">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+            </div>
+            <p className="text-sm font-medium text-ink">
+              {filter !== "all" ? `No ${filter} reminders` : "No reminders yet"}
+            </p>
+            <p className="mt-1 text-xs text-charcoal">
+              {filter !== "all"
+                ? "Try changing your filter to see more reminders."
+                : "Set reminders to follow up with companies."}
+            </p>
+            {filter === "all" && (
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="mt-4 rounded-md bg-primary px-4 py-2 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-deep"
+              >
+                + Add Reminder
+              </button>
+            )}
           </div>
         ) : (
           <div className="space-y-2">

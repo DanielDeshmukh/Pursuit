@@ -155,8 +155,36 @@ export function OutreachDashboard() {
 
       <div className="flex-1 overflow-y-auto px-4 pb-4 sm:px-6">
         {filtered.length === 0 ? (
-          <div className="py-12 text-center text-sm text-graphite">
-            No messages {filter !== "all" ? `(${filter})` : ""}
+          <div className="py-12 text-center">
+            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-cloud text-graphite">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="M22 7l-10 7L2 7" />
+              </svg>
+            </div>
+            <p className="text-sm font-medium text-ink">
+              {filter !== "all" ? `No ${filter} messages` : "No outreach messages yet"}
+            </p>
+            <p className="mt-1 text-xs text-charcoal">
+              {filter !== "all"
+                ? "Try changing your filter to see more messages."
+                : "Draft messages to track your outreach efforts."}
+            </p>
+            {filter === "all" && (
+              <button
+                onClick={() => setShowDraftModal(true)}
+                className="mt-4 rounded-md bg-primary px-4 py-2 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-deep"
+              >
+                + Draft Message
+              </button>
+            )}
           </div>
         ) : (
           <div className="space-y-3">
