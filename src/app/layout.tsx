@@ -9,6 +9,7 @@ import { AuthProvider } from "@/components/auth-provider";
 import { GlobalSearch } from "@/components/global-search";
 import { Toaster } from "sonner";
 import { ConfirmProvider } from "@/components/confirm-dialog";
+import { ErrorBoundary } from "@/components/error-boundary";
 import "./globals.css";
 
 const inter = Inter({
@@ -63,7 +64,7 @@ export default function RootLayout({
               <NotificationProvider />
               <KeyboardShortcutsManager />
               <GlobalSearch />
-              {children}
+              <ErrorBoundary>{children}</ErrorBoundary>
             </ShortcutsProvider>
           </AuthProvider>
         </ThemeProvider>
