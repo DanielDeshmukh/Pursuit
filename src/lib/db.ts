@@ -1,9 +1,9 @@
-import { createClient } from "@libsql/client";
-import type { Client } from "@libsql/client";
+import { createClient, type Client } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
 import * as schema from "./schema";
 
 let client: Client | undefined;
+let _db: ReturnType<typeof drizzle<typeof schema>> | undefined;
 
 function getClient(): Client {
   if (!client) {
@@ -19,21 +19,25 @@ function getClient(): Client {
   return client;
 }
 
-// Lazily initialized db — only connects when first used, not at import time.
-// This prevents build-time crashes when env vars are empty (e.g. in CI).
-let _db: ReturnType<typeof drizzle<typeof schema>> | undefined;
-
-export function getDb() {
+export function getDb(): ReturnType<typeof drizzle<typeof schema>> {
   if (!_db) {
     _db = drizzle(getClient(), { schema });
   }
   return _db;
 }
 
-// Backward-compatible export — use getDb() in new code.
-// This proxy delays connection until the first property access.
-export const db = new Proxy({} as ReturnType<typeof drizzle<typeof schema>>, {
-  get(_target, prop, receiver) {
-    return Reflect.get(getDb(), prop, receiver);
-  },
-});
+// Lazy proxy — the real db is only created when a property is first accessed.
+// This prevents module-import-time crashes when env vars are empty (CI builds).
+export const db: ReturnType<typeof drizzle<typeof schema>> = new Proxy(
+  {} as ReturnType<typeof drizzle<typeof schema>>,
+  {
+    get(_target, prop) {
+      const realDb = getDb();
+      const value = Reflect.get(realDb, prop);
+      if (typeof value === "function") {
+        return value.bind(realDb);
+      }
+      return value;
+    },
+  }
+);
