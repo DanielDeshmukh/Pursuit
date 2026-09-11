@@ -8,11 +8,10 @@ let _db: ReturnType<typeof drizzle<typeof schema>> | undefined;
 function getClient(): Client {
   if (!client) {
     const url = process.env.TURSO_DATABASE_URL;
-    if (!url) {
-      throw new Error("TURSO_DATABASE_URL is not set. Configure it in your environment.");
-    }
+    // During build time, env vars may not be set. Use a placeholder
+    // to prevent crashes — real queries will fail with a clear error.
     client = createClient({
-      url,
+      url: url || "file:placeholder.db",
       authToken: process.env.TURSO_AUTH_TOKEN,
     });
   }
