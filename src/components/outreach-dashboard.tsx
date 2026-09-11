@@ -60,6 +60,7 @@ export function OutreachDashboard() {
     try {
       await deleteOutreachMessage(id);
       setMessages((prev) => prev.filter((m) => m.id !== id));
+      toast.success("Message deleted");
     } catch {
       toast.error("Failed to delete message");
     }

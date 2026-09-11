@@ -60,6 +60,7 @@ export function ContactsList() {
     try {
       await deleteContact(id);
       setContacts((prev) => prev.filter((c) => c.id !== id));
+      toast.success("Contact deleted");
     } catch {
       toast.error("Failed to delete contact");
     }
@@ -109,6 +110,7 @@ export function ContactsList() {
     try {
       await deleteCompany(id);
       setCompanies((prev) => prev.filter((c) => c.id !== id));
+      toast.success("Company deleted");
     } catch {
       toast.error("Failed to delete company");
     }

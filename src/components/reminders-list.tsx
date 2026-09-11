@@ -53,6 +53,7 @@ export function RemindersList() {
     try {
       await deleteReminder(id);
       setReminders((prev) => prev.filter((r) => r.id !== id));
+      toast.success("Reminder deleted");
     } catch {
       toast.error("Failed to delete reminder");
     }

@@ -224,6 +224,7 @@ export function KanbanBoard() {
               await deleteApplication(selectedApp.id);
               setApplications((prev) => prev.filter((a) => a.id !== selectedApp.id));
               setSelectedApp(null);
+              toast.success("Application deleted");
             } catch {
               toast.error("Failed to delete application");
             }
@@ -243,6 +244,7 @@ export function KanbanBoard() {
               await addApplication(data);
               await loadApplications();
               setShowAddModal(false);
+              toast.success("Application added");
             } catch {
               toast.error("Failed to add application");
             }
