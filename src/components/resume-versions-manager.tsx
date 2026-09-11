@@ -8,6 +8,7 @@ import {
   type ResumeVersion,
 } from "@/lib/actions/resume-versions";
 import { useEscapeKey } from "@/lib/use-escape-key";
+import { confirm } from "@/components/confirm-dialog";
 
 export function ResumeVersionsManager() {
   const [versions, setVersions] = useState<ResumeVersion[]>([]);
@@ -37,7 +38,7 @@ export function ResumeVersionsManager() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this resume version?")) return;
+    if (!(await confirm({ message: "Delete this resume version?", danger: true }))) return;
     await deleteResumeVersion(id);
     setVersions((prev) => prev.filter((v) => v.id !== id));
   }

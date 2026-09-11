@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import {
   getOutreachMessages,
   addOutreachMessage,
@@ -13,6 +14,7 @@ import { getApplications, type ApplicationWithRelations } from "@/lib/actions/ap
 import { LoadingScreen } from "@/components/loading-screen";
 import { useEscapeKey } from "@/lib/use-escape-key";
 import { exportOutreachCSV } from "@/lib/csv-export";
+import { confirm } from "@/components/confirm-dialog";
 
 export function OutreachDashboard() {
   const [messages, setMessages] = useState<OutreachWithRelations[]>([]);
@@ -49,26 +51,26 @@ export function OutreachDashboard() {
         )
       );
     } catch {
-      alert("Failed to update status");
+      toast.error("Failed to update status");
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this message?")) return;
+    if (!(await confirm({ message: "Delete this message?", danger: true }))) return;
     try {
       await deleteOutreachMessage(id);
       setMessages((prev) => prev.filter((m) => m.id !== id));
     } catch {
-      alert("Failed to delete message");
+      toast.error("Failed to delete message");
     }
   }
 
   async function handleSendEmail(msg: OutreachWithRelations) {
     if (!msg.contactEmail) {
-      alert("No email address for this contact");
+      toast.error("No email address for this contact");
       return;
     }
-    if (!confirm(`Send email to ${msg.contactEmail}?`)) return;
+    if (!(await confirm({ message: `Send email to ${msg.contactEmail}?` }))) return;
 
     try {
       const res = await fetch("/api/outreach/send", {
@@ -87,9 +89,9 @@ export function OutreachDashboard() {
       }
 
       await handleStatusChange(msg.id, "sent");
-      alert("Email sent successfully!");
+      toast.success("Email sent successfully!");
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Failed to send email");
+      toast.error(e instanceof Error ? e.message : "Failed to send email");
     }
   }
 
@@ -321,7 +323,7 @@ function DraftModal({
       setSubject(data.subject || "");
       setBody(data.body || "");
     } catch {
-      alert("AI generation failed. Please write manually.");
+      toast.error("AI generation failed. Please write manually.");
     } finally {
       setGenerating(false);
     }

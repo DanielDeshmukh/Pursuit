@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd";
+import { toast } from "sonner";
 import {
   getApplications,
   updateApplicationStatus,
@@ -17,6 +18,7 @@ import { exportApplicationsCSV } from "@/lib/csv-export";
 import { getResumeVersions, type ResumeVersion } from "@/lib/actions/resume-versions";
 import { ResumeTailor } from "@/components/resume-tailor";
 import { InterviewPrep } from "@/components/interview-prep";
+import { confirm } from "@/components/confirm-dialog";
 
 export function KanbanBoard() {
   const [applications, setApplications] = useState<ApplicationWithRelations[]>([]);
@@ -217,13 +219,13 @@ export function KanbanBoard() {
           resumeVersions={resumeVersions}
           onClose={() => setSelectedApp(null)}
           onDelete={async () => {
-            if (!confirm("Delete this application?")) return;
+            if (!(await confirm({ message: "Delete this application?", danger: true }))) return;
             try {
               await deleteApplication(selectedApp.id);
               setApplications((prev) => prev.filter((a) => a.id !== selectedApp.id));
               setSelectedApp(null);
             } catch {
-              alert("Failed to delete application");
+              toast.error("Failed to delete application");
             }
           }}
           onUpdate={(updated) => {
@@ -242,7 +244,7 @@ export function KanbanBoard() {
               await loadApplications();
               setShowAddModal(false);
             } catch {
-              alert("Failed to add application");
+              toast.error("Failed to add application");
             }
           }}
         />
@@ -605,7 +607,7 @@ function AddModal({
       if (data.salaryMax) setSalaryMax(data.salaryMax);
       if (data.source) setSource(data.source);
     } catch {
-      alert("Could not extract job details from this URL.");
+      toast.error("Could not extract job details from this URL.");
     } finally {
       setScraping(false);
     }

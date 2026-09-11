@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { SidebarLayout } from "@/components/sidebar-layout";
 import { getProfile, upsertProfile } from "@/lib/actions/profile";
 import Badge from "@/components/badge";
@@ -334,7 +335,7 @@ export default function ProfilePage() {
       setEditing(false);
       setTimeout(() => setSaved(false), 2500);
     } catch {
-      alert("Failed to save profile");
+      toast.error("Failed to save profile");
     } finally {
       setSaving(false);
     }
@@ -351,7 +352,7 @@ export default function ProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) {
-      alert("Photo must be under 2MB");
+      toast.error("Photo must be under 2MB");
       return;
     }
     const reader = new FileReader();
@@ -392,7 +393,7 @@ export default function ProfilePage() {
         setEditing(true);
       }
     } catch (err) {
-      alert(`Parse failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+      toast.error(`Parse failed: ${err instanceof Error ? err.message : "Unknown error"}`);
     } finally {
       setParsing(false);
       if (resumeInputRef.current) resumeInputRef.current.value = "";

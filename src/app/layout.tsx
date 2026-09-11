@@ -7,6 +7,8 @@ import { ShortcutsProvider } from "@/lib/use-keyboard-shortcuts";
 import { KeyboardShortcutsManager } from "@/components/keyboard-shortcuts-manager";
 import { AuthProvider } from "@/components/auth-provider";
 import { GlobalSearch } from "@/components/global-search";
+import { Toaster } from "sonner";
+import { ConfirmProvider } from "@/components/confirm-dialog";
 import "./globals.css";
 
 const inter = Inter({
@@ -45,6 +47,19 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <ShortcutsProvider>
+              <Toaster
+                position="bottom-right"
+                toastOptions={{
+                  className: "text-sm",
+                  style: {
+                    background: "var(--color-paper)",
+                    color: "var(--color-ink)",
+                    border: "1px solid var(--color-hairline)",
+                  },
+                }}
+                closeButton
+              />
+              <ConfirmProvider />
               <NotificationProvider />
               <KeyboardShortcutsManager />
               <GlobalSearch />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import {
   getContacts,
   getCompanies,
@@ -15,6 +16,7 @@ import {
 import { LoadingScreen } from "@/components/loading-screen";
 import { useEscapeKey } from "@/lib/use-escape-key";
 import { exportContactsCSV } from "@/lib/csv-export";
+import { confirm } from "@/components/confirm-dialog";
 
 type Company = {
   id: string;
@@ -54,12 +56,12 @@ export function ContactsList() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this contact?")) return;
+    if (!(await confirm({ message: "Delete this contact?", danger: true }))) return;
     try {
       await deleteContact(id);
       setContacts((prev) => prev.filter((c) => c.id !== id));
     } catch {
-      alert("Failed to delete contact");
+      toast.error("Failed to delete contact");
     }
   }
 
@@ -97,12 +99,18 @@ export function ContactsList() {
   }
 
   async function handleCompanyDelete(id: string) {
-    if (!confirm("Delete this company? Contacts linked to it will not be deleted.")) return;
+    if (
+      !(await confirm({
+        message: "Delete this company? Contacts linked to it will not be deleted.",
+        danger: true,
+      }))
+    )
+      return;
     try {
       await deleteCompany(id);
       setCompanies((prev) => prev.filter((c) => c.id !== id));
     } catch {
-      alert("Failed to delete company");
+      toast.error("Failed to delete company");
     }
   }
 

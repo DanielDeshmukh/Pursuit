@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import {
   getReminders,
   addReminder,
@@ -12,6 +13,7 @@ import {
 import { getApplications, type ApplicationWithRelations } from "@/lib/actions/applications";
 import { LoadingScreen } from "@/components/loading-screen";
 import { useEscapeKey } from "@/lib/use-escape-key";
+import { confirm } from "@/components/confirm-dialog";
 
 export function RemindersList() {
   const [reminders, setReminders] = useState<ReminderWithApp[]>([]);
@@ -42,17 +44,17 @@ export function RemindersList() {
       await toggleReminder(id, done);
       setReminders((prev) => prev.map((r) => (r.id === id ? { ...r, done } : r)));
     } catch {
-      alert("Failed to toggle reminder");
+      toast.error("Failed to toggle reminder");
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this reminder?")) return;
+    if (!(await confirm({ message: "Delete this reminder?", danger: true }))) return;
     try {
       await deleteReminder(id);
       setReminders((prev) => prev.filter((r) => r.id !== id));
     } catch {
-      alert("Failed to delete reminder");
+      toast.error("Failed to delete reminder");
     }
   }
 
@@ -85,7 +87,7 @@ export function RemindersList() {
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      alert("Failed to add to calendar");
+      toast.error("Failed to add to calendar");
     }
   }
 
