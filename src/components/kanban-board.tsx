@@ -583,6 +583,15 @@ function AddModal({
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [scraping, setScraping] = useState(false);
+  const [errors, setErrors] = useState<{ jobTitle?: string; companyName?: string }>({});
+
+  function validate(): boolean {
+    const e: { jobTitle?: string; companyName?: string } = {};
+    if (!jobTitle.trim()) e.jobTitle = "Job title is required";
+    if (!companyName.trim()) e.companyName = "Company name is required";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  }
 
   const sources = [
     "LinkedIn",
@@ -648,20 +657,39 @@ function AddModal({
               <input
                 type="text"
                 value={jobTitle}
-                onChange={(e) => setJobTitle(e.target.value)}
-                className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+                onChange={(e) => {
+                  setJobTitle(e.target.value);
+                  if (errors.jobTitle) setErrors((prev) => ({ ...prev, jobTitle: undefined }));
+                }}
+                className={`w-full rounded-md border bg-canvas px-3 py-2 text-sm text-ink focus:outline-none ${
+                  errors.jobTitle
+                    ? "border-error focus:border-error"
+                    : "border-steel focus:border-ink"
+                }`}
                 placeholder="Software Engineer"
               />
+              {errors.jobTitle && <p className="mt-1 text-[11px] text-error">{errors.jobTitle}</p>}
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-graphite">Company *</label>
               <input
                 type="text"
                 value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+                onChange={(e) => {
+                  setCompanyName(e.target.value);
+                  if (errors.companyName)
+                    setErrors((prev) => ({ ...prev, companyName: undefined }));
+                }}
+                className={`w-full rounded-md border bg-canvas px-3 py-2 text-sm text-ink focus:outline-none ${
+                  errors.companyName
+                    ? "border-error focus:border-error"
+                    : "border-steel focus:border-ink"
+                }`}
                 placeholder="Acme Inc."
               />
+              {errors.companyName && (
+                <p className="mt-1 text-[11px] text-error">{errors.companyName}</p>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -722,24 +750,23 @@ function AddModal({
           </button>
           <button
             onClick={async () => {
-              if (jobTitle && companyName) {
-                setSaving(true);
-                try {
-                  await onAdd({
-                    jobTitle,
-                    companyName,
-                    jobUrl,
-                    salaryMin: salaryMin ? Number(salaryMin) : undefined,
-                    salaryMax: salaryMax ? Number(salaryMax) : undefined,
-                    source,
-                    notes,
-                  });
-                } finally {
-                  setSaving(false);
-                }
+              if (!validate()) return;
+              setSaving(true);
+              try {
+                await onAdd({
+                  jobTitle,
+                  companyName,
+                  jobUrl,
+                  salaryMin: salaryMin ? Number(salaryMin) : undefined,
+                  salaryMax: salaryMax ? Number(salaryMax) : undefined,
+                  source,
+                  notes,
+                });
+              } finally {
+                setSaving(false);
               }
             }}
-            disabled={!jobTitle || !companyName || saving}
+            disabled={saving}
             className="flex-1 rounded-md bg-primary py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-deep disabled:cursor-not-allowed disabled:bg-steel"
           >
             {saving ? "Adding..." : "Add"}

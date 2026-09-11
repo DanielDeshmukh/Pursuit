@@ -467,9 +467,18 @@ function ContactModal({
   const [email, setEmail] = useState(contact?.email ?? "");
   const [linkedinUrl, setLinkedinUrl] = useState(contact?.linkedinUrl ?? "");
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<{ name?: string; companyId?: string }>({});
+
+  function validate(): boolean {
+    const e: { name?: string; companyId?: string } = {};
+    if (!name.trim()) e.name = "Name is required";
+    if (!companyId) e.companyId = "Company is required";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  }
 
   async function handleSave() {
-    if (!name.trim() || !companyId) return;
+    if (!validate()) return;
     setSaving(true);
     try {
       onSave({ companyId, name, role, email, linkedinUrl });
@@ -505,10 +514,16 @@ function ContactModal({
             <input
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-md border border-steel bg-canvas px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+              onChange={(e) => {
+                setName(e.target.value);
+                if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }));
+              }}
+              className={`w-full rounded-md border bg-canvas px-3 py-2 text-sm text-ink focus:outline-none ${
+                errors.name ? "border-error focus:border-error" : "border-steel focus:border-ink"
+              }`}
               placeholder="John Doe"
             />
+            {errors.name && <p className="mt-1 text-[11px] text-error">{errors.name}</p>}
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-graphite">Role</label>
